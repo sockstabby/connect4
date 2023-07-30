@@ -1,18 +1,25 @@
 import "./App.css";
 
-import Widget from "./Widget";
-import Search from "./Search";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useFetch } from "./useFetch";
 
-function App() {
-  const width = 100;
-  const height = 100;
+const App: React.FC<{}> = ({}) => {
+  const [url, setUrl] = useState("http://localhost:3000/users");
+
+  const { isLoading, serverError, apiData } = useFetch(url);
+
+  const myFunction = () => {
+    if (url === "http://localhost:3000/users") {
+      setUrl("http://localhost:3000/users2");
+    } else {
+      setUrl("http://localhost:3000/users");
+    }
+  };
 
   return (
     <>
-      <Widget width={width} height={height} />
-      <Search />
+      <button onClick={myFunction}>Fetch</button>
     </>
   );
-}
-
+};
 export default App;
