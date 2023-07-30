@@ -12,6 +12,35 @@ type Icon = {
   iconColor: IconColors;
 };
 
+
+const Widget: React.FC<
+
+function getArray<T>(items: T[]): T[] {
+  return new Array<T>().concat(items);
+}
+
+interface Mine<T> {
+  name: T;
+}
+
+type Icons = Record<Statuses, Icon>;
+
+type Yo = Record<Statuses, IconColors>;
+
+type Whateva<T> = {
+  yeah: T;
+};
+
+let item: Mine<number> = { name: 34 };
+
+let myNumArr = getArray<number>([100, 200, 300]);
+
+let myNumArr2 = getArray([item, item]);
+
+console.log(myNumArr2);
+
+myNumArr2.name = "asdf";
+
 type Icons = Record<Statuses, Icon>;
 
 // type Salary = Record<"annual" | "bonus", number>;
