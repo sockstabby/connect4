@@ -1,77 +1,18 @@
 import "./App.css";
 
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { useFetch } from "./useFetch";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
+import Carousel from "./Carousel";
 
-import MailIcon from "@mui/icons-material/Mail";
+// for the example we are showing characters just to prove it works.
+// if you replace the images with valid image urls you just need to change
+// SlidingPanel in Carousel.tsx to render an img instead
+const images = [
+  "https://www.travelandleisure.com/thmb/sH4T0ElWwZFyUhtqAZD3USeiaSc=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/james-webb-hole-WEBB0722-a7b14258290d4da9be4c7d50ee732d9b.jpg",
+  "https://www.pbs.org/wgbh/nova/media/images/JWST_hero.width-1500.jpg",
+  "https://cdn.wccftech.com/wp-content/uploads/2016/09/spacee.jpg",
+  "https://d3i6fh83elv35t.cloudfront.net/static/2022/07/STScI-01G7NDA42495H05DYFR9XPZSCA-1-1024x599.png",
+];
 
-import {
-  Alert,
-  Badge,
-  Box,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Radio,
-  RadioGroup,
-  Rating,
-} from "@mui/material";
-
-const App: React.FC<{}> = ({}) => {
-  const [url, setUrl] = useState("http://localhost:3000/users");
-
-  const ref = useRef<HTMLInputElement | null>(null);
-
-  const { isLoading, serverError, apiData } = useFetch(url);
-
-  const myFunction = () => {
-    if (url === "http://localhost:3000/users") {
-      setUrl("http://localhost:3000/users2");
-    } else {
-      setUrl("http://localhost:3000/users");
-    }
-  };
-
-  const getLabelText = "asfasdf";
-
-  const value = 8;
-
-  const labels = ["asdf", "asdfasd", "asdfasdf"];
-  return (
-    <>
-      Some Text here
-      <Button variant="contained" onClick={myFunction}>
-        Fetch
-      </Button>
-      <ButtonGroup
-        variant="contained"
-        aria-label="outlined primary button group"
-      >
-        <Button>One</Button>
-        <Button>Two</Button>
-        <Button>Three</Button>
-      </ButtonGroup>
-      <FormGroup>
-        <FormControlLabel control={<Checkbox defaultChecked />} label="Label" />
-        <FormControlLabel required control={<Checkbox />} label="Required" />
-        <FormControlLabel disabled control={<Checkbox />} label="Disabled" />
-      </FormGroup>
-      <RadioGroup
-        aria-labelledby="demo-radio-buttons-group-label"
-        defaultValue="female"
-        name="radio-buttons-group"
-      >
-        <FormControlLabel value="female" control={<Radio />} label="Female" />
-        <FormControlLabel value="male" control={<Radio />} label="Male" />
-        <FormControlLabel value="other" control={<Radio />} label="Other" />
-      </RadioGroup>
-      <Badge badgeContent={4} color="primary">
-        <MailIcon color="action" />
-      </Badge>
-      <Alert severity="error">This is an error alert — check it out!</Alert>
-    </>
-  );
+const App = () => {
+  return <Carousel images={["A", "B", "C", "D", "E", "F", "G"]} />;
 };
 export default App;
