@@ -1,18 +1,88 @@
 import "./App.css";
+import Carousel, { OrientationType } from "./Carousel";
 
-import Carousel from "./Carousel";
+const CAROUSEL_ITEM_HEIGHT = 200;
+const CAROUSEL_ITEM_WIDTH = 200;
 
-// for the example we are showing characters just to prove it works.
-// if you replace the images with valid image urls you just need to change
-// SlidingPanel in Carousel.tsx to render an img instead
-const images = [
-  "https://www.travelandleisure.com/thmb/sH4T0ElWwZFyUhtqAZD3USeiaSc=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/james-webb-hole-WEBB0722-a7b14258290d4da9be4c7d50ee732d9b.jpg",
-  "https://www.pbs.org/wgbh/nova/media/images/JWST_hero.width-1500.jpg",
-  "https://cdn.wccftech.com/wp-content/uploads/2016/09/spacee.jpg",
-  "https://d3i6fh83elv35t.cloudfront.net/static/2022/07/STScI-01G7NDA42495H05DYFR9XPZSCA-1-1024x599.png",
-];
+const viewPortVerticalStyle: React.CSSProperties = {
+  top: 0,
+  left: "right/2",
+  position: "absolute",
+  height: CAROUSEL_ITEM_HEIGHT,
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+};
+
+const viewPortHorizontalStyle: React.CSSProperties = {
+  top: 0,
+  left: "right/2",
+  position: "absolute",
+  height: CAROUSEL_ITEM_HEIGHT,
+  width: CAROUSEL_ITEM_WIDTH,
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "start",
+};
+
+const carouselItemStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  height: CAROUSEL_ITEM_HEIGHT,
+  width: 200,
+  alignContent: "center",
+  alignItems: "center",
+  fontSize: 100,
+};
+
+const carouselItemHStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "center",
+  height: CAROUSEL_ITEM_HEIGHT,
+  width: 200,
+  alignContent: "center",
+  alignItems: "center",
+  fontSize: 100,
+};
 
 const App = () => {
-  return <Carousel images={["A", "B", "C", "D", "E", "F", "G"]} />;
+  const items = ["A", "B", "C", "D", "E", "F", "G"];
+
+  // caller will call even for items that should not be rendered.
+  // in that case we just draw a div to make up the height and we uppercase
+  // the text to show that this item is not loaded yet.
+  const renderItem = (index: number, showImage: boolean) => {
+    if (showImage) {
+      return (
+        <div key={`${items[index]}`} style={carouselItemStyle}>
+          {items[index].toLowerCase() + "*"}{" "}
+        </div>
+      );
+    }
+    return (
+      <div key={`${items[index]}`} style={carouselItemStyle}>
+        {items[index]}{" "}
+      </div>
+    );
+  };
+
+  const orientation: OrientationType = "vertical";
+  const viewPortStyle =
+    // @ts-ignore
+    orientation == "vertical" ? viewPortVerticalStyle : viewPortHorizontalStyle;
+  return (
+    <Carousel
+      renderItem={renderItem}
+      itemHeight={CAROUSEL_ITEM_HEIGHT}
+      images={items}
+      viewportClass="viewp"
+      viewPortStyle={viewPortStyle}
+      orientation={orientation}
+      itemWidth={CAROUSEL_ITEM_WIDTH}
+    />
+  );
 };
 export default App;
