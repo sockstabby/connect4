@@ -26,6 +26,18 @@ const carouselItemStyle: React.CSSProperties = {
   fontSize: 100,
 };
 
+const myFunction = (): string | null => {
+  if ((Math.random() * 10) % 2 === 0) {
+    return null;
+  }
+  return "yah baby";
+};
+
+let ret = myFunction();
+
+let item = ret?.toLowerCase();
+!item?.toUpperCase();
+
 describe("Carousel", () => {
   it("renders a carousel", () => {
     const items = ["A", "B", "C", "D", "E", "F", "G"];
