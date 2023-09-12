@@ -5,10 +5,19 @@ import BlackBoard from "../src/assets/connect4-board-back-layer.svg";
 import OrangePiece from "../src/assets/orange-piece.svg";
 import YellowPiece from "../src/assets/yellow-piece.svg";
 
+import YellowWinningPiece from "../src/assets/yellow-winning-piece.svg";
+import RedWinningPiece from "../src/assets/red-winning-piece.svg";
+
+import Player1 from "../src/assets/player1.svg";
+import Player2 from "../src/assets/player2.svg";
+import GameLogo from "../src/assets/game-logo.svg";
+
 import { testForWin, Locations } from "./utils";
 import { useState } from "react";
 
 const initialState = [[], [], [], [], [], [], []];
+
+import useScreenSize from "./useScreenResize";
 
 type Column = string[];
 
@@ -26,6 +35,8 @@ const App = () => {
   // current is the animated piece it is not fixed or permanent
   const [current, setCurrent] = useState<null | number>(null);
   const [winner, setWinner] = useState<Winner | null>(null);
+
+  const screenSize = useScreenSize();
 
   const animateRow = (col: number) => {
     const playerTurn = `${plays % 2 === 0 ? "red" : "yellow"}`;
@@ -81,6 +92,7 @@ const App = () => {
         animationDuration: "0.5s",
         animationName: animationName,
         animationFillMode: "forwards",
+        zIndex: -1,
       };
 
       return { ...ret, ...merge };
@@ -118,8 +130,72 @@ const App = () => {
 
   console.log("winner =", winner);
   console.log(JSON.stringify(colState));
+
+  let winningPieces: any = [];
+
+  if (winner != null) {
+    winningPieces = winner.pieces.map((piece) => {
+      const style = getTokenStyle(piece.col, piece.row);
+
+      console.log("creating piece for ", piece.col, piece.row);
+
+      const image =
+        winner.player === "red" ? RedWinningPiece : YellowWinningPiece;
+
+      return (
+        <div key={`winningtoken${piece.col}${piece.row}orange`} style={style}>
+          <img src={image} alt="" />
+        </div>
+      );
+    });
+  }
+
+  console.log("winning pieces = ", winningPieces);
+
   return (
     <>
+      <div className="rowContainer row-centered grow-h game-controls-container ">
+        <div className="menu-button-container">
+          <button>Menu</button>
+        </div>
+
+        <img src={GameLogo} alt=""></img>
+
+        <div className="restart-button-container">
+          <button>Restart</button>
+        </div>
+      </div>
+
+      <div className="player1-card">
+        <div className="player-container rowContainer grow-h">
+          <img src={Player1} alt="" />{" "}
+        </div>
+
+        <div className="rowContainer player-name-text-container grow-h row-centered uppercase">
+          Player 1
+        </div>
+
+        <div className="rowContainer player-score-text-container grow-h row-centered uppercase">
+          24
+        </div>
+
+        <div className="rowContainer"></div>
+      </div>
+      <div className="player1-card-background"></div>
+
+      <div className="player2-card">
+        <div className="player-container rowContainer grow-h">
+          <img src={Player2} alt="" />{" "}
+        </div>
+        <div className="rowContainer player-name-text-container grow-h row-centered uppercase">
+          Player 2
+        </div>
+        <div className="rowContainer player-score-text-container grow-h row-centered uppercase">
+          18
+        </div>
+      </div>
+      <div className="player2-card-background"></div>
+
       <div className="dropzone">
         <div
           className={`drop-column ${playerTurn}`}
@@ -165,7 +241,38 @@ const App = () => {
         <img src={BlackBoard} alt="" />
       </div>
 
+      <div className="bottom-plate"></div>
+
+      {winner == null ? (
+        <div className={`caret-container ${playerTurn}`}>
+          <div className="rowContainer player-caret-name-text-container grow-h row-centered uppercase">
+            {playerTurn === "red" ? "Player 1's Turn" : "Player 2's Turn"}
+          </div>
+
+          <div className="rowContainer player-score-text-container grow-h row-centered ">
+            24s
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="winner-card column-container">
+            <div className="row-container winner-name-text-container grow-h row-centered uppercase">
+              {winner.player}
+            </div>
+
+            <div className="rowContainer winner-text-container grow-h row-centered uppercase">
+              WINS
+            </div>
+
+            <button className="uppercase">Play Again</button>
+          </div>
+          <div className="winner-card background"> </div>
+        </>
+      )}
+
       {tokens}
+
+      {winningPieces}
 
       {current != null && (
         <div style={getTokenStyle(current, 6)}>

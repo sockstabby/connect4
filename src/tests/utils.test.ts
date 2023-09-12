@@ -47,7 +47,28 @@ const bottomLeftTopRightData = [
   [],
 ];
 
+const leftRightTestData2 = [
+  [],
+  [],
+  [],
+  ["yellow", "red", "red"],
+  ["yellow", "red"],
+  ["red"],
+  ["yellow"],
+];
+
 describe("utils", () => {
+  it("testLeftRight", () => {
+    const [win, _winningSet] = testForLeftRightWin(
+      2,
+      0,
+      "yellow",
+      leftRightTestData2
+    );
+
+    expect(win).toEqual(false);
+  });
+
   it("testForTopLeftBottomRightWin", () => {
     const [win, _winningSet] = testForTopLeftBottomRightWin(
       3,

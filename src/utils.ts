@@ -74,7 +74,7 @@ export const testForTopRightBottomLeftWin = (
     if (state[i][j] === color) {
       itemsLeftBottom++;
 
-      winningSet.push({ col: i, row });
+      winningSet.push({ col: i, row: j });
 
       if (itemsLeftBottom === 3) {
         // to do: add these items to the winning set
@@ -91,13 +91,16 @@ export const testForTopRightBottomLeftWin = (
   //up and to the right
   for (
     let i = col + 1, j = row + 1;
-    i < state.length && !rightTopQuit && j < state[i].length;
+    i < state.length &&
+    !rightTopQuit &&
+    j < state[i].length &&
+    winningSet.length < 5;
     i++, j++
   ) {
     if (state[i][j] === color) {
       itemsRightTop++;
 
-      winningSet.push({ col: i, row });
+      winningSet.push({ col: i, row: j });
 
       if (itemsLeftBottom + itemsRightTop + 1 === 4) {
         // to do: add these items to the winning set
@@ -145,7 +148,11 @@ export const testForLeftRightWin = (
 
   winningSet.push({ col, row });
 
-  for (let i = col + 1; i < state.length && !rightQuit; i++) {
+  for (
+    let i = col + 1;
+    i < state.length && !rightQuit && winningSet.length < 5;
+    i++
+  ) {
     if (state[i][row] === color) {
       itemsRight++;
 
@@ -157,7 +164,7 @@ export const testForLeftRightWin = (
         rightQuit = true;
       }
     } else {
-      leftQuit = true;
+      rightQuit = true;
     }
   }
 
@@ -188,7 +195,7 @@ export const testForTopLeftBottomRightWin = (
     if (state[i][j] === color) {
       itemsLeftBottom++;
 
-      winningSet.push({ col: i, row });
+      winningSet.push({ col: i, row: j });
 
       if (itemsLeftBottom === 3) {
         // to do: add these items to the winning set
@@ -205,13 +212,13 @@ export const testForTopLeftBottomRightWin = (
   //down and to the right
   for (
     let i = col + 1, j = row - 1;
-    i < state.length && !rightTopQuit && j >= 0;
+    i < state.length && !rightTopQuit && j >= 0 && winningSet.length < 5;
     i++, j--
   ) {
     if (state[i][j] === color) {
       itemsRightTop++;
 
-      winningSet.push({ col: i, row });
+      winningSet.push({ col: i, row: j });
 
       if (itemsLeftBottom + itemsRightTop + 1 === 4) {
         // to do: add these items to the winning set
@@ -239,11 +246,11 @@ export const testForTopDownWin = (
   const winningSet: Locations = [];
 
   //up and to the left
-  for (let j = row - 1; !quit && j >= 0; j--) {
+  for (let j = row - 1; !quit && j >= 0 && winningSet.length < 5; j--) {
     if (state[col][j] === color) {
       adjacentCount++;
 
-      winningSet.push({ col, row });
+      winningSet.push({ col, row: j });
 
       if (adjacentCount === 3) {
         // to do: add these items to the winning set

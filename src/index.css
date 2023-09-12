@@ -1,18 +1,33 @@
 :root {
-  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+
+
+
+  font-family: 'Space Grotesk', sans-serif;
+
+
+
+
+
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #5C2DD5
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-}
+
+
+  --game-background-color1: #7945ff;
+  --game-background-color2: #5c2dd5;
+
+
+  background-color: var(--game-background-color1);
+
+ 
 
 a {
   font-weight: 500;
@@ -24,17 +39,17 @@ a:hover {
 }
 
 body {
+
+  --game-background-color1: #7945ff;
+  --game-background-color2: #5c2dd5;
+
   margin: 0;
   display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #5C2DD5
-
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
-

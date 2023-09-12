@@ -1,66 +1,70 @@
-/* 632x584 */
+/* board = 632x584 desktop*/
+/* max-width for desktop is 1020px */
+
+button {
+  background-color: var(--game-background-color2);
+  border-radius: 28px;
+  border: 1px solid var(--game-background-color2);
+  display: inline-block;
+  cursor: pointer;
+  color: #ffffff;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 16px 31px;
+  text-decoration: none;
+  /* text-shadow: 0px 1px 0px var(--game-background-color2); */
+  line-height: 0px;
+  height: 40px;
+}
+button:hover {
+  /* background-color: var(--game-background-color1); */
+  border: 1px solid white;
+}
+button:active {
+  position: relative;
+  top: 1px;
+}
 
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
+  width: 100%;
+
+  color: black;
 }
 
 .white-board {
   position: absolute;
-
   top: calc(100vh / 2 - 292px);
   left: calc(100vw / 2 - 316px);
-
-  /* left: 100px; */
   z-index: 1;
 }
 
 .black-board {
   position: absolute;
-
   top: calc(100vh / 2 - 292px);
   left: calc(100vw / 2 - 316px);
-
-  /* top: 205px;
-  left: 100px; */
+  z-index: -2;
 }
 
-.orange-piece {
+.bottom-plate {
   position: absolute;
-  top: 218px;
-  left: 205px;
-}
+  top: calc(100vh - 169px);
 
-.orange-piece2 {
-  position: absolute;
-  top: 305px;
-  left: 205px;
+  left: 0px;
 
-  transition: top 2s;
+  z-index: -1000;
 
-  /* transition: transform 2.5s;
-  transform: translate(657px, 205px); */
-}
+  height: 169px;
 
-.drop {
-  /* //top: 653px; */
-}
+  width: 100%;
 
-.orig {
-  position: absolute;
-  /* transition: top 2s; */
+  background-color: var(--game-background-color2);
 
-  /* this works */
-  /* animation: pulse 1s infinite; */
-
-  animation-iteration-count: 1;
-  animation-name: pulse;
-  animation-duration: 0.5s;
-
-  top: 218px;
-  left: 205px;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
 }
 
 @keyframes move-0 {
@@ -124,12 +128,8 @@
   justify-content: space-between;
   position: absolute;
 
-  top: calc(100vh / 2 - 392px);
+  top: calc(100vh / 2 - 362px);
   left: calc(100vw / 2 - 316px);
-
-  /* top: 112px;
-  left: 104px; */
-
   width: 621px;
   height: 100px;
 }
@@ -140,13 +140,226 @@
 }
 
 .red:hover {
-  background-image: url("assets/orange-piece.svg");
+  background-image: url("assets/small-caret-red.svg");
   background-repeat: no-repeat;
   background-position: center center;
 }
 
 .yellow:hover {
-  background-image: url("assets/yellow-piece.svg");
+  background-image: url("assets/small-caret-yellow.svg");
   background-repeat: no-repeat;
   background-position: center center;
+}
+
+.game-controls-container {
+  padding-top: 10px;
+  display: flex;
+}
+
+.menu-button-container {
+  display: flex;
+  flex-direction: row;
+  max-width: 130px;
+  padding-right: 210px;
+}
+
+.restart-button-container {
+  display: flex;
+  flex-direction: row;
+  max-width: 130px;
+  padding-left: 210px;
+}
+
+/* UTILITY CLASSES *************  */
+
+.column-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.row-container {
+  display: flex;
+  align-items: center;
+}
+
+.row-centered {
+  justify-content: center;
+}
+
+.col-centered {
+  justify-content: center;
+  align-items: center;
+}
+
+.col-start {
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.row-space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.text-align-center {
+  text-align: center;
+}
+.grow-h {
+  width: 100%;
+}
+
+.grow-v {
+  height: 100%;
+}
+
+.gap5 {
+  gap: 5px;
+}
+
+.gap8 {
+  gap: 8px;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.player1-card {
+  position: absolute;
+  top: calc(100vh / 2 - 94px);
+  left: calc(100vw / 2 - 316px - 50px - 141px);
+
+  background-color: white;
+  border-radius: 30px;
+
+  border: 2px solid black;
+
+  width: 141px;
+  height: 187px;
+}
+
+.player1-card-background {
+  position: absolute;
+  top: calc(100vh / 2 - 94px + 10px);
+  left: calc(100vw / 2 - 316px - 50px - 141px);
+
+  z-index: -1;
+
+  background-color: black;
+  border-radius: 30px;
+
+  border: 1px solid black;
+
+  width: 141px;
+  height: 187px;
+}
+
+.player2-card {
+  position: absolute;
+  top: calc(100vh / 2 - 94px);
+  left: calc(100vw / 2 + 316px + 50px - 0px);
+
+  background-color: white;
+  border-radius: 30px;
+
+  border: 2px solid black;
+
+  width: 141px;
+  height: 187px;
+}
+
+.player2-card-background {
+  position: absolute;
+  top: calc(100vh / 2 - 94px + 10px);
+  left: calc(100vw / 2 + 316px + 50px - 0px);
+
+  z-index: -1;
+
+  background-color: black;
+  border-radius: 30px;
+
+  border: 1px solid black;
+
+  width: 141px;
+  height: 187px;
+}
+
+.player-container {
+  margin-top: -26px;
+}
+
+.player-name-text-container {
+  font-size: 20px;
+}
+
+.player-score-text-container {
+  font-size: 62px;
+  font-weight: 700;
+}
+
+.caret-container {
+  position: absolute;
+
+  background-repeat: no-repeat;
+  background-position: center center;
+
+  top: calc(100vh - 150px - 20px);
+  left: calc(100vw / 2 - 96px);
+
+  z-index: 1000;
+
+  width: 199px;
+  height: 164px;
+
+  color: white;
+}
+
+.winner-card {
+  position: absolute;
+
+  padding: 5px;
+
+  padding-left: 20px;
+  padding-right: 20px;
+
+  top: calc(100vh - 160px - 20px);
+  left: calc(100vw / 2 - 143px);
+
+  background-color: white;
+  border: 2px solid black;
+
+  border-radius: 25px;
+
+  width: 285px;
+  height: 160px;
+
+  z-index: 100000;
+}
+
+.winner-card.background {
+  top: calc(100vh - 160px - 20px + 10px);
+  background-color: black;
+  z-index: 10000;
+}
+
+.caret-container.red {
+  background-image: url("assets/red-caret.svg");
+}
+
+.caret-container.yellow {
+  color: black;
+  background-image: url("assets/yellow-caret.svg");
+}
+
+.player-caret-name-text-container {
+  padding-top: 40px;
+}
+
+.winner-name-text-container {
+  padding-top: 8px;
+}
+
+.winner-text-container {
+  font-size: 60px;
+  line-height: 76px;
 }
