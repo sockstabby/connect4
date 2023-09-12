@@ -63,10 +63,14 @@ const App = () => {
   };
 
   const getTokenStyle = (col: number, row: number) => {
+    const posLeft = window.innerWidth / 2 - 300;
+    const posTop = window.innerHeight / 2 - 275 + 5 * 88;
+
+    console.log("posTop", posTop);
     const ret: React.CSSProperties = {
       position: "absolute",
-      top: 653 - row * 88,
-      left: col * 88 + 118,
+      top: posTop - row * 88,
+      left: col * 88 + posLeft,
     };
 
     if (row === 6) {

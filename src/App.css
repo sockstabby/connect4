@@ -1,3 +1,5 @@
+/* 632x584 */
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -7,15 +9,22 @@
 
 .white-board {
   position: absolute;
-  top: 200px;
-  left: 100px;
+
+  top: calc(100vh / 2 - 292px);
+  left: calc(100vw / 2 - 316px);
+
+  /* left: 100px; */
   z-index: 1;
 }
 
 .black-board {
   position: absolute;
-  top: 205px;
-  left: 100px;
+
+  top: calc(100vh / 2 - 292px);
+  left: calc(100vw / 2 - 316px);
+
+  /* top: 205px;
+  left: 100px; */
 }
 
 .orange-piece {
@@ -56,55 +65,57 @@
 
 @keyframes move-0 {
   0% {
-    top: 218px;
+    top: calc(100vh / 2 - 392px);
   }
   100% {
-    top: 653px;
+    /* top: 653px; */
+    /* top: calc(100vh / 2 - 292px) */
+    top: calc(100vh / 2 + 165px);
   }
 }
 
 @keyframes move-1 {
   0% {
-    top: 218px;
+    top: calc(100vh / 2 - 392px);
   }
   100% {
-    top: 565px;
+    top: calc(100vh / 2 + 165px - (88px * 1));
   }
 }
 
 @keyframes move-2 {
   0% {
-    top: 218px;
+    top: calc(100vh / 2 - 392px);
   }
   100% {
-    top: 477px;
+    top: calc(100vh / 2 + 165px - (88px * 2));
   }
 }
 
 @keyframes move-3 {
   0% {
-    top: 218px;
+    top: calc(100vh / 2 - 392px);
   }
   100% {
-    top: 389px;
+    top: calc(100vh / 2 + 165px - (88px * 3));
   }
 }
 
 @keyframes move-4 {
   0% {
-    top: 218px;
+    top: calc(100vh / 2 - 392px);
   }
   100% {
-    top: 301px;
+    top: calc(100vh / 2 + 165px - (88px * 4));
   }
 }
 
 @keyframes move-5 {
   0% {
-    top: 218px;
+    top: calc(100vh / 2 - 392px);
   }
   100% {
-    top: 213px;
+    top: calc(100vh / 2 + 165px - (88px * 5));
   }
 }
 
@@ -112,8 +123,13 @@
   display: flex;
   justify-content: space-between;
   position: absolute;
-  top: 112px;
-  left: 104px;
+
+  top: calc(100vh / 2 - 392px);
+  left: calc(100vw / 2 - 316px);
+
+  /* top: 112px;
+  left: 104px; */
+
   width: 621px;
   height: 100px;
 }
