@@ -108,38 +108,6 @@
   }
 }
 
-/* 87 */
-
-.orange-piece3 {
-  position: absolute;
-  top: 218px;
-  left: 293px;
-}
-
-.orange-piece4 {
-  position: absolute;
-  top: 218px;
-  left: 381px;
-}
-
-.orange-piece5 {
-  position: absolute;
-  top: 218px;
-  left: 469px;
-}
-
-.orange-piece6 {
-  position: absolute;
-  top: 218px;
-  left: 557px;
-}
-
-.orange-piece7 {
-  position: absolute;
-  top: 218px;
-  left: 645px;
-}
-
 .dropzone {
   display: flex;
   justify-content: space-between;

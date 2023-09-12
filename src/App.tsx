@@ -4,28 +4,32 @@ import Board from "../src/assets/connect4-board-top-layer.svg";
 import BlackBoard from "../src/assets/connect4-board-back-layer.svg";
 import OrangePiece from "../src/assets/orange-piece.svg";
 import YellowPiece from "../src/assets/yellow-piece.svg";
+
+import { testForWin, Locations } from "./utils";
 import { useState } from "react";
+
+const initialState = [[], [], [], [], [], [], []];
 
 type Column = string[];
 
-type ColState = Column[];
+type Winner = {
+  pieces: Locations;
+  player: string;
+};
+
+export type ColState = Column[];
 
 const App = () => {
-  const [colState, setColState] = useState<ColState>([
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-  ]);
-
+  const [colState, setColState] = useState<ColState>(initialState);
+  // count of numner of plays
   const [plays, setPlays] = useState(0);
-
+  // current is the animated piece it is not fixed or permanent
   const [current, setCurrent] = useState<null | number>(null);
+  const [winner, setWinner] = useState<Winner | null>(null);
 
   const animateRow = (col: number) => {
+    const playerTurn = `${plays % 2 === 0 ? "red" : "yellow"}`;
+
     if (current != null) {
       // basically there is a piece down that was animated into its position
       // and in this block we delete that item by setting current to null
@@ -38,8 +42,6 @@ const App = () => {
       // and that item is short lived and turned into a permanent piece on the next
       // turn.
 
-      const playerTurn = `${plays % 2 === 0 ? "red" : "yellow"}`;
-
       colState[current].push(playerTurn);
 
       setColState(colState);
@@ -47,6 +49,16 @@ const App = () => {
       setPlays(plays + 1);
     } else {
       setCurrent(col);
+      const [win, winningSet] = testForWin(
+        col,
+        colState[col].length,
+        playerTurn,
+        colState
+      );
+
+      if (win) {
+        setWinner({ player: playerTurn, pieces: winningSet });
+      }
     }
   };
 
@@ -59,11 +71,10 @@ const App = () => {
 
     if (row === 6) {
       const animationName = `move-${colState[col].length}`;
-      console.log("animationName", animationName);
 
       const merge = {
         animationIterationCount: 1,
-        animationDuration: "3.5s",
+        animationDuration: "0.5s",
         animationName: animationName,
         animationFillMode: "forwards",
       };
@@ -81,9 +92,6 @@ const App = () => {
   }
 
   const tokens: any = [];
-
-  console.log("player turn ", playerTurn);
-  console.log("colState=  ", colState);
 
   colState.forEach((column, i) => {
     column.forEach((row, j) => {
@@ -104,8 +112,8 @@ const App = () => {
     });
   });
 
-  console.log("current = ", current);
-
+  console.log("winner =", winner);
+  console.log(JSON.stringify(colState));
   return (
     <>
       <div className="dropzone">
@@ -168,33 +176,3 @@ const App = () => {
   );
 };
 export default App;
-
-// <div className="orange-piece">
-//         <img src={OrangePiece} alt="" />
-//       </div>
-
-//       {
-//         <div className="orange-piece2">
-//           <img src={OrangePiece} alt="" />
-//         </div>
-//       }
-
-//       <div className="orange-piece3">
-//         <img src={OrangePiece} alt="" />
-//       </div>
-
-//       <div className="orange-piece4">
-//         <img src={OrangePiece} alt="" />
-//       </div>
-
-//       <div className="orange-piece5">
-//         <img src={OrangePiece} alt="" />
-//       </div>
-
-//       <div className="orange-piece6">
-//         <img src={OrangePiece} alt="" />
-//       </div>
-
-//       <div className="orange-piece7">
-//         <img src={OrangePiece} alt="" />
-//       </div>
