@@ -13,11 +13,13 @@ import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
 
 import { testForWin, Locations } from "./utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const initialState = [[], [], [], [], [], [], []];
 
 import useScreenSize from "./useScreenResize";
+
+import useKeypress from "./useKeyPress";
 
 type Column = string[];
 
@@ -36,7 +38,33 @@ const App = () => {
   const [current, setCurrent] = useState<null | number>(null);
   const [winner, setWinner] = useState<Winner | null>(null);
 
-  const screenSize = useScreenSize();
+  const [pause, setPause] = useState(false);
+
+  const [mainMenuOpen, setMainMenuOpen] = useState(false);
+  const mainMenuOpenRef = useRef<boolean>(false);
+
+  useScreenSize();
+
+  useKeypress("Escape", () => {
+    console.log("pause pressed");
+
+    if (mainMenuOpenRef.current) {
+      console.log("WTF WTF");
+
+      setMainMenuOpen(false);
+      mainMenuOpenRef.current = false;
+    } else {
+      console.log("DSFSDFSDFFSDFDSFSDFSFDFSFSFFSDSSDF");
+      setPause((p) => !p);
+    }
+  });
+
+  console.log(" render mainMenuOpen = ", mainMenuOpen);
+
+  const openMainMenuModal = () => {
+    mainMenuOpenRef.current = true;
+    setMainMenuOpen(true);
+  };
 
   const animateRow = (col: number) => {
     const playerTurn = `${plays % 2 === 0 ? "red" : "yellow"}`;
@@ -154,9 +182,49 @@ const App = () => {
 
   return (
     <>
+      {pause && (
+        <>
+          <div className="disabled-background"></div>
+
+          <div className="pause-modal">
+            <div className="modal-content column-container col-start gap10">
+              <div className="modal-title-container uppercase">PAUSE</div>
+              <div className="modal-button column-container col-centered uppercase">
+                Continue Game
+              </div>
+              <div className="modal-button column-container col-centered uppercase">
+                Restart
+              </div>
+              <div className="modal-button column-container col-centered uppercase">
+                Quit Game
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {mainMenuOpen && (
+        <>
+          <div className="disabled-background"></div>
+          <div className="main-menu-modal">
+            <div className="modal-content column-container col-start gap10">
+              <div className="modal-title-container uppercase">
+                <img src={GameLogo} alt=""></img>
+              </div>
+              <div className="play-vs-player-button row-container uppercase pad-left60 ">
+                PLAY VS PLAYER
+              </div>
+              <div className="modal-button row-container uppercase pad-left60 ">
+                GAME RULES
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="rowContainer row-centered grow-h game-controls-container ">
         <div className="menu-button-container">
-          <button>Menu</button>
+          <button onClick={openMainMenuModal}>Menu</button>
         </div>
 
         <img src={GameLogo} alt=""></img>
@@ -241,7 +309,9 @@ const App = () => {
         <img src={BlackBoard} alt="" />
       </div>
 
-      <div className="bottom-plate"></div>
+      <div
+        className={`bottom-plate ${winner != null ? winner.player : ""} `}
+      ></div>
 
       {winner == null ? (
         <div className={`caret-container ${playerTurn}`}>
