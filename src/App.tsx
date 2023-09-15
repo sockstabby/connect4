@@ -13,7 +13,7 @@ import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
 
 import { testForWin, Locations } from "./utils";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const initialState = [[], [], [], [], [], [], []];
 
@@ -28,20 +28,255 @@ type Winner = {
   player: string;
 };
 
+let g_initiator = false;
+
+const socket = new WebSocket("wss://connect4.isomarkets.com");
+
+// Connection opened
+socket.addEventListener("open", (event) => {
+  console.log("woohoo open called");
+});
+
+socket.addEventListener("close", (event) => {
+  console.error("The Websocket is closed.");
+});
+
+// Listen for messages
+socket.addEventListener("message", (event) => {
+  //console.log("Message from server ", event.data);
+});
+
 export type ColState = Column[];
+
+type LobbyProps = {
+  onStartGame: (initiator: boolean, opponent: string) => void;
+};
+
+const Lobby = ({ onStartGame }: LobbyProps) => {
+  const [name, setName] = useState("");
+  const [participants, setParticipants] = useState([]);
+  const [playersWantingToPlay, setPlayersWantingToPlay] = useState({});
+
+  const playerRef = useRef();
+
+  const [chosenOpponent, setChosenOpponent] = useState(null);
+
+  console.log("players wanting to play = ", playersWantingToPlay);
+
+  useEffect(() => {
+    //console.log("effect called ");
+
+    // Listen for messages
+    socket.addEventListener("message", (event) => {
+      //console.log("Message from server ", event.data);
+
+      //setMessage(JSON.stringify(event.data));
+
+      const payload = JSON.parse(event.data);
+
+      console.log("GOT A MESSAGE payload = ", payload);
+
+      if (payload.message === "lobbyParticipants") {
+        console.log("participants = ", payload.data);
+
+        setParticipants(payload.data);
+      }
+      if (payload.message === "playRequested") {
+        console.log("a player wants to play = ", payload.data);
+
+        setPlayersWantingToPlay((s) => ({
+          ...s,
+          [payload.data]: payload.data,
+        }));
+      }
+
+      if (payload.message === "startGame") {
+        onStartGame(payload.data.initiator, payload.data.opponent);
+      }
+    });
+  }, []);
+
+  const nameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
+
+  const playerSelected = (e) => {
+    console.log("player selected = ", e.target.value);
+
+    setChosenOpponent(e.target.value);
+    // setName(e.target.value);
+  };
+
+  const sendPlayRequest = () => {
+    console.log("sendPlayRequest", chosenOpponent);
+
+    if (playerRef.current && playerRef.current.value) {
+      //console.log("playerRef.value=", playerRef.current.value);
+
+      const payload = {
+        service: "chat",
+        action: "sendPlayRequest",
+        data: {
+          chosenOpponent,
+        },
+      };
+
+      socket.send(JSON.stringify(payload));
+    }
+  };
+
+  const acceptPlayRequest = () => {
+    console.log("sendPlayRequest", chosenOpponent);
+
+    if (playerRef.current && playerRef.current.value) {
+      //console.log("playerRef.value=", playerRef.current.value);
+
+      //const opponent = chosenOpponent.replace("*", "");
+
+      let opponent = chosenOpponent.replaceAll("*", "");
+
+      console.log("opponent to send request to is ", opponent);
+
+      const payload = {
+        service: "chat",
+        action: "acceptPlayRequest",
+        data: {
+          chosenOpponent: opponent,
+          acceptor: name,
+        },
+      };
+
+      socket.send(JSON.stringify(payload));
+    }
+  };
+
+  const joinLobby = () => {
+    const payload = {
+      service: "chat",
+      action: "joinLobby",
+      data: {
+        name,
+      },
+    };
+
+    socket.send(JSON.stringify(payload));
+  };
+
+  const closeSocket = () => {
+    console.log("closing socket");
+    socket.close();
+  };
+
+  const players = participants.map((i) => {
+    let name = i.name;
+
+    if (playersWantingToPlay.hasOwnProperty(i.name)) {
+      name = i.name + "************";
+    }
+    return <option value={name}> {name} </option>;
+  });
+
+  return (
+    <>
+      <div className="disabled-background"></div>
+
+      <div className="lobby-modal">
+        <div className="modal-content column-container col-start gap10">
+          <div className="modal-title-container uppercase">Lobby</div>
+
+          <button onClick={closeSocket}>Close Socket</button>
+          <div
+            onClick={joinLobby}
+            className="modal-button column-container col-centered uppercase"
+          >
+            Join Lobby
+          </div>
+
+          <input onChange={nameChanged} type="text" value={name} />
+
+          <label> Lobby:</label>
+          {/* <input readOnly type="text" value={message} /> */}
+
+          <select
+            ref={playerRef}
+            onChange={playerSelected}
+            className="lobby-player-list"
+            name="players"
+            size={5}
+          >
+            {players}
+          </select>
+
+          <div className="row-container row-centered gap10">
+            <button onClick={sendPlayRequest}>Send Play Request</button>
+
+            <button onClick={acceptPlayRequest}>Accept Request</button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
 const App = () => {
   const [colState, setColState] = useState<ColState>(initialState);
   // count of numner of plays
   const [plays, setPlays] = useState(0);
-  // current is the animated piece it is not fixed or permanent
+
+  const playsRef = useRef(0);
+
+  // currentRef is the animated piece it is not fixed or permanent
+  const currentRef = useRef<number | null>(null);
+
+  const currentRefColor = useRef<null | string>(null);
+
   const [current, setCurrent] = useState<null | number>(null);
+
   const [winner, setWinner] = useState<Winner | null>(null);
 
   const [pause, setPause] = useState(false);
 
+  const [initiator, setInitiator] = useState(false);
+
   const [mainMenuOpen, setMainMenuOpen] = useState(false);
   const mainMenuOpenRef = useRef<boolean>(false);
+
+  const [showLobby, setShowLobby] = useState(true);
+
+  const [opponent, setOpponent] = useState("");
+
+  useEffect(() => {
+    // Listen for messages
+    socket.addEventListener("message", (event) => {
+      //console.log("Message from server ", event.data);
+
+      //setMessage(JSON.stringify(event.data));
+
+      const payload = JSON.parse(event.data);
+
+      console.log("GOT A MESSAGE payload = ", payload);
+
+      if (payload.message === "playTurn") {
+        console.log("our opponent has played their turn");
+
+        setPlays((p) => p + 1);
+        playsRef.current++;
+        animateRow(payload.data.turn.col, true);
+      }
+
+      if (payload.message === "clearToken") {
+        console.log("opponent asked us to clear our token");
+
+        if (currentRef.current != null) {
+          console.log("this is a good thing");
+        } else {
+          console.error("asked to clear token when we dont have one!");
+        }
+
+        animateRow(0, true);
+      }
+    });
+  }, []);
 
   useScreenSize();
 
@@ -59,17 +294,51 @@ const App = () => {
     }
   });
 
-  console.log(" render mainMenuOpen = ", mainMenuOpen);
-
   const openMainMenuModal = () => {
     mainMenuOpenRef.current = true;
     setMainMenuOpen(true);
   };
 
-  const animateRow = (col: number) => {
-    const playerTurn = `${plays % 2 === 0 ? "red" : "yellow"}`;
+  const getRemoteColor = () => {
+    console.log("getRemoteColor global initiator = ", g_initiator);
+    if (g_initiator) {
+      return "yellow";
+    }
 
-    if (current != null) {
+    return "red";
+  };
+
+  const getLocalColor = () => {
+    if (initiator) {
+      return "red";
+    }
+
+    return "yellow";
+  };
+
+  const localMove = (col: number) => {
+    const payload = {
+      service: "chat",
+      action: "playTurn",
+      data: {
+        turn: { col },
+        opponent,
+      },
+    };
+
+    console.warn("sending playturn");
+    socket.send(JSON.stringify(payload));
+
+    //animateRow(col);
+  };
+
+  const animateRow = (col: number, remote: boolean = false) => {
+    if (currentRef.current != null) {
+      console.error("clearing a token ");
+
+      // this token could have been placed by us
+      // or the remote player
+
       // basically there is a piece down that was animated into its position
       // and in this block we delete that item by setting current to null
       // and at the same time we make a permanent piece on the board
@@ -81,31 +350,75 @@ const App = () => {
       // and that item is short lived and turned into a permanent piece on the next
       // turn.
 
-      colState[current].push(playerTurn);
+      colState[currentRef.current].push(currentRefColor.current);
+
+      currentRef.current = null;
+      currentRefColor.current = null;
 
       setColState(colState);
       setCurrent(null);
-      setPlays(plays + 1);
+
+      if (!remote) {
+        const payload = {
+          service: "chat",
+          action: "clearToken",
+          data: {
+            opponent,
+          },
+        };
+
+        //tell the other guy to clear its token
+        console.warn("telling other guy to clear its token");
+
+        socket.send(JSON.stringify(payload));
+      }
     } else {
+      console.error("making a token ");
+
+      //creates the animation of the piece
+      if (!remote) {
+        localMove(col);
+        playsRef.current++;
+        setPlays(plays + 1);
+      }
+
+      const player = remote === true ? getRemoteColor() : getLocalColor();
+
+      console.log("remote ", remote);
+
+      console.log("the player that played this token is ", player);
+
+      currentRef.current = col;
+      currentRefColor.current = player;
+
       setCurrent(col);
+
       const [win, winningSet] = testForWin(
         col,
         colState[col].length,
-        playerTurn,
+        player,
         colState
       );
 
       if (win) {
-        setWinner({ player: playerTurn, pieces: winningSet });
+        setWinner({ player, pieces: winningSet });
       }
     }
+  };
+
+  const startGame = (initiator: boolean, opponent: string) => {
+    console.log("startGame ", initiator, opponent);
+
+    setInitiator(initiator);
+    setOpponent(opponent);
+
+    setShowLobby(false);
   };
 
   const getTokenStyle = (col: number, row: number) => {
     const posLeft = window.innerWidth / 2 - 300;
     const posTop = window.innerHeight / 2 - 275 + 5 * 88;
 
-    console.log("posTop", posTop);
     const ret: React.CSSProperties = {
       position: "absolute",
       top: posTop - row * 88,
@@ -129,12 +442,6 @@ const App = () => {
     return ret;
   };
 
-  let playerTurn = `${plays % 2 === 0 ? "red" : "yellow"}`;
-
-  if (current != null) {
-    playerTurn = `${plays % 2 === 0 ? "yellow" : "red"}`;
-  }
-
   const tokens: any = [];
 
   colState.forEach((column, i) => {
@@ -156,17 +463,11 @@ const App = () => {
     });
   });
 
-  console.log("winner =", winner);
-  console.log(JSON.stringify(colState));
-
   let winningPieces: any = [];
 
   if (winner != null) {
     winningPieces = winner.pieces.map((piece) => {
       const style = getTokenStyle(piece.col, piece.row);
-
-      console.log("creating piece for ", piece.col, piece.row);
-
       const image =
         winner.player === "red" ? RedWinningPiece : YellowWinningPiece;
 
@@ -178,10 +479,45 @@ const App = () => {
     });
   }
 
-  console.log("winning pieces = ", winningPieces);
+  //console.log("winning pieces = ", winningPieces);
+
+  let myTurn = false;
+
+  if (initiator) {
+    myTurn = plays % 2 === 0;
+  } else {
+    myTurn = plays % 2 !== 0;
+  }
+
+  let playerTurn;
+
+  if (myTurn) {
+    if (initiator) {
+      playerTurn = "red";
+    } else {
+      playerTurn = "yellow";
+    }
+  } else {
+    if (initiator) {
+      playerTurn = "yellow";
+    } else {
+      playerTurn = "red";
+    }
+  }
+
+  console.log("myTurn", myTurn);
+  console.log("initiator", initiator);
+  console.log("playerTurn", playerTurn);
+
+  console.log("currentRef.current", currentRef.current);
+  console.log("currentRefColor.current", currentRefColor.current);
+
+  g_initiator = initiator;
 
   return (
     <>
+      {showLobby && <Lobby onStartGame={startGame} />}
+
       {pause && (
         <>
           <div className="disabled-background"></div>
@@ -264,42 +600,47 @@ const App = () => {
       </div>
       <div className="player2-card-background"></div>
 
-      <div className="dropzone">
-        <div
-          className={`drop-column ${playerTurn}`}
-          onClick={() => animateRow(0)}
-        ></div>
+      {/* {((initiator && playerTurn === "red") ||
+        (!initiator && playerTurn === "yellow")) && ( */}
 
-        <div
-          className={`drop-column ${playerTurn}`}
-          onClick={() => animateRow(1)}
-        ></div>
+      {myTurn && (
+        <div className="dropzone">
+          <div
+            className={`drop-column ${playerTurn}`}
+            onClick={() => animateRow(0)}
+          ></div>
 
-        <div
-          className={`drop-column ${playerTurn}`}
-          onClick={() => animateRow(2)}
-        ></div>
+          <div
+            className={`drop-column ${playerTurn}`}
+            onClick={() => animateRow(1)}
+          ></div>
 
-        <div
-          className={`drop-column ${playerTurn}`}
-          onClick={() => animateRow(3)}
-        ></div>
+          <div
+            className={`drop-column ${playerTurn}`}
+            onClick={() => animateRow(2)}
+          ></div>
 
-        <div
-          className={`drop-column ${playerTurn}`}
-          onClick={() => animateRow(4)}
-        ></div>
+          <div
+            className={`drop-column ${playerTurn}`}
+            onClick={() => animateRow(3)}
+          ></div>
 
-        <div
-          className={`drop-column ${playerTurn}`}
-          onClick={() => animateRow(5)}
-        ></div>
+          <div
+            className={`drop-column ${playerTurn}`}
+            onClick={() => animateRow(4)}
+          ></div>
 
-        <div
-          className={`drop-column ${playerTurn}`}
-          onClick={() => animateRow(6)}
-        ></div>
-      </div>
+          <div
+            className={`drop-column ${playerTurn}`}
+            onClick={() => animateRow(5)}
+          ></div>
+
+          <div
+            className={`drop-column ${playerTurn}`}
+            onClick={() => animateRow(6)}
+          ></div>
+        </div>
+      )}
 
       <div className="white-board">
         <img src={Board} alt="" />
@@ -344,9 +685,9 @@ const App = () => {
 
       {winningPieces}
 
-      {current != null && (
-        <div style={getTokenStyle(current, 6)}>
-          {playerTurn === "red" ? (
+      {currentRef.current != null && (
+        <div style={getTokenStyle(currentRef.current, 6)}>
+          {currentRefColor.current === "yellow" ? (
             <img src={YellowPiece} alt="" />
           ) : (
             <img src={OrangePiece} alt="" />
