@@ -1,12 +1,10 @@
-:root {
-
-
-
+input, textarea, select {
   font-family: 'Space Grotesk', sans-serif;
+}
 
 
-
-
+:root {
+  font-family: 'Space Grotesk', sans-serif;
 
   line-height: 1.5;
   font-weight: 400;

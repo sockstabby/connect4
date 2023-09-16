@@ -5,6 +5,8 @@ import BlackBoard from "../src/assets/connect4-board-back-layer.svg";
 import OrangePiece from "../src/assets/orange-piece.svg";
 import YellowPiece from "../src/assets/yellow-piece.svg";
 
+import ModalButton from "../src/assets/restart-button.svg";
+
 import YellowWinningPiece from "../src/assets/yellow-winning-piece.svg";
 import RedWinningPiece from "../src/assets/red-winning-piece.svg";
 
@@ -33,17 +35,12 @@ let g_initiator = false;
 const socket = new WebSocket("wss://connect4.isomarkets.com");
 
 // Connection opened
-socket.addEventListener("open", (event) => {
+socket.addEventListener("open", (_event) => {
   console.log("woohoo open called");
 });
 
-socket.addEventListener("close", (event) => {
+socket.addEventListener("close", (_event) => {
   console.error("The Websocket is closed.");
-});
-
-// Listen for messages
-socket.addEventListener("message", (event) => {
-  //console.log("Message from server ", event.data);
 });
 
 export type ColState = Column[];
@@ -51,6 +48,8 @@ export type ColState = Column[];
 type LobbyProps = {
   onStartGame: (initiator: boolean, opponent: string) => void;
 };
+
+const dummyPlayers = ["a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"];
 
 const Lobby = ({ onStartGame }: LobbyProps) => {
   const [name, setName] = useState("");
@@ -80,6 +79,7 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
         console.log("participants = ", payload.data);
 
         setParticipants(payload.data);
+        //setParticipants(dummyPlayers);
       }
       if (payload.message === "playRequested") {
         console.log("a player wants to play = ", payload.data);
@@ -100,7 +100,7 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
     setName(e.target.value);
   };
 
-  const playerSelected = (e) => {
+  const playerSelected = (e: any) => {
     console.log("player selected = ", e.target.value);
 
     setChosenOpponent(e.target.value);
@@ -110,6 +110,7 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
   const sendPlayRequest = () => {
     console.log("sendPlayRequest", chosenOpponent);
 
+    // @ts-ignore
     if (playerRef.current && playerRef.current.value) {
       //console.log("playerRef.value=", playerRef.current.value);
 
@@ -128,11 +129,13 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
   const acceptPlayRequest = () => {
     console.log("sendPlayRequest", chosenOpponent);
 
+    // @ts-ignore
     if (playerRef.current && playerRef.current.value) {
       //console.log("playerRef.value=", playerRef.current.value);
 
       //const opponent = chosenOpponent.replace("*", "");
 
+      // @ts-ignore
       let opponent = chosenOpponent.replaceAll("*", "");
 
       console.log("opponent to send request to is ", opponent);
@@ -168,9 +171,12 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
   };
 
   const players = participants.map((i) => {
+    // @ts-ignore
     let name = i.name;
 
+    // @ts-ignore
     if (playersWantingToPlay.hasOwnProperty(i.name)) {
+      // @ts-ignore
       name = i.name + "************";
     }
     return <option value={name}> {name} </option>;
@@ -184,13 +190,24 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
         <div className="modal-content column-container col-start gap10">
           <div className="modal-title-container uppercase">Lobby</div>
 
-          <button onClick={closeSocket}>Close Socket</button>
-          <div
+          {/* <button onClick={closeSocket}>Close Socket</button> */}
+
+          <button
+            disabled={name === ""}
+            className={`button--unstyled uppercase ${
+              name === "" ? "disabled" : ""
+            } `}
+            onClick={joinLobby}
+          >
+            Join Lobby
+          </button>
+
+          {/* <div
             onClick={joinLobby}
             className="modal-button column-container col-centered uppercase"
           >
             Join Lobby
-          </div>
+          </div> */}
 
           <input onChange={nameChanged} type="text" value={name} />
 
@@ -198,9 +215,11 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
           {/* <input readOnly type="text" value={message} /> */}
 
           <select
+            className="lobby-player-list widthHeight style"
+            // @ts-ignore
             ref={playerRef}
             onChange={playerSelected}
-            className="lobby-player-list"
+            // className="lobby-player-list"
             name="players"
             size={5}
           >
@@ -230,6 +249,7 @@ const App = () => {
 
   const currentRefColor = useRef<null | string>(null);
 
+  // @ts-ignore
   const [current, setCurrent] = useState<null | number>(null);
 
   const [winner, setWinner] = useState<Winner | null>(null);
@@ -350,6 +370,7 @@ const App = () => {
       // and that item is short lived and turned into a permanent piece on the next
       // turn.
 
+      // @ts-ignore
       colState[currentRef.current].push(currentRefColor.current);
 
       currentRef.current = null;
@@ -570,7 +591,7 @@ const App = () => {
         </div>
       </div>
 
-      <div className="player1-card">
+      <div className="player1-card player-card">
         <div className="player-container rowContainer grow-h">
           <img src={Player1} alt="" />{" "}
         </div>
@@ -585,9 +606,9 @@ const App = () => {
 
         <div className="rowContainer"></div>
       </div>
-      <div className="player1-card-background"></div>
+      {/* <div className="player1-card-background"></div> */}
 
-      <div className="player2-card">
+      <div className="player2-card player-card">
         <div className="player-container rowContainer grow-h">
           <img src={Player2} alt="" />{" "}
         </div>
@@ -598,10 +619,6 @@ const App = () => {
           18
         </div>
       </div>
-      <div className="player2-card-background"></div>
-
-      {/* {((initiator && playerTurn === "red") ||
-        (!initiator && playerTurn === "yellow")) && ( */}
 
       {myTurn && (
         <div className="dropzone">

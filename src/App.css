@@ -15,6 +15,40 @@
   z-index: 10000;
 }
 
+.button--unstyled {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+
+  width: 420px;
+  height: 86px;
+  color: black;
+
+  background-image: url("assets/restart-button.svg");
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.button--unstyled.disabled {
+  color: rgb(214, 212, 212);
+  background-image: url("assets/restart-button-disabled.svg");
+  cursor: not-allowed;
+}
+
+.button--unstyled:hover {
+  background-image: url("assets/restart-button-hovered.svg");
+}
+
+.button--unstyled.disabled:hover {
+  background-image: url("assets/restart-button-disabled.svg");
+  cursor: not-allowed;
+}
+
+.button--unstyled:focus {
+  outline-color: white;
+}
+
 .modal-button {
   background-image: url("assets/restart-button.svg");
   background-repeat: no-repeat;
@@ -27,6 +61,7 @@
   font-weight: 500px;
 
   padding-bottom: 5px;
+  outline-color: white;
 }
 
 .play-vs-player-button {
@@ -82,15 +117,15 @@
 .lobby-modal {
   position: absolute;
 
-  top: calc(100vh / 2 - 350px);
+  top: calc(100vh / 2 - 467px);
   left: calc(100vw / 2 - 240px);
 
   width: 488px;
-  height: 700px;
+  height: 935px;
 
   /* background-color: var(--game-background-color2); */
 
-  background-image: url("assets/pause-modal.svg");
+  background-image: url("assets/lobby-modal.svg");
   background-repeat: no-repeat;
   background-position: center center;
 
@@ -146,7 +181,7 @@ button {
 }
 button:hover {
   /* background-color: var(--game-background-color1); */
-  border: 1px solid white;
+  /* border: 1px solid white; */
 }
 button:active {
   position: relative;
@@ -370,48 +405,33 @@ button:active {
   text-transform: uppercase;
 }
 
-.player1-card {
+.player-card {
   position: absolute;
-  top: calc(100vh / 2 - 94px);
-  left: calc(100vw / 2 - 316px - 50px - 141px);
 
   background-color: white;
   border-radius: 30px;
 
   border: 2px solid black;
 
+  border-bottom: 10px solid black;
+
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+
   width: 141px;
-  height: 187px;
+  /* height: 187px; */
+
+  height: auto;
 }
 
-.player1-card-background {
-  position: absolute;
-  top: calc(100vh / 2 - 94px + 10px);
+.player1-card {
+  top: calc(100vh / 2 - 94px);
   left: calc(100vw / 2 - 316px - 50px - 141px);
-
-  z-index: -1;
-
-  background-color: black;
-  border-radius: 30px;
-
-  border: 1px solid black;
-
-  width: 141px;
-  height: 187px;
 }
 
 .player2-card {
-  position: absolute;
   top: calc(100vh / 2 - 94px);
   left: calc(100vw / 2 + 316px + 50px - 0px);
-
-  background-color: white;
-  border-radius: 30px;
-
-  border: 2px solid black;
-
-  width: 141px;
-  height: 187px;
 }
 
 .player2-card-background {
@@ -511,3 +531,66 @@ button:active {
 }
 
 /* *************************************************** */
+
+select {
+  margin-bottom: 10px;
+  margin-top: 10px;
+
+  outline: 0;
+  /* background: var(--game-background-color2); */
+  background-color: black;
+  color: white;
+  border: 1px solid black;
+  padding: 4px;
+  border-radius: 9px;
+
+  font-size: 1.5rem;
+}
+
+select.widthHeight::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+select.style::-webkit-scrollbar-track {
+  border: white;
+  background-color: var(--game-background-color2);
+}
+
+select.style::-webkit-scrollbar-thumb {
+  background-color: var(--game-background-color1);
+  border: 1px solid white;
+  border-radius: 5px;
+}
+
+option:checked {
+  color: rgb(246, 250, 0);
+  background-color: var(--game-background-color1) !important;
+}
+
+option:active {
+  color: rgb(246, 250, 0);
+  background-color: var(--game-background-color1) !important;
+}
+
+option:hover {
+  color: rgb(246, 250, 0);
+  background-color: var(--game-background-color1) !important;
+}
+option {
+  height: 30px;
+  border-radius: 100px;
+  padding-left: 30px;
+}
+
+option::selection {
+  color: rgb(246, 250, 0);
+  background-color: var(--game-background-color1) !important;
+}
+
+input[type="text"] {
+  background-color: black;
+  border: 0;
+  border-radius: 100px;
+  padding-left: 15px;
+}
