@@ -46,7 +46,7 @@
 }
 
 .button--unstyled:focus {
-  outline-color: white;
+  /* outline-color: white; */
 }
 
 .modal-button {
@@ -88,79 +88,54 @@
   background-position: center center;
 }
 
-.pause-modal {
-  position: absolute;
-
-  top: calc(100vh / 2 - 245px);
-  left: calc(100vw / 2 - 240px);
-
-  width: 488px;
-  height: 506px;
-
-  /* background-color: var(--game-background-color2); */
-
-  background-image: url("assets/pause-modal.svg");
-  background-repeat: no-repeat;
-  background-position: center center;
-
-  /* border: 2px solid black; */
-
-  border-radius: 30px;
-
-  z-index: 10001;
-}
-
 .lobby-player-list {
-  width: 80%;
+  width: 100%;
+  height: 100px;
 }
 
-.lobby-modal {
+.centered {
+  /* text-align: center; */
   position: absolute;
-
-  top: calc(100vh / 2 - 467px);
-  left: calc(100vw / 2 - 240px);
-
-  width: 488px;
-  height: 935px;
-
-  /* background-color: var(--game-background-color2); */
-
-  background-image: url("assets/lobby-modal.svg");
-  background-repeat: no-repeat;
-  background-position: center center;
-
-  /* border: 2px solid black; */
-
-  border-radius: 30px;
-
-  z-index: 10001;
+  top: 50%;
+  left: 0;
+  right: 0;
+  margin: auto;
+  transform: translateY(-50%);
 }
 
-/* 480x435 */
-.main-menu-modal {
+.parent {
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
   position: absolute;
-
-  top: calc(100vh / 2 - 218px);
-  left: calc(100vw / 2 - 240px);
-
-  width: 488px;
-  height: 450px;
-
-  background-image: url("assets/main-menu-modal.svg");
-  background-repeat: no-repeat;
-  background-position: center center;
-
   z-index: 10002;
 }
 
+.modal {
+  width: 460px;
+  color: #fff;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid black;
+  background-color: var(--game-background-color1);
+  border-radius: 30px;
+  border: 2px solid black;
+  border-bottom: 15px solid black;
+  border-bottom-left-radius: 45px;
+  border-bottom-right-radius: 45px;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+}
+
 .modal-content {
-  padding-top: 25px;
+  /* padding-top: 10px; */
 }
 
 .modal-title-container {
-  font-size: 56px;
+  font-size: 48px;
   color: white;
-  padding-bottom: 20px;
+  padding-bottom: 5px;
 }
 
 button {
@@ -181,11 +156,19 @@ button {
 }
 button:hover {
   /* background-color: var(--game-background-color1); */
-  /* border: 1px solid white; */
+  border: 1px solid white;
 }
 button:active {
   position: relative;
   top: 1px;
+}
+
+button:disabled,
+button[disabled] {
+  cursor: not-allowed;
+  /* background-color: darkgray; */
+  color: black;
+  border: 0px solid white;
 }
 
 #root {
@@ -327,6 +310,7 @@ button:active {
 .game-controls-container {
   padding-top: 10px;
   display: flex;
+  /* height: 30px; */
 }
 
 .menu-button-container {
@@ -399,6 +383,10 @@ button:active {
 
 .gap15 {
   gap: 15px;
+}
+
+.modal-content > * {
+  padding-bottom: 5px;
 }
 
 .uppercase {
@@ -533,8 +521,8 @@ button:active {
 /* *************************************************** */
 
 select {
-  margin-bottom: 10px;
-  margin-top: 10px;
+  /* margin-bottom: 10px;
+  margin-top: 10px; */
 
   outline: 0;
   /* background: var(--game-background-color2); */
@@ -544,7 +532,7 @@ select {
   padding: 4px;
   border-radius: 9px;
 
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 select.widthHeight::-webkit-scrollbar {
@@ -578,9 +566,10 @@ option:hover {
   background-color: var(--game-background-color1) !important;
 }
 option {
-  height: 30px;
+  /* height: 30px; */
   border-radius: 100px;
-  padding-left: 30px;
+  text-align: center;
+  /* padding-left: 30px; */
 }
 
 option::selection {
@@ -588,9 +577,23 @@ option::selection {
   background-color: var(--game-background-color1) !important;
 }
 
+option:focus {
+  color: rgb(246, 250, 0);
+  background-color: var(--game-background-color1) !important;
+}
+
+option:active {
+  color: rgb(246, 250, 0);
+  background-color: var(--game-background-color1) !important;
+}
+
 input[type="text"] {
   background-color: black;
+  text-align: center;
   border: 0;
   border-radius: 100px;
-  padding-left: 15px;
+}
+
+label {
+  padding-bottom: 5px;
 }

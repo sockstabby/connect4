@@ -47,18 +47,19 @@ export type ColState = Column[];
 
 type LobbyProps = {
   onStartGame: (initiator: boolean, opponent: string) => void;
+  onClose: () => void;
 };
 
 const dummyPlayers = ["a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"];
 
-const Lobby = ({ onStartGame }: LobbyProps) => {
+const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
   const [name, setName] = useState("");
   const [participants, setParticipants] = useState([]);
   const [playersWantingToPlay, setPlayersWantingToPlay] = useState({});
 
-  const playerRef = useRef();
+  const [invitee, setInvitee] = useState("");
 
-  const [chosenOpponent, setChosenOpponent] = useState(null);
+  const [chosenOpponent, setChosenOpponent] = useState("");
 
   console.log("players wanting to play = ", playersWantingToPlay);
 
@@ -107,13 +108,17 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
     // setName(e.target.value);
   };
 
+  const inviteeSelected = (e: any) => {
+    console.log("invitee selected = ", e.target.value);
+
+    setInvitee(e.target.value);
+    // setName(e.target.value);
+  };
+
   const sendPlayRequest = () => {
     console.log("sendPlayRequest", chosenOpponent);
 
-    // @ts-ignore
-    if (playerRef.current && playerRef.current.value) {
-      //console.log("playerRef.value=", playerRef.current.value);
-
+    if (chosenOpponent !== "") {
       const payload = {
         service: "chat",
         action: "sendPlayRequest",
@@ -127,24 +132,16 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
   };
 
   const acceptPlayRequest = () => {
-    console.log("sendPlayRequest", chosenOpponent);
+    console.log("sendPlayRequest");
 
-    // @ts-ignore
-    if (playerRef.current && playerRef.current.value) {
-      //console.log("playerRef.value=", playerRef.current.value);
-
-      //const opponent = chosenOpponent.replace("*", "");
-
-      // @ts-ignore
-      let opponent = chosenOpponent.replaceAll("*", "");
-
-      console.log("opponent to send request to is ", opponent);
+    if (invitee !== "") {
+      console.log("opponent to send accept request to is ", invitee);
 
       const payload = {
         service: "chat",
         action: "acceptPlayRequest",
         data: {
-          chosenOpponent: opponent,
+          chosenOpponent: invitee,
           acceptor: name,
         },
       };
@@ -177,59 +174,81 @@ const Lobby = ({ onStartGame }: LobbyProps) => {
     // @ts-ignore
     if (playersWantingToPlay.hasOwnProperty(i.name)) {
       // @ts-ignore
-      name = i.name + "************";
+      name = i.name;
     }
     return <option value={name}> {name} </option>;
   });
+
+  const invitesToPlay = Object.keys(playersWantingToPlay).map((i) => {
+    return <option value={i}> {i} </option>;
+  });
+
+  console.log("players", players);
+  console.log("invitesToPlay", invitesToPlay);
 
   return (
     <>
       <div className="disabled-background"></div>
 
-      <div className="lobby-modal">
-        <div className="modal-content column-container col-start gap10">
-          <div className="modal-title-container uppercase">Lobby</div>
+      <div className="parent">
+        <div className="modal centered">
+          <div className="modal-content column-container col-start gap10">
+            <div className="modal-title-container uppercase">Online Mode</div>
 
-          {/* <button onClick={closeSocket}>Close Socket</button> */}
+            <div className="column-container">
+              <label> Enter your name to join the lobby:</label>
+              <input onChange={nameChanged} type="text" value={name} />
+            </div>
 
-          <button
-            disabled={name === ""}
-            className={`button--unstyled uppercase ${
-              name === "" ? "disabled" : ""
-            } `}
-            onClick={joinLobby}
-          >
-            Join Lobby
-          </button>
+            <div className="row-container">
+              <button
+                className={`button--unstyled uppercase ${
+                  name === "" ? "disabled" : ""
+                } `}
+                onClick={joinLobby}
+              >
+                Join Lobby
+              </button>
+            </div>
 
-          {/* <div
-            onClick={joinLobby}
-            className="modal-button column-container col-centered uppercase"
-          >
-            Join Lobby
-          </div> */}
+            <div className="column-container grow-h gap8">
+              Available Players:
+              <select
+                className="lobby-player-list widthHeight style"
+                onChange={playerSelected}
+                name="players"
+                size={5}
+              >
+                {players}
+              </select>
+              <button
+                disabled={chosenOpponent === "" || chosenOpponent === name}
+                onClick={sendPlayRequest}
+              >
+                Send Invite
+              </button>
+            </div>
 
-          <input onChange={nameChanged} type="text" value={name} />
+            <div className="column-container grow-h">
+              <label> Invitations Received:</label>
 
-          <label> Lobby:</label>
-          {/* <input readOnly type="text" value={message} /> */}
+              <select
+                className="lobby-player-list widthHeight style"
+                onChange={inviteeSelected}
+                name="invites"
+                size={5}
+              >
+                {invitesToPlay}
+              </select>
+            </div>
 
-          <select
-            className="lobby-player-list widthHeight style"
-            // @ts-ignore
-            ref={playerRef}
-            onChange={playerSelected}
-            // className="lobby-player-list"
-            name="players"
-            size={5}
-          >
-            {players}
-          </select>
+            <div className="row-container row-centered gap10  grow-h">
+              <button onClick={(_e) => onClose()}>Cancel</button>
 
-          <div className="row-container row-centered gap10">
-            <button onClick={sendPlayRequest}>Send Play Request</button>
-
-            <button onClick={acceptPlayRequest}>Accept Request</button>
+              <button disabled={invitee === ""} onClick={acceptPlayRequest}>
+                Accept Invite
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -537,48 +556,6 @@ const App = () => {
 
   return (
     <>
-      {showLobby && <Lobby onStartGame={startGame} />}
-
-      {pause && (
-        <>
-          <div className="disabled-background"></div>
-
-          <div className="pause-modal">
-            <div className="modal-content column-container col-start gap10">
-              <div className="modal-title-container uppercase">PAUSE</div>
-              <div className="modal-button column-container col-centered uppercase">
-                Continue Game
-              </div>
-              <div className="modal-button column-container col-centered uppercase">
-                Restart
-              </div>
-              <div className="modal-button column-container col-centered uppercase">
-                Quit Game
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {mainMenuOpen && (
-        <>
-          <div className="disabled-background"></div>
-          <div className="main-menu-modal">
-            <div className="modal-content column-container col-start gap10">
-              <div className="modal-title-container uppercase">
-                <img src={GameLogo} alt=""></img>
-              </div>
-              <div className="play-vs-player-button row-container uppercase pad-left60 ">
-                PLAY VS PLAYER
-              </div>
-              <div className="modal-button row-container uppercase pad-left60 ">
-                GAME RULES
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
       <div className="rowContainer row-centered grow-h game-controls-container ">
         <div className="menu-button-container">
           <button onClick={openMainMenuModal}>Menu</button>
@@ -590,6 +567,55 @@ const App = () => {
           <button>Restart</button>
         </div>
       </div>
+
+      {showLobby && (
+        <Lobby onStartGame={startGame} onClose={() => setShowLobby(false)} />
+      )}
+
+      {pause && (
+        <>
+          <div className="disabled-background"></div>
+
+          <div className="parent">
+            <div className="modal centered">
+              <div className="modal-content column-container col-start gap8">
+                <div className="modal-title-container uppercase">PAUSE</div>
+                <div className="modal-button column-container col-centered uppercase">
+                  Continue Game
+                </div>
+                <div className="modal-button column-container col-centered uppercase">
+                  Restart
+                </div>
+                <div className="modal-button column-container col-centered uppercase">
+                  Quit Game
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {mainMenuOpen && (
+        <>
+          <div className="disabled-background"></div>
+
+          <div className="parent">
+            <div className="modal centered">
+              <div className="modal-content column-container col-start gap10">
+                <div className="modal-title-container uppercase">
+                  <img src={GameLogo} alt=""></img>
+                </div>
+                <div className="play-vs-player-button row-container uppercase pad-left60 ">
+                  PLAY VS PLAYER
+                </div>
+                <div className="modal-button row-container uppercase pad-left60 ">
+                  GAME RULES
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="player1-card player-card">
         <div className="player-container rowContainer grow-h">
@@ -606,7 +632,6 @@ const App = () => {
 
         <div className="rowContainer"></div>
       </div>
-      {/* <div className="player1-card-background"></div> */}
 
       <div className="player2-card player-card">
         <div className="player-container rowContainer grow-h">
