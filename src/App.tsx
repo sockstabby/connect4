@@ -45,8 +45,10 @@ socket.addEventListener("close", (_event) => {
 
 export type ColState = Column[];
 
+type GameMode = "online" | "local";
+
 type LobbyProps = {
-  onStartGame: (initiator: boolean, opponent: string) => void;
+  onStartGame: (initiator: boolean, opponent: string, mode: GameMode) => void;
   onClose: () => void;
 };
 
@@ -56,10 +58,10 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
   const [name, setName] = useState("");
   const [participants, setParticipants] = useState([]);
   const [playersWantingToPlay, setPlayersWantingToPlay] = useState({});
-
   const [invitee, setInvitee] = useState("");
-
   const [chosenOpponent, setChosenOpponent] = useState("");
+
+  const [mode, setMode] = useState<GameMode>("local");
 
   console.log("players wanting to play = ", playersWantingToPlay);
 
@@ -92,7 +94,7 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
       }
 
       if (payload.message === "startGame") {
-        onStartGame(payload.data.initiator, payload.data.opponent);
+        onStartGame(payload.data.initiator, payload.data.opponent, mode);
       }
     });
   }, []);
@@ -186,6 +188,10 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
   console.log("players", players);
   console.log("invitesToPlay", invitesToPlay);
 
+  const toggleMode = () => {
+    setMode(mode === "online" ? "local" : "online");
+  };
+
   return (
     <>
       <div className="disabled-background"></div>
@@ -193,62 +199,132 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
       <div className="parent">
         <div className="modal centered">
           <div className="modal-content column-container col-start gap10">
-            <div className="modal-title-container uppercase">Online Mode</div>
-
-            <div className="column-container">
-              <label> Enter your name to join the lobby:</label>
-              <input onChange={nameChanged} type="text" value={name} />
+            <div className="row-container">
+              <img src={GameLogo} alt=""></img>
             </div>
 
             <div className="row-container">
-              <button
-                className={`button--unstyled uppercase ${
-                  name === "" ? "disabled" : ""
-                } `}
-                onClick={joinLobby}
+              <label
+                className={
+                  mode === "online" ? "online-active" : "online-inactive"
+                }
               >
-                Join Lobby
-              </button>
+                Local
+              </label>
+              <div className="toggle-wrapper">
+                <input
+                  type="checkbox"
+                  id="switch"
+                  checked={mode === "online"}
+                  onChange={toggleMode}
+                  tabIndex={0}
+                />
+                <label htmlFor="switch">Online Mode</label>
+              </div>
+
+              <label
+                className={
+                  mode === "online" ? "online-active" : "online-inactive"
+                }
+              >
+                Online
+              </label>
             </div>
 
-            <div className="column-container grow-h gap8">
-              Available Players:
-              <select
-                className="lobby-player-list widthHeight style"
-                onChange={playerSelected}
-                name="players"
-                size={5}
-              >
-                {players}
-              </select>
-              <button
-                disabled={chosenOpponent === "" || chosenOpponent === name}
-                onClick={sendPlayRequest}
-              >
-                Send Invite
-              </button>
-            </div>
+            {mode !== "online" && (
+              <>
+                <div className="column-container">
+                  <label> Player One Name:</label>
+                  <input onChange={nameChanged} type="text" value={name} />
+                </div>
 
-            <div className="column-container grow-h">
-              <label> Invitations Received:</label>
+                <div className="column-container">
+                  <label> Player Two Name:</label>
+                  <input onChange={nameChanged} type="text" value={name} />
+                </div>
 
-              <select
-                className="lobby-player-list widthHeight style"
-                onChange={inviteeSelected}
-                name="invites"
-                size={5}
-              >
-                {invitesToPlay}
-              </select>
-            </div>
+                <div className="row-container">
+                  <button
+                    className="button--unstyled uppercase"
+                    // onClick={joinLobby}
+                  >
+                    Start Game
+                  </button>
+                </div>
 
-            <div className="row-container row-centered gap10  grow-h">
-              <button onClick={(_e) => onClose()}>Cancel</button>
+                <div className="row-container">
+                  <button
+                    className="button--unstyled uppercase"
+                    // onClick={joinLobby}
+                  >
+                    Game Rules
+                  </button>
+                </div>
 
-              <button disabled={invitee === ""} onClick={acceptPlayRequest}>
-                Accept Invite
-              </button>
-            </div>
+                <div className="row-container row-centered gap10 pad-top-100  grow-h">
+                  <button onClick={(_e) => onClose()}>Cancel</button>
+                </div>
+              </>
+            )}
+
+            {mode === "online" && (
+              <>
+                <div className="column-container">
+                  <label> Enter your name to join the lobby:</label>
+                  <input onChange={nameChanged} type="text" value={name} />
+                </div>
+
+                <div className="row-container">
+                  <button
+                    className={`button--unstyled uppercase ${
+                      name === "" ? "disabled" : ""
+                    } `}
+                    onClick={joinLobby}
+                  >
+                    Join Lobby
+                  </button>
+                </div>
+
+                <div className="column-container grow-h gap8">
+                  Available Players:
+                  <select
+                    className="lobby-player-list widthHeight style"
+                    onChange={playerSelected}
+                    name="players"
+                    size={5}
+                  >
+                    {players}
+                  </select>
+                  <button
+                    disabled={chosenOpponent === "" || chosenOpponent === name}
+                    onClick={sendPlayRequest}
+                  >
+                    Send Invite
+                  </button>
+                </div>
+
+                <div className="column-container grow-h">
+                  <label> Invitations Received:</label>
+
+                  <select
+                    className="lobby-player-list widthHeight style"
+                    onChange={inviteeSelected}
+                    name="invites"
+                    size={5}
+                  >
+                    {invitesToPlay}
+                  </select>
+                </div>
+
+                <div className="row-container row-centered gap10  grow-h">
+                  <button onClick={(_e) => onClose()}>Cancel</button>
+
+                  <button disabled={invitee === ""} onClick={acceptPlayRequest}>
+                    Accept Invite
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -323,8 +399,6 @@ const App = () => {
     console.log("pause pressed");
 
     if (mainMenuOpenRef.current) {
-      console.log("WTF WTF");
-
       setMainMenuOpen(false);
       mainMenuOpenRef.current = false;
     } else {
