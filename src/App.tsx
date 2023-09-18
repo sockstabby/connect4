@@ -48,7 +48,13 @@ export type ColState = Column[];
 type GameMode = "online" | "local";
 
 type LobbyProps = {
-  onStartGame: (initiator: boolean, opponent: string, mode: GameMode) => void;
+  onStartGame: (
+    initiator: boolean,
+    opponent: string,
+    mode: GameMode,
+    player1: string,
+    player2: string
+  ) => void;
   onClose: () => void;
 };
 
@@ -60,6 +66,9 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
   const [playersWantingToPlay, setPlayersWantingToPlay] = useState({});
   const [invitee, setInvitee] = useState("");
   const [chosenOpponent, setChosenOpponent] = useState("");
+
+  const [player1, setPlayer1] = useState("Player 1");
+  const [player2, setPlayer2] = useState("Player 2");
 
   const [mode, setMode] = useState<GameMode>("local");
 
@@ -94,7 +103,13 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
       }
 
       if (payload.message === "startGame") {
-        onStartGame(payload.data.initiator, payload.data.opponent, mode);
+        onStartGame(
+          payload.data.initiator,
+          payload.data.opponent,
+          mode,
+          name,
+          payload.data.opponent
+        );
       }
     });
   }, []);
@@ -192,6 +207,10 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
     setMode(mode === "online" ? "local" : "online");
   };
 
+  const startLocalGame = () => {
+    onStartGame(true, "local", "local", player1, player1);
+  };
+
   return (
     <>
       <div className="disabled-background"></div>
@@ -235,18 +254,18 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
               <>
                 <div className="column-container">
                   <label> Player One Name:</label>
-                  <input onChange={nameChanged} type="text" value={name} />
+                  <input onChange={nameChanged} type="text" value={player1} />
                 </div>
 
                 <div className="column-container">
                   <label> Player Two Name:</label>
-                  <input onChange={nameChanged} type="text" value={name} />
+                  <input onChange={nameChanged} type="text" value={player2} />
                 </div>
 
                 <div className="row-container">
                   <button
                     className="button--unstyled uppercase"
-                    // onClick={joinLobby}
+                    onClick={startLocalGame}
                   >
                     Start Game
                   </button>
@@ -336,6 +355,8 @@ const App = () => {
   const [colState, setColState] = useState<ColState>(initialState);
   // count of numner of plays
   const [plays, setPlays] = useState(0);
+
+  const [mode, setMode] = useState("online");
 
   const playsRef = useRef(0);
 
@@ -520,11 +541,19 @@ const App = () => {
     }
   };
 
-  const startGame = (initiator: boolean, opponent: string) => {
-    console.log("startGame ", initiator, opponent);
+  const startGame = (
+    initiator: boolean,
+    opponent: string,
+    mode: GameMode,
+    player1: string,
+    player2: string
+  ) => {
+    console.log("startGame ", initiator, opponent, mode, player1, player2);
 
     setInitiator(initiator);
     setOpponent(opponent);
+
+    setMode(mode);
 
     setShowLobby(false);
   };
@@ -620,6 +649,9 @@ const App = () => {
   }
 
   console.log("myTurn", myTurn);
+
+  console.log("mode", myTurn);
+
   console.log("initiator", initiator);
   console.log("playerTurn", playerTurn);
 
@@ -719,7 +751,7 @@ const App = () => {
         </div>
       </div>
 
-      {myTurn && (
+      {(myTurn || mode === "local") && (
         <div className="dropzone">
           <div
             className={`drop-column ${playerTurn}`}
