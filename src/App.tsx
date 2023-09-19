@@ -5,8 +5,6 @@ import BlackBoard from "../src/assets/connect4-board-back-layer.svg";
 import OrangePiece from "../src/assets/orange-piece.svg";
 import YellowPiece from "../src/assets/yellow-piece.svg";
 
-import ModalButton from "../src/assets/restart-button.svg";
-
 import YellowWinningPiece from "../src/assets/yellow-winning-piece.svg";
 import RedWinningPiece from "../src/assets/red-winning-piece.svg";
 
@@ -15,7 +13,7 @@ import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
 
 import { testForWin, Locations } from "./utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 
 const initialState = [[], [], [], [], [], [], []];
 
@@ -31,6 +29,7 @@ type Winner = {
 };
 
 let g_initiator = false;
+let g_initiatorColor = "red";
 
 const socket = new WebSocket("wss://connect4.isomarkets.com");
 
@@ -70,32 +69,18 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
   const [player1, setPlayer1] = useState("Player 1");
   const [player2, setPlayer2] = useState("Player 2");
 
-  const [mode, setMode] = useState<GameMode>("local");
+  const [mode, setMode] = useState<GameMode>("online");
 
   console.log("players wanting to play = ", playersWantingToPlay);
 
   useEffect(() => {
-    //console.log("effect called ");
-
-    // Listen for messages
     socket.addEventListener("message", (event) => {
-      //console.log("Message from server ", event.data);
-
-      //setMessage(JSON.stringify(event.data));
-
       const payload = JSON.parse(event.data);
 
-      console.log("GOT A MESSAGE payload = ", payload);
-
       if (payload.message === "lobbyParticipants") {
-        console.log("participants = ", payload.data);
-
         setParticipants(payload.data);
-        //setParticipants(dummyPlayers);
       }
       if (payload.message === "playRequested") {
-        console.log("a player wants to play = ", payload.data);
-
         setPlayersWantingToPlay((s) => ({
           ...s,
           [payload.data]: payload.data,
@@ -103,12 +88,25 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
       }
 
       if (payload.message === "startGame") {
+        console.log("startGame", payload);
+
+        let player1Name;
+        let player2Name;
+
+        if (payload.data.initiator) {
+          player1Name = payload.data.initiatorName;
+          player2Name = payload.data.opponentName;
+        } else {
+          player1Name = payload.data.initiatorName;
+          player2Name = payload.data.nonInitiatorName;
+        }
+
         onStartGame(
           payload.data.initiator,
           payload.data.opponent,
-          mode,
-          name,
-          payload.data.opponent
+          "online",
+          player1Name,
+          player2Name
         );
       }
     });
@@ -351,8 +349,39 @@ const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
   );
 };
 
+type Action =
+  | { type: "setColState"; value: ColState }
+  | { type: "setAdvancedPlan" };
+
+function reducer(state: GameState, action: Action) {
+  if (action.type === "setColState") {
+    return { ...state, colState: action.value };
+  }
+
+  return state;
+}
+
+type GameState = {
+  colState: ColState;
+  yellowWins: number;
+  redWins: number;
+};
+
+const initialGameState: GameState = {
+  colState: initialState,
+  yellowWins: 0,
+  redWins: 0,
+};
+
 const App = () => {
-  const [colState, setColState] = useState<ColState>(initialState);
+  const [state, dispatch] = useReducer(reducer, initialGameState);
+
+  // this solves the problem of closures resulting in stale data that occur from
+  // our socket listener
+  const [stateRef, setStateRef] = useState<React.MutableRefObject<GameState>>(
+    useRef(initialGameState)
+  );
+
   // count of numner of plays
   const [plays, setPlays] = useState(0);
 
@@ -370,6 +399,8 @@ const App = () => {
 
   const [winner, setWinner] = useState<Winner | null>(null);
 
+  const [winnerGameState, setWinnerGameState] = useState<ColState | null>(null);
+
   const [pause, setPause] = useState(false);
 
   const [initiator, setInitiator] = useState(false);
@@ -381,16 +412,16 @@ const App = () => {
 
   const [opponent, setOpponent] = useState("");
 
+  const [player1, setPlayer1] = useState("");
+
+  const [player2, setPlayer2] = useState("");
+
+  const [initiatorColor, setInitiatorColor] = useState("red");
+
   useEffect(() => {
     // Listen for messages
     socket.addEventListener("message", (event) => {
-      //console.log("Message from server ", event.data);
-
-      //setMessage(JSON.stringify(event.data));
-
       const payload = JSON.parse(event.data);
-
-      console.log("GOT A MESSAGE payload = ", payload);
 
       if (payload.message === "playTurn") {
         console.log("our opponent has played their turn");
@@ -398,18 +429,6 @@ const App = () => {
         setPlays((p) => p + 1);
         playsRef.current++;
         animateRow(payload.data.turn.col, true);
-      }
-
-      if (payload.message === "clearToken") {
-        console.log("opponent asked us to clear our token");
-
-        if (currentRef.current != null) {
-          console.log("this is a good thing");
-        } else {
-          console.error("asked to clear token when we dont have one!");
-        }
-
-        animateRow(0, true);
       }
     });
   }, []);
@@ -428,6 +447,29 @@ const App = () => {
     }
   });
 
+  useEffect(() => {
+    if (current !== null) {
+      console.log("current changed non null");
+
+      //@ts-ignore
+
+      const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
+
+      colState[currentRef.current!].push(currentRefColor.current);
+
+      //dispatch({ type: "setColState", value: colState });
+
+      stateRef.current = { ...stateRef.current, ...{ colState } };
+
+      setStateRef(stateRef);
+
+      setTimeout(() => {
+        currentRef.current = null;
+        setCurrent(null);
+      }, 200);
+    }
+  }, [current]);
+
   const openMainMenuModal = () => {
     mainMenuOpenRef.current = true;
     setMainMenuOpen(true);
@@ -436,18 +478,19 @@ const App = () => {
   const getRemoteColor = () => {
     console.log("getRemoteColor global initiator = ", g_initiator);
     if (g_initiator) {
-      return "yellow";
+      return g_initiatorColor === "red" ? "yellow" : "red";
     }
 
-    return "red";
+    // i am not the initiator and we know the initiator color
+    return g_initiatorColor;
   };
 
   const getLocalColor = () => {
     if (initiator) {
-      return "red";
+      return g_initiatorColor;
     }
 
-    return "yellow";
+    return g_initiatorColor === "red" ? "yellow" : "red";
   };
 
   const localMove = (col: number) => {
@@ -462,82 +505,81 @@ const App = () => {
 
     console.warn("sending playturn");
     socket.send(JSON.stringify(payload));
-
-    //animateRow(col);
   };
 
   const animateRow = (col: number, remote: boolean = false) => {
-    if (currentRef.current != null) {
-      console.error("clearing a token ");
+    console.error("making a token ");
 
-      // this token could have been placed by us
-      // or the remote player
-
-      // basically there is a piece down that was animated into its position
-      // and in this block we delete that item by setting current to null
-      // and at the same time we make a permanent piece on the board
-
-      // console.log("deleting current animation");
-
-      // Notice that only when we delete it we create an actual fixed piece
-      // on the board. in doing so we only ever have one piece on the board that was animated
-      // and that item is short lived and turned into a permanent piece on the next
-      // turn.
-
-      // @ts-ignore
-      colState[currentRef.current].push(currentRefColor.current);
-
-      currentRef.current = null;
-      currentRefColor.current = null;
-
-      setColState(colState);
-      setCurrent(null);
-
-      if (!remote) {
-        const payload = {
-          service: "chat",
-          action: "clearToken",
-          data: {
-            opponent,
-          },
-        };
-
-        //tell the other guy to clear its token
-        console.warn("telling other guy to clear its token");
-
-        socket.send(JSON.stringify(payload));
-      }
+    //creates the animation of the piece
+    let player;
+    if (mode === "online") {
+      player = remote === true ? getRemoteColor() : getLocalColor();
     } else {
-      console.error("making a token ");
+      player = playsRef.current % 2 === 0 ? "red" : "yellow";
+    }
 
-      //creates the animation of the piece
-      if (!remote) {
-        localMove(col);
-        playsRef.current++;
-        setPlays(plays + 1);
-      }
+    console.log("remote ", remote);
+    console.log("the player that played this token is ", player);
 
-      const player = remote === true ? getRemoteColor() : getLocalColor();
+    console.log("***********************************************", col);
 
-      console.log("remote ", remote);
+    const [win, winningSet] = testForWin(
+      col,
+      stateRef.current.colState[col].length,
+      player,
+      stateRef.current.colState
+    );
 
-      console.log("the player that played this token is ", player);
-
+    if (!win) {
       currentRef.current = col;
       currentRefColor.current = player;
 
       setCurrent(col);
+    }
 
-      const [win, winningSet] = testForWin(
-        col,
-        colState[col].length,
-        player,
-        colState
-      );
-
-      if (win) {
-        setWinner({ player, pieces: winningSet });
+    if (!remote) {
+      if (mode === "online") {
+        localMove(col);
       }
+      playsRef.current++;
+      setPlays(plays + 1);
+    }
+
+    console.log("state.colstate", stateRef.current.colState);
+
+    if (win) {
+      console.log("stateRef.current", stateRef.current);
+
+      const objectToMerge =
+        player === "yellow"
+          ? { yellowWins: stateRef.current.yellowWins + 1 }
+          : { redWins: stateRef.current.redWins + 1 };
+
+      console.log("objectToMerge", objectToMerge);
+
+      stateRef.current = {
+        ...stateRef.current,
+        ...objectToMerge,
+      };
+
+      const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
+
+      stateRef.current = {
+        ...stateRef.current,
+        ...{ colState: [[], [], [], [], [], [], []] },
+      };
+
+      setStateRef(stateRef);
+
+      setWinnerGameState(colState);
+
+      console.log("setting a winner!");
+
+      setWinner({ player, pieces: winningSet });
+
+      setPlays(0);
+    } else {
+      console.log("not setting a winner");
     }
   };
 
@@ -550,12 +592,32 @@ const App = () => {
   ) => {
     console.log("startGame ", initiator, opponent, mode, player1, player2);
 
+    stateRef.current = {
+      ...stateRef.current,
+      ...{ colState: [[], [], [], [], [], [], []], yellowWins: 0, redWins: 0 },
+    };
+
+    setStateRef(stateRef);
     setInitiator(initiator);
     setOpponent(opponent);
 
-    setMode(mode);
+    setPlayer1(player1);
+    setPlayer2(player2);
 
+    setMode(mode);
     setShowLobby(false);
+  };
+
+  const playAgain = () => {
+    setInitiatorColor(initiatorColor === "red" ? "yellow" : "red");
+
+    g_initiatorColor = g_initiatorColor === "red" ? "yellow" : "red";
+
+    // setColState([[], [], [], [], [], [], []]);
+
+    setInitiator(!initiator);
+    g_initiator = !g_initiator;
+    setWinner(null);
   };
 
   const getTokenStyle = (col: number, row: number) => {
@@ -569,7 +631,7 @@ const App = () => {
     };
 
     if (row === 6) {
-      const animationName = `move-${colState[col].length}`;
+      const animationName = `move-${stateRef.current.colState[col].length}`;
 
       const merge = {
         animationIterationCount: 1,
@@ -587,7 +649,15 @@ const App = () => {
 
   const tokens: any = [];
 
-  colState.forEach((column, i) => {
+  const colState = winner != null ? winnerGameState : stateRef.current.colState;
+
+  console.log("colState******************************", colState);
+
+  console.log("winner******************************", winner);
+
+  console.log("winnerGameState******************************", winnerGameState);
+
+  colState!.forEach((column, i) => {
     column.forEach((row, j) => {
       const style = getTokenStyle(i, j);
       if (row === "red") {
@@ -622,8 +692,6 @@ const App = () => {
     });
   }
 
-  //console.log("winning pieces = ", winningPieces);
-
   let myTurn = false;
 
   if (initiator) {
@@ -635,28 +703,36 @@ const App = () => {
   let playerTurn;
 
   if (myTurn) {
-    if (initiator) {
-      playerTurn = "red";
-    } else {
-      playerTurn = "yellow";
-    }
+    playerTurn = getLocalColor();
+
+    // if (initiator) {
+    //   playerTurn = initiatorColor;
+    // } else {
+    //   playerTurn = initiatorColor === "red" ? "yellow" : "red";
+    // }
   } else {
-    if (initiator) {
-      playerTurn = "yellow";
-    } else {
-      playerTurn = "red";
-    }
+    playerTurn = getRemoteColor();
+
+    // if (initiator) {
+    //   playerTurn = initiatorColor;
+    // } else {
+    //   playerTurn = initiatorColor === "red" ? "yellow" : "red";
+    // }
   }
 
   console.log("myTurn", myTurn);
 
-  console.log("mode", myTurn);
+  console.log("mode", mode);
+
+  console.log("stateRef.current.colState", stateRef.current.colState);
 
   console.log("initiator", initiator);
   console.log("playerTurn", playerTurn);
 
   console.log("currentRef.current", currentRef.current);
   console.log("currentRefColor.current", currentRefColor.current);
+
+  console.log("stateRef.current", stateRef.current);
 
   g_initiator = initiator;
 
@@ -729,11 +805,11 @@ const App = () => {
         </div>
 
         <div className="rowContainer player-name-text-container grow-h row-centered uppercase">
-          Player 1
+          {player1}
         </div>
 
         <div className="rowContainer player-score-text-container grow-h row-centered uppercase">
-          24
+          {stateRef.current.redWins}
         </div>
 
         <div className="rowContainer"></div>
@@ -744,14 +820,14 @@ const App = () => {
           <img src={Player2} alt="" />{" "}
         </div>
         <div className="rowContainer player-name-text-container grow-h row-centered uppercase">
-          Player 2
+          {player2}
         </div>
         <div className="rowContainer player-score-text-container grow-h row-centered uppercase">
-          18
+          {stateRef.current.yellowWins}
         </div>
       </div>
 
-      {(myTurn || mode === "local") && (
+      {(myTurn || mode === "local") && winner == null && (
         <div className="dropzone">
           <div
             className={`drop-column ${playerTurn}`}
@@ -804,11 +880,11 @@ const App = () => {
 
       {winner == null ? (
         <div className={`caret-container ${playerTurn}`}>
-          <div className="rowContainer player-caret-name-text-container grow-h row-centered uppercase">
-            {playerTurn === "red" ? "Player 1's Turn" : "Player 2's Turn"}
+          <div className="row-container player-caret-name-text-container grow-h-90 row-centered uppercase">
+            {playerTurn === "red" ? `${player1}'s Turn` : `${player2}'s Turn`}
           </div>
 
-          <div className="rowContainer player-score-text-container grow-h row-centered ">
+          <div className="row-container player-score-text-container grow-h row-centered ">
             24s
           </div>
         </div>
@@ -819,11 +895,13 @@ const App = () => {
               {winner.player}
             </div>
 
-            <div className="rowContainer winner-text-container grow-h row-centered uppercase">
+            <div className="row-container winner-text-container grow-h row-centered uppercase">
               WINS
             </div>
 
-            <button className="uppercase">Play Again</button>
+            <button onClick={playAgain} className="uppercase">
+              Play Again
+            </button>
           </div>
           <div className="winner-card background"> </div>
         </>

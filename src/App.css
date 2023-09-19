@@ -369,6 +369,11 @@ button[disabled] {
   width: 100%;
 }
 
+.grow-h-90 {
+  width: 90%;
+
+}
+
 .grow-v {
   height: 100%;
 }
@@ -441,6 +446,11 @@ button[disabled] {
 }
 
 .caret-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  align-items: center;
   position: absolute;
 
   background-repeat: no-repeat;
@@ -495,7 +505,7 @@ button[disabled] {
 }
 
 .player-caret-name-text-container {
-  padding-top: 40px;
+  padding-top: 15px;
 }
 
 .winner-name-text-container {
