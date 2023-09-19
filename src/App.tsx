@@ -33,6 +33,7 @@ type GameState = {
   plays: number;
   animatedPiece: number | null;
   animatedPieceColor: string | null;
+  mainMenuOpen: boolean;
 };
 
 const initialGameState: GameState = {
@@ -44,11 +45,12 @@ const initialGameState: GameState = {
   plays: 0,
   animatedPiece: null,
   animatedPieceColor: null,
+  mainMenuOpen: false,
 };
 
 export const App = () => {
   // this solves the problem of closures resulting in stale data that occur from
-  // our socket listener
+  // our socket listener. Only place state in here if it is shared with the websocket event listener.
   const [stateRef, setStateRef] = useState<React.MutableRefObject<GameState>>(
     useRef(initialGameState)
   );
@@ -58,13 +60,15 @@ export const App = () => {
   const [mode, setMode] = useState("online");
 
   // THE ONLY REASON WE NEED THIS IS BECAUSE WE HAVE A USEEFFECT DEPENDENCY THAT
-  // TAKES CARE OF CLEANING UP THE ANIMATED PIECE.
+  // TAKES CARE OF CLEANING UP THE ANIMATED PIECE. OTHERWISE A PLAIN OLD REF WOULD DO.
   const [lastDroppedColumn, setLastDroppedColumn] = useState<null | number>(
     null
   );
 
   const [winner, setWinner] = useState<Winner | null>(null);
 
+  // we store the state of the board here so that players can reflect on the game until
+  // they decide to play again.
   const [winnerGameState, setWinnerGameState] = useState<ColState | null>(null);
 
   const [pause, setPause] = useState(false);
@@ -191,7 +195,12 @@ export const App = () => {
     if (mode === "online") {
       player = remote === true ? getRemoteColor() : getLocalColor();
     } else {
-      player = stateRef.current.plays % 2 === 0 ? "red" : "yellow";
+      if (stateRef.current.initiatorColor === "yellow") {
+        player = stateRef.current.plays % 2 === 0 ? "yellow" : "red";
+      }
+      if (stateRef.current.initiatorColor === "red") {
+        player = stateRef.current.plays % 2 === 0 ? "red" : "yellow";
+      }
     }
 
     stateRef.current = {
