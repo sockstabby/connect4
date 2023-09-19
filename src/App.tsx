@@ -4,21 +4,15 @@ import Board from "../src/assets/connect4-board-top-layer.svg";
 import BlackBoard from "../src/assets/connect4-board-back-layer.svg";
 import OrangePiece from "../src/assets/orange-piece.svg";
 import YellowPiece from "../src/assets/yellow-piece.svg";
-
 import YellowWinningPiece from "../src/assets/yellow-winning-piece.svg";
 import RedWinningPiece from "../src/assets/red-winning-piece.svg";
-
 import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
-
 import { testForWin, Locations } from "./utils";
-import { useEffect, useReducer, useRef, useState } from "react";
-
-const initialState = [[], [], [], [], [], [], []];
-
+import { useEffect, useRef, useState } from "react";
+import StartGameModal, { GameMode } from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
-
 import useKeypress from "./useKeyPress";
 
 type Column = string[];
@@ -28,366 +22,38 @@ type Winner = {
   player: string;
 };
 
-let g_initiator = false;
-let g_initiatorColor = "red";
-
-const socket = new WebSocket("wss://connect4.isomarkets.com");
-
-// Connection opened
-socket.addEventListener("open", (_event) => {
-  console.log("woohoo open called");
-});
-
-socket.addEventListener("close", (_event) => {
-  console.error("The Websocket is closed.");
-});
-
 export type ColState = Column[];
-
-type GameMode = "online" | "local";
-
-type LobbyProps = {
-  onStartGame: (
-    initiator: boolean,
-    opponent: string,
-    mode: GameMode,
-    player1: string,
-    player2: string
-  ) => void;
-  onClose: () => void;
-};
-
-const dummyPlayers = ["a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"];
-
-const Lobby = ({ onStartGame, onClose }: LobbyProps) => {
-  const [name, setName] = useState("");
-  const [participants, setParticipants] = useState([]);
-  const [playersWantingToPlay, setPlayersWantingToPlay] = useState({});
-  const [invitee, setInvitee] = useState("");
-  const [chosenOpponent, setChosenOpponent] = useState("");
-
-  const [player1, setPlayer1] = useState("Player 1");
-  const [player2, setPlayer2] = useState("Player 2");
-
-  const [mode, setMode] = useState<GameMode>("online");
-
-  console.log("players wanting to play = ", playersWantingToPlay);
-
-  useEffect(() => {
-    socket.addEventListener("message", (event) => {
-      const payload = JSON.parse(event.data);
-
-      if (payload.message === "lobbyParticipants") {
-        setParticipants(payload.data);
-      }
-      if (payload.message === "playRequested") {
-        setPlayersWantingToPlay((s) => ({
-          ...s,
-          [payload.data]: payload.data,
-        }));
-      }
-
-      if (payload.message === "startGame") {
-        console.log("startGame", payload);
-
-        let player1Name;
-        let player2Name;
-
-        if (payload.data.initiator) {
-          player1Name = payload.data.initiatorName;
-          player2Name = payload.data.opponentName;
-        } else {
-          player1Name = payload.data.initiatorName;
-          player2Name = payload.data.nonInitiatorName;
-        }
-
-        onStartGame(
-          payload.data.initiator,
-          payload.data.opponent,
-          "online",
-          player1Name,
-          player2Name
-        );
-      }
-    });
-  }, []);
-
-  const nameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-  };
-
-  const playerSelected = (e: any) => {
-    console.log("player selected = ", e.target.value);
-
-    setChosenOpponent(e.target.value);
-    // setName(e.target.value);
-  };
-
-  const inviteeSelected = (e: any) => {
-    console.log("invitee selected = ", e.target.value);
-
-    setInvitee(e.target.value);
-    // setName(e.target.value);
-  };
-
-  const sendPlayRequest = () => {
-    console.log("sendPlayRequest", chosenOpponent);
-
-    if (chosenOpponent !== "") {
-      const payload = {
-        service: "chat",
-        action: "sendPlayRequest",
-        data: {
-          chosenOpponent,
-        },
-      };
-
-      socket.send(JSON.stringify(payload));
-    }
-  };
-
-  const acceptPlayRequest = () => {
-    console.log("sendPlayRequest");
-
-    if (invitee !== "") {
-      console.log("opponent to send accept request to is ", invitee);
-
-      const payload = {
-        service: "chat",
-        action: "acceptPlayRequest",
-        data: {
-          chosenOpponent: invitee,
-          acceptor: name,
-        },
-      };
-
-      socket.send(JSON.stringify(payload));
-    }
-  };
-
-  const joinLobby = () => {
-    const payload = {
-      service: "chat",
-      action: "joinLobby",
-      data: {
-        name,
-      },
-    };
-
-    socket.send(JSON.stringify(payload));
-  };
-
-  const closeSocket = () => {
-    console.log("closing socket");
-    socket.close();
-  };
-
-  const players = participants.map((i) => {
-    // @ts-ignore
-    let name = i.name;
-
-    // @ts-ignore
-    if (playersWantingToPlay.hasOwnProperty(i.name)) {
-      // @ts-ignore
-      name = i.name;
-    }
-    return <option value={name}> {name} </option>;
-  });
-
-  const invitesToPlay = Object.keys(playersWantingToPlay).map((i) => {
-    return <option value={i}> {i} </option>;
-  });
-
-  console.log("players", players);
-  console.log("invitesToPlay", invitesToPlay);
-
-  const toggleMode = () => {
-    setMode(mode === "online" ? "local" : "online");
-  };
-
-  const startLocalGame = () => {
-    onStartGame(true, "local", "local", player1, player1);
-  };
-
-  return (
-    <>
-      <div className="disabled-background"></div>
-
-      <div className="parent">
-        <div className="modal centered">
-          <div className="modal-content column-container col-start gap10">
-            <div className="row-container">
-              <img src={GameLogo} alt=""></img>
-            </div>
-
-            <div className="row-container">
-              <label
-                className={
-                  mode === "online" ? "online-active" : "online-inactive"
-                }
-              >
-                Local
-              </label>
-              <div className="toggle-wrapper">
-                <input
-                  type="checkbox"
-                  id="switch"
-                  checked={mode === "online"}
-                  onChange={toggleMode}
-                  tabIndex={0}
-                />
-                <label htmlFor="switch">Online Mode</label>
-              </div>
-
-              <label
-                className={
-                  mode === "online" ? "online-active" : "online-inactive"
-                }
-              >
-                Online
-              </label>
-            </div>
-
-            {mode !== "online" && (
-              <>
-                <div className="column-container">
-                  <label> Player One Name:</label>
-                  <input onChange={nameChanged} type="text" value={player1} />
-                </div>
-
-                <div className="column-container">
-                  <label> Player Two Name:</label>
-                  <input onChange={nameChanged} type="text" value={player2} />
-                </div>
-
-                <div className="row-container">
-                  <button
-                    className="button--unstyled uppercase"
-                    onClick={startLocalGame}
-                  >
-                    Start Game
-                  </button>
-                </div>
-
-                <div className="row-container">
-                  <button
-                    className="button--unstyled uppercase"
-                    // onClick={joinLobby}
-                  >
-                    Game Rules
-                  </button>
-                </div>
-
-                <div className="row-container row-centered gap10 pad-top-100  grow-h">
-                  <button onClick={(_e) => onClose()}>Cancel</button>
-                </div>
-              </>
-            )}
-
-            {mode === "online" && (
-              <>
-                <div className="column-container">
-                  <label> Enter your name to join the lobby:</label>
-                  <input onChange={nameChanged} type="text" value={name} />
-                </div>
-
-                <div className="row-container">
-                  <button
-                    className={`button--unstyled uppercase ${
-                      name === "" ? "disabled" : ""
-                    } `}
-                    onClick={joinLobby}
-                  >
-                    Join Lobby
-                  </button>
-                </div>
-
-                <div className="column-container grow-h gap8">
-                  Available Players:
-                  <select
-                    className="lobby-player-list widthHeight style"
-                    onChange={playerSelected}
-                    name="players"
-                    size={5}
-                  >
-                    {players}
-                  </select>
-                  <button
-                    disabled={chosenOpponent === "" || chosenOpponent === name}
-                    onClick={sendPlayRequest}
-                  >
-                    Send Invite
-                  </button>
-                </div>
-
-                <div className="column-container grow-h">
-                  <label> Invitations Received:</label>
-
-                  <select
-                    className="lobby-player-list widthHeight style"
-                    onChange={inviteeSelected}
-                    name="invites"
-                    size={5}
-                  >
-                    {invitesToPlay}
-                  </select>
-                </div>
-
-                <div className="row-container row-centered gap10  grow-h">
-                  <button onClick={(_e) => onClose()}>Cancel</button>
-
-                  <button disabled={invitee === ""} onClick={acceptPlayRequest}>
-                    Accept Invite
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
-
-type Action =
-  | { type: "setColState"; value: ColState }
-  | { type: "setAdvancedPlan" };
-
-function reducer(state: GameState, action: Action) {
-  if (action.type === "setColState") {
-    return { ...state, colState: action.value };
-  }
-
-  return state;
-}
 
 type GameState = {
   colState: ColState;
   yellowWins: number;
   redWins: number;
+  initiator: boolean;
+  initiatorColor: string;
+  plays: number;
+  currentRef: number | null;
 };
 
 const initialGameState: GameState = {
-  colState: initialState,
+  colState: [[], [], [], [], [], [], []],
   yellowWins: 0,
   redWins: 0,
+  initiator: false,
+  initiatorColor: "red",
+  plays: 0,
+  currentRef: null,
 };
 
 export const App = () => {
-  const [state, dispatch] = useReducer(reducer, initialGameState);
-
   // this solves the problem of closures resulting in stale data that occur from
   // our socket listener
   const [stateRef, setStateRef] = useState<React.MutableRefObject<GameState>>(
     useRef(initialGameState)
   );
 
-  // count of numner of plays
-  const [plays, setPlays] = useState(0);
+  const [websocket, setWebsocket] = useState<WebSocket | null>(null);
 
   const [mode, setMode] = useState("online");
-
-  const playsRef = useRef(0);
 
   // currentRef is the animated piece it is not fixed or permanent
   const currentRef = useRef<number | null>(null);
@@ -403,12 +69,8 @@ export const App = () => {
 
   const [pause, setPause] = useState(false);
 
-  const [initiator, setInitiator] = useState(false);
-
   const [mainMenuOpen, setMainMenuOpen] = useState(false);
   const mainMenuOpenRef = useRef<boolean>(false);
-
-  const [showLobby, setShowLobby] = useState(true);
 
   const [opponent, setOpponent] = useState("");
 
@@ -416,20 +78,35 @@ export const App = () => {
 
   const [player2, setPlayer2] = useState("");
 
-  const [initiatorColor, setInitiatorColor] = useState("red");
-
   useEffect(() => {
-    // Listen for messages
-    socket.addEventListener("message", (event) => {
+    function closeHandler(_event: any) {
+      console.error("The Websocket is closed.");
+      // we need to tell the user what to do when this happens
+
+      setWebsocket(null);
+    }
+
+    function messageHandler(event: MessageEvent<any>) {
       const payload = JSON.parse(event.data);
 
       if (payload.message === "playTurn") {
         console.log("our opponent has played their turn");
-
         animateRow(payload.data.turn.col, true);
       }
-    });
-  }, []);
+    }
+
+    if (websocket !== null) {
+      websocket!.addEventListener("close", closeHandler);
+      websocket!.addEventListener("message", messageHandler);
+    }
+
+    return () => {
+      if (websocket !== null) {
+        websocket!.removeEventListener("close", closeHandler);
+        websocket!.removeEventListener("message", closeHandler);
+      }
+    };
+  }, [websocket]);
 
   useScreenSize();
 
@@ -437,26 +114,17 @@ export const App = () => {
     console.log("pause pressed");
 
     if (mainMenuOpenRef.current) {
-      setMainMenuOpen(false);
       mainMenuOpenRef.current = false;
+      setMainMenuOpen(false);
     } else {
-      console.log("DSFSDFSDFFSDFDSFSDFSFDFSFSFFSDSSDF");
       setPause((p) => !p);
     }
   });
 
   useEffect(() => {
     if (current !== null) {
-      console.log("current changed non null");
-
-      //@ts-ignore
-
       const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
-
       colState[currentRef.current!].push(currentRefColor.current);
-
-      //dispatch({ type: "setColState", value: colState });
-
       stateRef.current = { ...stateRef.current, ...{ colState } };
 
       setStateRef(stateRef);
@@ -464,7 +132,7 @@ export const App = () => {
       setTimeout(() => {
         currentRef.current = null;
         setCurrent(null);
-      }, 200);
+      }, 0);
     }
   }, [current]);
 
@@ -474,21 +142,24 @@ export const App = () => {
   };
 
   const getRemoteColor = () => {
-    console.log("getRemoteColor global initiator = ", g_initiator);
-    if (g_initiator) {
-      return g_initiatorColor === "red" ? "yellow" : "red";
+    console.log(
+      "getRemoteColor stateRef.current.initiator = ",
+      stateRef.current.initiator
+    );
+    if (stateRef.current.initiator) {
+      return stateRef.current.initiatorColor === "red" ? "yellow" : "red";
     }
 
     // i am not the initiator and we know the initiator color
-    return g_initiatorColor;
+    return stateRef.current.initiatorColor;
   };
 
   const getLocalColor = () => {
-    if (initiator) {
-      return g_initiatorColor;
+    if (stateRef.current.initiator) {
+      return stateRef.current.initiatorColor;
     }
 
-    return g_initiatorColor === "red" ? "yellow" : "red";
+    return stateRef.current.initiatorColor === "red" ? "yellow" : "red";
   };
 
   const localMove = (col: number) => {
@@ -502,7 +173,7 @@ export const App = () => {
     };
 
     console.warn("sending playturn");
-    socket.send(JSON.stringify(payload));
+    websocket!.send(JSON.stringify(payload));
   };
 
   const animateRow = (col: number, remote: boolean = false) => {
@@ -513,11 +184,15 @@ export const App = () => {
     if (mode === "online") {
       player = remote === true ? getRemoteColor() : getLocalColor();
     } else {
-      player = playsRef.current % 2 === 0 ? "red" : "yellow";
+      player = stateRef.current.plays % 2 === 0 ? "red" : "yellow";
     }
 
-    setPlays((p) => p + 1);
-    playsRef.current++;
+    stateRef.current = {
+      ...stateRef.current,
+      plays: stateRef.current.plays + 1,
+    };
+
+    setStateRef(stateRef);
 
     console.log("remote ", remote);
     console.log("the player that played this token is ", player);
@@ -542,8 +217,6 @@ export const App = () => {
       if (mode === "online") {
         localMove(col);
       }
-      // playsRef.current++;
-      // setPlays(plays + 1);
     }
 
     console.log("state.colstate", stateRef.current.colState);
@@ -567,7 +240,7 @@ export const App = () => {
 
       stateRef.current = {
         ...stateRef.current,
-        ...{ colState: [[], [], [], [], [], [], []] },
+        ...{ colState: [[], [], [], [], [], [], []], plays: 0 },
       };
 
       setStateRef(stateRef);
@@ -577,8 +250,6 @@ export const App = () => {
       console.log("setting a winner!");
 
       setWinner({ player, pieces: winningSet });
-
-      setPlays(0);
     } else {
       console.log("not setting a winner");
     }
@@ -589,35 +260,48 @@ export const App = () => {
     opponent: string,
     mode: GameMode,
     player1: string,
-    player2: string
+    player2: string,
+    socket: WebSocket
   ) => {
     console.log("startGame ", initiator, opponent, mode, player1, player2);
 
     stateRef.current = {
       ...stateRef.current,
-      ...{ colState: [[], [], [], [], [], [], []], yellowWins: 0, redWins: 0 },
+      ...{
+        colState: [[], [], [], [], [], [], []],
+        yellowWins: 0,
+        redWins: 0,
+        initiator,
+      },
     };
 
     setStateRef(stateRef);
-    setInitiator(initiator);
+    // setInitiator(initiator);
     setOpponent(opponent);
 
     setPlayer1(player1);
     setPlayer2(player2);
 
     setMode(mode);
-    setShowLobby(false);
+
+    setWebsocket(socket);
+
+    mainMenuOpenRef.current = false;
+    setMainMenuOpen(false);
   };
 
   const playAgain = () => {
-    setInitiatorColor(initiatorColor === "red" ? "yellow" : "red");
+    stateRef.current = {
+      ...stateRef.current,
+      ...{
+        initiator: !stateRef.current.initiator,
+        initiatorColor:
+          stateRef.current.initiatorColor === "red" ? "yellow" : "red",
+      },
+    };
 
-    g_initiatorColor = g_initiatorColor === "red" ? "yellow" : "red";
+    setStateRef(stateRef);
 
-    // setColState([[], [], [], [], [], [], []]);
-
-    setInitiator(!initiator);
-    g_initiator = !g_initiator;
     setWinner(null);
   };
 
@@ -695,10 +379,10 @@ export const App = () => {
 
   let myTurn = false;
 
-  if (initiator) {
-    myTurn = plays % 2 === 0;
+  if (stateRef.current.initiator) {
+    myTurn = stateRef.current.plays % 2 === 0;
   } else {
-    myTurn = plays % 2 !== 0;
+    myTurn = stateRef.current.plays % 2 !== 0;
   }
 
   let playerTurn;
@@ -715,15 +399,13 @@ export const App = () => {
 
   console.log("stateRef.current.colState", stateRef.current.colState);
 
-  console.log("initiator", initiator);
+  console.log("stateRef.current.initiator", stateRef.current.initiator);
   console.log("playerTurn", playerTurn);
 
   console.log("currentRef.current", currentRef.current);
   console.log("currentRefColor.current", currentRefColor.current);
 
   console.log("stateRef.current", stateRef.current);
-
-  g_initiator = initiator;
 
   return (
     <>
@@ -739,8 +421,14 @@ export const App = () => {
         </div>
       </div>
 
-      {showLobby && (
-        <Lobby onStartGame={startGame} onClose={() => setShowLobby(false)} />
+      {mainMenuOpen && (
+        <StartGameModal
+          onStartGame={startGame}
+          onClose={() => {
+            mainMenuOpenRef.current = false;
+            setMainMenuOpen(false);
+          }}
+        />
       )}
 
       {pause && (
@@ -759,28 +447,6 @@ export const App = () => {
                 </div>
                 <div className="modal-button column-container col-centered uppercase">
                   Quit Game
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {mainMenuOpen && (
-        <>
-          <div className="disabled-background"></div>
-
-          <div className="parent">
-            <div className="modal centered">
-              <div className="modal-content column-container col-start gap10">
-                <div className="modal-title-container uppercase">
-                  <img src={GameLogo} alt=""></img>
-                </div>
-                <div className="play-vs-player-button row-container uppercase pad-left60 ">
-                  PLAY VS PLAYER
-                </div>
-                <div className="modal-button row-container uppercase pad-left60 ">
-                  GAME RULES
                 </div>
               </div>
             </div>
