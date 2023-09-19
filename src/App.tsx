@@ -373,7 +373,7 @@ const initialGameState: GameState = {
   redWins: 0,
 };
 
-const App = () => {
+export const App = () => {
   const [state, dispatch] = useReducer(reducer, initialGameState);
 
   // this solves the problem of closures resulting in stale data that occur from
@@ -426,8 +426,6 @@ const App = () => {
       if (payload.message === "playTurn") {
         console.log("our opponent has played their turn");
 
-        setPlays((p) => p + 1);
-        playsRef.current++;
         animateRow(payload.data.turn.col, true);
       }
     });
@@ -518,6 +516,9 @@ const App = () => {
       player = playsRef.current % 2 === 0 ? "red" : "yellow";
     }
 
+    setPlays((p) => p + 1);
+    playsRef.current++;
+
     console.log("remote ", remote);
     console.log("the player that played this token is ", player);
 
@@ -541,8 +542,8 @@ const App = () => {
       if (mode === "online") {
         localMove(col);
       }
-      playsRef.current++;
-      setPlays(plays + 1);
+      // playsRef.current++;
+      // setPlays(plays + 1);
     }
 
     console.log("state.colstate", stateRef.current.colState);
@@ -704,20 +705,8 @@ const App = () => {
 
   if (myTurn) {
     playerTurn = getLocalColor();
-
-    // if (initiator) {
-    //   playerTurn = initiatorColor;
-    // } else {
-    //   playerTurn = initiatorColor === "red" ? "yellow" : "red";
-    // }
   } else {
     playerTurn = getRemoteColor();
-
-    // if (initiator) {
-    //   playerTurn = initiatorColor;
-    // } else {
-    //   playerTurn = initiatorColor === "red" ? "yellow" : "red";
-    // }
   }
 
   console.log("myTurn", myTurn);
