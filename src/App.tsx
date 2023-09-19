@@ -57,13 +57,11 @@ export const App = () => {
 
   const [mode, setMode] = useState("online");
 
-  //currentRef is the animated piece it is not fixed or permanent
-  //const currentRef = useRef<number | null>(null);
-
-  const currentRefColor = useRef<null | string>(null);
-
-  // @ts-ignore
-  const [current, setCurrent] = useState<null | number>(null);
+  // THE ONLY REASON WE NEED THIS IS BECAUSE WE HAVE A USEEFFECT DEPENDENCY THAT
+  // TAKES CARE OF CLEANING UP THE ANIMATED PIECE.
+  const [lastDroppedColumn, setLastDroppedColumn] = useState<null | number>(
+    null
+  );
 
   const [winner, setWinner] = useState<Winner | null>(null);
 
@@ -126,7 +124,9 @@ export const App = () => {
   useEffect(() => {
     if (stateRef.current.animatedPiece !== null) {
       const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
-      colState[stateRef.current.animatedPiece].push(currentRefColor.current);
+      colState[stateRef.current.animatedPiece].push(
+        stateRef.current.animatedPieceColor
+      );
       stateRef.current = { ...stateRef.current, ...{ colState } };
 
       setStateRef(stateRef);
@@ -138,10 +138,10 @@ export const App = () => {
         };
 
         setStateRef(stateRef);
-        setCurrent(null);
+        setLastDroppedColumn(null);
       }, 0);
     }
-  }, [current]);
+  }, [lastDroppedColumn]);
 
   const openMainMenuModal = () => {
     mainMenuOpenRef.current = true;
@@ -216,15 +216,11 @@ export const App = () => {
     if (!win) {
       stateRef.current = {
         ...stateRef.current,
-        ...{ animatedPiece: col },
+        ...{ animatedPiece: col, animatedPieceColor: player },
       };
 
       setStateRef(stateRef);
-
-      // currentRef.current = col;
-      // ?
-      currentRefColor.current = player;
-      setCurrent(col);
+      setLastDroppedColumn(col);
     }
 
     if (!remote) {
@@ -417,7 +413,10 @@ export const App = () => {
   console.log("playerTurn", playerTurn);
 
   console.log("stateRef.current.animatedPiece", stateRef.current.animatedPiece);
-  console.log("currentRefColor.current", currentRefColor.current);
+  console.log(
+    "stateRef.current.animatedPieceColor",
+    stateRef.current.animatedPieceColor
+  );
 
   console.log("stateRef.current", stateRef.current);
 
@@ -582,7 +581,7 @@ export const App = () => {
 
       {stateRef.current.animatedPiece != null && (
         <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
-          {currentRefColor.current === "yellow" ? (
+          {stateRef.current.animatedPieceColor === "yellow" ? (
             <img src={YellowPiece} alt="" />
           ) : (
             <img src={OrangePiece} alt="" />
