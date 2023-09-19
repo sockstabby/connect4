@@ -31,7 +31,8 @@ type GameState = {
   initiator: boolean;
   initiatorColor: string;
   plays: number;
-  currentRef: number | null;
+  animatedPiece: number | null;
+  animatedPieceColor: string | null;
 };
 
 const initialGameState: GameState = {
@@ -41,7 +42,8 @@ const initialGameState: GameState = {
   initiator: false,
   initiatorColor: "red",
   plays: 0,
-  currentRef: null,
+  animatedPiece: null,
+  animatedPieceColor: null,
 };
 
 export const App = () => {
@@ -55,8 +57,8 @@ export const App = () => {
 
   const [mode, setMode] = useState("online");
 
-  // currentRef is the animated piece it is not fixed or permanent
-  const currentRef = useRef<number | null>(null);
+  //currentRef is the animated piece it is not fixed or permanent
+  //const currentRef = useRef<number | null>(null);
 
   const currentRefColor = useRef<null | string>(null);
 
@@ -122,15 +124,20 @@ export const App = () => {
   });
 
   useEffect(() => {
-    if (current !== null) {
+    if (stateRef.current.animatedPiece !== null) {
       const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
-      colState[currentRef.current!].push(currentRefColor.current);
+      colState[stateRef.current.animatedPiece].push(currentRefColor.current);
       stateRef.current = { ...stateRef.current, ...{ colState } };
 
       setStateRef(stateRef);
 
       setTimeout(() => {
-        currentRef.current = null;
+        stateRef.current = {
+          ...stateRef.current,
+          ...{ animatedPiece: null },
+        };
+
+        setStateRef(stateRef);
         setCurrent(null);
       }, 0);
     }
@@ -207,9 +214,16 @@ export const App = () => {
     );
 
     if (!win) {
-      currentRef.current = col;
-      currentRefColor.current = player;
+      stateRef.current = {
+        ...stateRef.current,
+        ...{ animatedPiece: col },
+      };
 
+      setStateRef(stateRef);
+
+      // currentRef.current = col;
+      // ?
+      currentRefColor.current = player;
       setCurrent(col);
     }
 
@@ -402,7 +416,7 @@ export const App = () => {
   console.log("stateRef.current.initiator", stateRef.current.initiator);
   console.log("playerTurn", playerTurn);
 
-  console.log("currentRef.current", currentRef.current);
+  console.log("stateRef.current.animatedPiece", stateRef.current.animatedPiece);
   console.log("currentRefColor.current", currentRefColor.current);
 
   console.log("stateRef.current", stateRef.current);
@@ -566,8 +580,8 @@ export const App = () => {
 
       {winningPieces}
 
-      {currentRef.current != null && (
-        <div style={getTokenStyle(currentRef.current, 6)}>
+      {stateRef.current.animatedPiece != null && (
+        <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
           {currentRefColor.current === "yellow" ? (
             <img src={YellowPiece} alt="" />
           ) : (
