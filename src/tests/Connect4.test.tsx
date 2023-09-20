@@ -7,6 +7,21 @@ describe("Carousel", () => {
   it("connect4", () => {
     render(<App />);
 
+    fireEvent.click(screen.getByText(/menu/i));
+
+    const player1Input = screen.getByLabelText("Player One Name:");
+
+    const player2Input = screen.getByLabelText("Player Two Name:");
+
+    fireEvent.change(player1Input, { target: { value: "PLAYER TEST NAME 1" } });
+
+    fireEvent.change(player2Input, { target: { value: "PLAYER TEST NAME 2" } });
+
+    fireEvent.click(screen.getByText(/start game/i));
+
+    //expect(screen.getByRole("")).toBeInTheDocument();
+    //fireEvent.click(screen.getByText(/start game/i));
+
     screen.debug();
 
     expect(1).toEqual(1);
