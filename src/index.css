@@ -1,10 +1,11 @@
-input, textarea, select {
-  font-family: 'Space Grotesk', sans-serif;
+input,
+textarea,
+select {
+  font-family: "Space Grotesk", sans-serif;
 }
 
-
 :root {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
 
   line-height: 1.5;
   font-weight: 400;
@@ -18,15 +19,13 @@ input, textarea, select {
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 
-
   --game-background-color1: #7945ff;
   --game-background-color2: #5c2dd5;
 
   --accent-color: #fd6687;
 
   background-color: var(--game-background-color1);
-
- 
+}
 
 a {
   font-weight: 500;
@@ -38,7 +37,6 @@ a:hover {
 }
 
 body {
-
   --game-background-color1: #7945ff;
   --game-background-color2: #5c2dd5;
 

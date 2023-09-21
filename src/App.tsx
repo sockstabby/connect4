@@ -59,7 +59,7 @@ type Connect4Props = {
   websocketUrl?: string;
 };
 export const App = ({
-  gameTimerConfig = 4,
+  gameTimerConfig = 40,
   websocketUrl = "wss://connect4.isomarkets.com",
 }: Connect4Props) => {
   // stateRef is intended to store refs where ordinary state wont suffice due to
@@ -479,18 +479,14 @@ export const App = ({
 
   return (
     <>
-      <div className="row-container row-centered grow-h game-controls-container ">
-        <div className="menu-button-container">
-          <button onClick={openMainMenuModal}>Menu</button>
-        </div>
+      <div className="flex flex-row justify-around pt-3 items-center">
+        <button onClick={openMainMenuModal}>Menu</button>
 
         <img src={GameLogo} alt=""></img>
 
-        <div className="restart-button-container">
-          <button onClick={restartGame} disabled={mode === "online"}>
-            Restart
-          </button>
-        </div>
+        <button onClick={restartGame} disabled={mode === "online"}>
+          Restart
+        </button>
       </div>
 
       <ReactModal
@@ -519,32 +515,32 @@ export const App = ({
       {gameStarted && (
         <>
           <div className="player1-card player-card">
-            <div className="player-container row-container row-centered grow-h pad-bottom-10">
-              <img src={Player1} alt="" />{" "}
+            <div className="player-container flex flex-row pb-1 justify-center">
+              <img src={Player1} alt="Player One Smiley Face" />
             </div>
 
-            <div className="row-container player-name-text-container grow-h row-centered uppercase">
+            <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
               {player1}
             </div>
 
             <div
               data-testid="red-win-count"
-              className="row-container player-score-text-container grow-h row-centered uppercase"
+              className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
             >
               {stateRef.current.redWins}
             </div>
           </div>
 
           <div className="player2-card player-card">
-            <div className="player-container row-container row-centered grow-h pad-bottom-10">
-              <img src={Player2} alt="" />{" "}
+            <div className="player-container flex flex-row pb-1 justify-center">
+              <img src={Player2} alt="Player Two Smiley Face" />
             </div>
-            <div className="row-container player-name-text-container grow-h row-centered uppercase">
+            <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
               {player2}
             </div>
             <div
               data-testid="yellow-win-count"
-              className="row-container player-score-text-container grow-h row-centered uppercase"
+              className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
             >
               {stateRef.current.yellowWins}
             </div>
@@ -606,18 +602,20 @@ export const App = ({
       ></div>
 
       {winner == null && gameStarted && (
-        <div className={`caret-container ${playerTurn}`}>
-          <div className="row-container player-caret-name-text-container grow-h-90 row-centered uppercase weight-700">
+        <div
+          className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col`}
+        >
+          <div className="flex flex-row justify-center uppercase pt-5 font-extrabold text-xl pb-3">
             {playerTurn === "red" ? `${player1}'s Turn` : `${player2}'s Turn`}
           </div>
 
           {stateRef.current.plays > 1 ? (
-            <div className="row-container player-score-text-container grow-h row-centered ">
+            <div className="flex flex-row justify-center text-5xl font-extrabold">
               {timerSeconds != null ? `${timerSeconds}s` : "24s"}
             </div>
           ) : (
-            <div className="row-container row-centered pad-all-10 line-height-regular">
-              Note: Timer will start after each player has played a turn.
+            <div className="flex flex-row leading-tight text-xs">
+              Note: A timer will start after each player has played a turn.
             </div>
           )}
         </div>
@@ -652,18 +650,18 @@ export const App = ({
         shouldCloseOnOverlayClick={false}
         overlayClassName="disabled-background"
       >
-        <div className="column-container col-centered">
+        <div className="flex flex-col justify-center">
           <div
-            className="row-container grow-h row-centered uppercase color-black"
+            className="uppercase color-black text-center"
             data-testid="winning-player"
           >
             {winner && `${winner!.player}`}
           </div>
 
-          <div className="row-container winner-text-container  grow-h row-centered uppercase color-black">
+          <div className="uppercase text-center text-5xl font-bold pt-1 text-black">
             WINS
           </div>
-          <div className="row-container row-centered gap15">
+          <div className="flex flex-row justify-center gap-5 pt-6">
             <button onClick={() => terminateGame()} className="uppercase">
               Quit
             </button>
@@ -682,9 +680,9 @@ export const App = ({
       {stateRef.current.animatedPiece != null && (
         <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
           {stateRef.current.animatedPieceColor === "yellow" ? (
-            <img src={YellowPiece} alt="" />
+            <img src={YellowPiece} alt="Yellow Token" />
           ) : (
-            <img src={OrangePiece} alt="" />
+            <img src={OrangePiece} alt="Red Token" />
           )}
         </div>
       )}
