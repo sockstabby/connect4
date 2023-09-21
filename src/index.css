@@ -22,6 +22,7 @@ input, textarea, select {
   --game-background-color1: #7945ff;
   --game-background-color2: #5c2dd5;
 
+  --accent-color: #fd6687;
 
   background-color: var(--game-background-color1);
 
