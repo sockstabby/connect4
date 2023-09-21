@@ -7,19 +7,64 @@
   background-color: rgba(0, 0, 0, 0.5);  
 }
 
-.button--unstyled {
+.button--fancy {
+  position: relative;
   padding: 0;
-  border: 0;
   background: none;
   box-shadow: none;
-
-  width: 420px;
-  height: 86px;
+  border: 1px solid black;
+  width: 410px;
+  height: 76px;
   color: black;
+  background-color: black;
+  background-color: white;
+  border-radius: 18px;
+  z-index: unset;
+}
 
-  background-image: url("assets/restart-button.svg");
-  background-repeat: no-repeat;
-  background-position: center center;
+.button--fancy:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.button-holder {
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.button--fancy::after {
+  content: '';
+  background-color: black;
+  /* opacity: 0; */
+  border-radius: 5px;
+  /* opacity: .5; */
+  position: absolute;
+  /* z-index: 1; */
+  width: 408px;
+  height: 86px;
+  left: -1px;
+  top: 1px;
+  border-radius: 18px;
+  border: 1px solid black;
+  z-index: -5;
+}
+
+.button--fancy::after:hover {
+  background-color: var(--game-background-color2);
+  color: white;
+}
+
+.button--fancy.disabled {
+  color: rgb(214, 212, 212);
+  background-color: gray;
+
+}
+
+button.button--fancy:disabled,
+button.button--fancy[disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #aca0a0;
 }
 
 .button--unstyled.disabled {
@@ -41,34 +86,6 @@
   /* outline-color: white; */
 }
 
-.modal-button {
-  background-image: url("assets/restart-button.svg");
-  background-repeat: no-repeat;
-  background-position: center center;
-
-  width: 420px;
-  height: 86px;
-
-  font-size: 24px;
-  font-weight: 500px;
-
-  padding-bottom: 5px;
-  outline-color: white;
-}
-
-.play-vs-player-button {
-  background-image: url("assets/player-vs-player.svg");
-  background-repeat: no-repeat;
-  background-position: center center;
-
-  width: 420px;
-  height: 86px;
-
-  font-size: 24px;
-  font-weight: 500;
-
-  padding-bottom: 5px;
-}
 
 .pad-left60 {
   padding-left: 60px;
@@ -125,7 +142,7 @@
 }
 
 .pad-top-100 {
-  padding-top: 149px;
+  padding-top: 144px;
 }
 
 .modal-content {
@@ -181,6 +198,7 @@ button[disabled] {
 
   --player1-color: #fd6687;
   --player2-color: #ffce67;
+  --accent-color: var(--player1-color)
 }
 
 .white-board {
@@ -607,8 +625,6 @@ input[type="checkbox"] {
 input[type="checkbox"]:checked::before {
   transform: scale(1);
 }
-
-
 
 
 .toggle-wrapper input[type="checkbox"] {

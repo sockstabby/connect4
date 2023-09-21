@@ -13,7 +13,6 @@ import { testForWin, Locations } from "./utils";
 import { useEffect, useRef, useState } from "react";
 import StartGameModal, { GameMode } from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
-import useKeypress from "./useKeyPress";
 import ReactModal from "react-modal";
 
 ReactModal.setAppElement("body");
@@ -84,7 +83,6 @@ export const App = ({
   // we store the state of the board here so that players can reflect on the game until
   // they decide to play again.
   const [winnerGameState, setWinnerGameState] = useState<ColState | null>(null);
-  const [showPauseModal, setShowPauseModal] = useState(false);
 
   const [opponent, setOpponent] = useState("");
 
@@ -167,15 +165,6 @@ export const App = ({
 
   useScreenSize();
 
-  useKeypress("Escape", () => {
-    if (stateRef.current.mainMenuOpen) {
-      stateRef.current.mainMenuOpen = false;
-      toggleRender();
-    } else {
-      setShowPauseModal((p) => !p);
-    }
-  });
-
   useEffect(() => {
     if (stateRef.current.animatedPiece !== null) {
       const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
@@ -201,6 +190,11 @@ export const App = ({
 
   const openMainMenuModal = () => {
     stateRef.current = { ...stateRef.current, ...{ mainMenuOpen: true } };
+    toggleRender();
+  };
+
+  const closeMainMenuModal = () => {
+    stateRef.current = { ...stateRef.current, ...{ mainMenuOpen: false } };
     toggleRender();
   };
 
@@ -503,7 +497,9 @@ export const App = ({
         className="modal centered"
         isOpen={stateRef.current.mainMenuOpen}
         shouldCloseOnOverlayClick={true}
-        onRequestClose={() => setShowPauseModal(false)}
+        onRequestClose={() => {
+          closeMainMenuModal();
+        }}
         overlayClassName="disabled-background"
       >
         <StartGameModal
@@ -519,29 +515,6 @@ export const App = ({
           }}
         />
       </ReactModal>
-
-      {false && showPauseModal && (
-        <>
-          <div className="disabled-background"></div>
-
-          <div className="parent">
-            <div className="modal centered">
-              <div className="modal-content column-container col-start gap8">
-                <div className="modal-title-container uppercase">PAUSE</div>
-                <div className="modal-button column-container col-centered uppercase">
-                  Continue Game
-                </div>
-                <div className="modal-button column-container col-centered uppercase">
-                  Restart
-                </div>
-                <div className="modal-button column-container col-centered uppercase">
-                  Quit Game
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
 
       {gameStarted && (
         <>
