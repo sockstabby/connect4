@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import GameLogo from "../src/assets/game-logo.svg";
+import PlayerVsPlayer from "../src/assets/player-vs-player.svg";
+import PlayerVsCPU from "../src/assets/player-vs-cpu.svg";
 
 export type GameMode = "online" | "local";
 
@@ -193,9 +194,17 @@ const StartGameModal = ({
   return (
     <>
       <div className="modal-content column-container col-start gap10">
-        <div className="row-container">
-          <img src={GameLogo} alt=""></img>
-        </div>
+        {mode !== "online" && (
+          <div className="row-container">
+            <img src={PlayerVsCPU} alt="" />
+          </div>
+        )}
+
+        {mode === "online" && (
+          <div className="row-container">
+            <img src={PlayerVsPlayer} alt="" />
+          </div>
+        )}
 
         <div className="row-container gap30 pad-bottom20 medium-font-size">
           <label
@@ -245,17 +254,17 @@ const StartGameModal = ({
               />
             </div>
 
-            <div className="row-container">
+            <div className="row-container button-holder">
               <button
-                className="button--unstyled uppercase"
+                className="button--fancy uppercase"
                 onClick={startLocalGame}
               >
                 Start Game
               </button>
             </div>
 
-            <div className="row-container">
-              <button className="button--unstyled uppercase">Game Rules</button>
+            <div className="row-container button-holder">
+              <button className="button--fancy uppercase">Game Rules</button>
             </div>
 
             <div className="row-container row-centered gap10 pad-top-100  grow-h">
@@ -280,14 +289,15 @@ const StartGameModal = ({
             </div>
 
             <div className="row-container">
-              <button
-                className={`button--unstyled uppercase ${
-                  name === "" ? "disabled" : ""
-                } `}
-                onClick={joinLobby}
-              >
-                Join Lobby
-              </button>
+              <div className="row-container button-holder">
+                <button
+                  disabled={name === ""}
+                  className="button--fancy uppercase"
+                  onClick={joinLobby}
+                >
+                  Join Lobby
+                </button>
+              </div>
             </div>
 
             <div className="column-container grow-h gap2 col-centered">
