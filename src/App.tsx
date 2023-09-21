@@ -140,6 +140,8 @@ export const App = ({
     function messageHandler(event: MessageEvent<any>) {
       const payload = JSON.parse(event.data);
 
+      console.log("event=", payload);
+
       if (payload.message === "playTurn") {
         if (payload.data.turn === -1) {
           setRemoteDisconnected(true);
@@ -321,6 +323,13 @@ export const App = ({
         mainMenuOpen: false,
       },
     };
+
+    console.log("start game");
+    console.log("initiator", initiator);
+    console.log("mode", mode);
+    console.log("player1", player1);
+    console.log("player2", player2);
+
     setRemoteDisconnected(false);
     setGameStarted(true);
     toggleRender();
@@ -329,6 +338,7 @@ export const App = ({
     setPlayer2(player2);
     setMode(mode);
     if (socket != null) {
+      console.log("websocket not null");
       setWebsocket(socket);
     }
   };
@@ -471,6 +481,8 @@ export const App = ({
 
   const [myTurn, playerTurn] = getCurrentTurn();
 
+  console.log("myTurn", myTurn);
+
   return (
     <>
       <div className="rowContainer row-centered grow-h game-controls-container ">
@@ -582,31 +594,26 @@ export const App = ({
             data-testid="drop-column-1"
             onClick={() => animateRow(1)}
           ></div>
-
           <div
             className={`drop-column ${playerTurn}`}
             data-testid="drop-column-2"
             onClick={() => animateRow(2)}
           ></div>
-
           <div
             className={`drop-column ${playerTurn}`}
             data-testid="drop-column-3"
             onClick={() => animateRow(3)}
           ></div>
-
           <div
             className={`drop-column ${playerTurn}`}
             data-testid="drop-column-4"
             onClick={() => animateRow(4)}
           ></div>
-
           <div
             className={`drop-column ${playerTurn}`}
             data-testid="drop-column-5"
             onClick={() => animateRow(5)}
           ></div>
-
           <div
             className={`drop-column ${playerTurn}`}
             data-testid="drop-column-6"

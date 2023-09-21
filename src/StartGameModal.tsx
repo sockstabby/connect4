@@ -3,7 +3,7 @@ import GameLogo from "../src/assets/game-logo.svg";
 
 export type GameMode = "online" | "local";
 
-type Player = {
+export type Player = {
   name: string;
 };
 
@@ -56,7 +56,6 @@ const StartGameModal = ({
     }
 
     function messageHandler(event: MessageEvent<any>) {
-      console.log("event=", event.data);
       const payload = JSON.parse(event.data);
 
       if (payload.message === "lobbyParticipants") {
@@ -170,8 +169,7 @@ const StartGameModal = ({
     }
     return (
       <option key={name} value={name}>
-        {" "}
-        {name}{" "}
+        {name}
       </option>
     );
   });
