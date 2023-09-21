@@ -479,7 +479,7 @@ export const App = ({
 
   return (
     <>
-      <div className="rowContainer row-centered grow-h game-controls-container ">
+      <div className="row-container row-centered grow-h game-controls-container ">
         <div className="menu-button-container">
           <button onClick={openMainMenuModal}>Menu</button>
         </div>
@@ -519,34 +519,32 @@ export const App = ({
       {gameStarted && (
         <>
           <div className="player1-card player-card">
-            <div className="player-container rowContainer grow-h">
+            <div className="player-container row-container row-centered grow-h pad-bottom-10">
               <img src={Player1} alt="" />{" "}
             </div>
 
-            <div className="rowContainer player-name-text-container grow-h row-centered uppercase">
+            <div className="row-container player-name-text-container grow-h row-centered uppercase">
               {player1}
             </div>
 
             <div
               data-testid="red-win-count"
-              className="rowContainer player-score-text-container grow-h row-centered uppercase"
+              className="row-container player-score-text-container grow-h row-centered uppercase"
             >
               {stateRef.current.redWins}
             </div>
-
-            <div className="rowContainer"></div>
           </div>
 
           <div className="player2-card player-card">
-            <div className="player-container rowContainer grow-h">
+            <div className="player-container row-container row-centered grow-h pad-bottom-10">
               <img src={Player2} alt="" />{" "}
             </div>
-            <div className="rowContainer player-name-text-container grow-h row-centered uppercase">
+            <div className="row-container player-name-text-container grow-h row-centered uppercase">
               {player2}
             </div>
             <div
               data-testid="yellow-win-count"
-              className="rowContainer player-score-text-container grow-h row-centered uppercase"
+              className="row-container player-score-text-container grow-h row-centered uppercase"
             >
               {stateRef.current.yellowWins}
             </div>

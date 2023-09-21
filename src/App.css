@@ -1,10 +1,10 @@
 /* board = 632x584 desktop*/
 /* max-width for desktop is 1020px */
 
-.disabled-background { 
+.disabled-background {
   position: fixed;
   inset: 0px;
-  background-color: rgba(0, 0, 0, 0.5);  
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .button--fancy {
@@ -33,7 +33,7 @@
 }
 
 .button--fancy::after {
-  content: '';
+  content: "";
   background-color: black;
   /* opacity: 0; */
   border-radius: 5px;
@@ -57,44 +57,17 @@
 .button--fancy.disabled {
   color: rgb(214, 212, 212);
   background-color: gray;
-
 }
 
 button.button--fancy:disabled,
-button.button--fancy[disabled]{
+button.button--fancy[disabled] {
   border: 1px solid #999999;
   background-color: #cccccc;
   color: #aca0a0;
 }
 
-.button--unstyled.disabled {
-  color: rgb(214, 212, 212);
-  background-image: url("assets/restart-button-disabled.svg");
-  cursor: not-allowed;
-}
-
-.button--unstyled:hover {
-  background-image: url("assets/restart-button-hovered.svg");
-}
-
-.button--unstyled.disabled:hover {
-  background-image: url("assets/restart-button-disabled.svg");
-  cursor: not-allowed;
-}
-
-.button--unstyled:focus {
-  /* outline-color: white; */
-}
-
-
 .pad-left60 {
   padding-left: 60px;
-}
-
-.modal-button:hover {
-  background-image: url("assets/hovered-modal-button.svg");
-  background-repeat: no-repeat;
-  background-position: center center;
 }
 
 .lobby-player-list {
@@ -103,7 +76,6 @@ button.button--fancy[disabled]{
 }
 
 .centered {
-  /* text-align: center; */
   position: absolute;
   top: 50%;
   left: 0;
@@ -137,16 +109,12 @@ button.button--fancy[disabled]{
   border-top-right-radius: 40px;
 }
 
-.pad-top-7{
+.pad-top-7 {
   padding-top: 7px;
 }
 
 .pad-top-100 {
   padding-top: 144px;
-}
-
-.modal-content {
-  /* padding-top: 10px; */
 }
 
 .modal-title-container {
@@ -167,23 +135,16 @@ button {
   font-weight: 700;
   padding: 16px 31px;
   text-decoration: none;
-  /* text-shadow: 0px 1px 0px var(--game-background-color2); */
   line-height: 0px;
   height: 40px;
 }
 button:hover {
-  /* background-color: var(--game-background-color1); */
   border: 1px solid white;
-}
-button:active {
-  position: relative;
-  top: 1px;
 }
 
 button:disabled,
 button[disabled] {
   cursor: not-allowed;
-  /* background-color: darkgray; */
   color: black;
   border: 0px solid white;
 }
@@ -193,12 +154,10 @@ button[disabled] {
   margin: 0 auto;
   text-align: center;
   width: 100%;
-
   color: black;
-
   --player1-color: #fd6687;
   --player2-color: #ffce67;
-  --accent-color: var(--player1-color)
+  --accent-color: #fd6687;
 }
 
 .white-board {
@@ -382,7 +341,6 @@ button[disabled] {
 
 .grow-h-90 {
   width: 90%;
-
 }
 
 .grow-v {
@@ -424,8 +382,12 @@ button[disabled] {
   font-size: 2.5rem;
 }
 
-.pad-bottom20 {
+.pad-bottom-20 {
   padding-bottom: 20px;
+}
+
+.pad-bottom-10 {
+  padding-bottom: 10px;
 }
 
 .pad-all-10 {
@@ -502,14 +464,14 @@ button[disabled] {
 }
 
 .winner-card {
-  position:absolute;
+  position: absolute;
   top: calc(100vh - 160px - 20px) !important;
   left: calc(100vw / 2 - 143px) !important;
   background-color: white;
   border: 2px solid black;
   border-radius: 25px;
   width: 285px;
-  height: auto
+  height: auto;
 }
 
 .caret-container.red {
@@ -619,13 +581,12 @@ input[type="checkbox"] {
   width: 1rem;
   height: 1rem;
   place-content: center;
-  accent-color: black);
+  accent-color: black;
 }
 
 input[type="checkbox"]:checked::before {
   transform: scale(1);
 }
-
 
 .toggle-wrapper input[type="checkbox"] {
   height: 0;

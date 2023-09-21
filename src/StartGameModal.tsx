@@ -206,7 +206,7 @@ const StartGameModal = ({
           </div>
         )}
 
-        <div className="row-container gap30 pad-bottom20 medium-font-size">
+        <div className="row-container gap30 pad-bottom-20 medium-font-size">
           <label
             htmlFor="switch"
             className={mode === "online" ? "mode-inactive" : "mode-active"}
@@ -244,7 +244,7 @@ const StartGameModal = ({
               />
             </div>
 
-            <div className="column-container pad-bottom20 grow-h name-label-max-width col-centered">
+            <div className="column-container pad-bottom-20 grow-h name-label-max-width col-centered">
               <label htmlFor="player2Name"> Player Two Name:</label>
               <input
                 onChange={player2NameChanged}
