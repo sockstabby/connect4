@@ -515,7 +515,7 @@ export const App = ({
       {gameStarted && (
         <>
           <div className="player1-card player-card">
-            <div className="player-container flex flex-row pb-1 justify-center">
+            <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
               <img src={Player1} alt="Player One Smiley Face" />
             </div>
 
@@ -532,7 +532,7 @@ export const App = ({
           </div>
 
           <div className="player2-card player-card">
-            <div className="player-container flex flex-row pb-1 justify-center">
+            <div className="player-container flex flex-row pb-1 justify-center -mt-6">
               <img src={Player2} alt="Player Two Smiley Face" />
             </div>
             <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
@@ -549,7 +549,7 @@ export const App = ({
       )}
 
       {(myTurn || mode === "local") && winner == null && gameStarted && (
-        <div className="dropzone">
+        <div className="dropzone flex flex-row w-full justify-between">
           <div
             className={`drop-column ${playerTurn}`}
             data-testid="drop-column-0"
@@ -589,12 +589,18 @@ export const App = ({
         </div>
       )}
 
-      <div className="white-board">
-        <img src={Board} alt="" />
-      </div>
-
-      <div className="black-board">
-        <img src={BlackBoard} alt="" />
+      <div className="game-board-container-container-container">
+        <div className="game-board-container-container">
+          <div className="drop-slots"></div>
+          <div className="game-board-container">
+            <div className="white-board">
+              <img src={Board} alt="" />
+            </div>
+            <div className="black-board">
+              <img src={BlackBoard} alt="" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div
@@ -603,7 +609,7 @@ export const App = ({
 
       {winner == null && gameStarted && (
         <div
-          className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col`}
+          className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
         >
           <div className="flex flex-row justify-center uppercase pt-5 font-extrabold text-xl pb-3">
             {playerTurn === "red" ? `${player1}'s Turn` : `${player2}'s Turn`}
@@ -629,7 +635,7 @@ export const App = ({
         overlayClassName="disabled-background"
       >
         <div className="column-container col-centered gap15">
-          <div className="row-container grow-h row-centered uppercase color-black">
+          <div className="row-container grow-h row-centered uppercase text-black">
             Remote Player Quit
           </div>
 
@@ -652,7 +658,7 @@ export const App = ({
       >
         <div className="flex flex-col justify-center">
           <div
-            className="uppercase color-black text-center"
+            className="uppercase text-black text-center"
             data-testid="winning-player"
           >
             {winner && `${winner!.player}`}

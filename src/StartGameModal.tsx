@@ -137,7 +137,7 @@ const StartGameModal = ({
         },
       };
 
-      websocket!.send(JSON.stringify(payload));
+      websocket?.send(JSON.stringify(payload));
     }
   };
 
@@ -193,23 +193,22 @@ const StartGameModal = ({
 
   return (
     <>
-      <div className="modal-content column-container col-start gap10">
+      <div className="flex flex-col justify-start gap-3 items-center pt-3 pb-3">
         {mode !== "online" && (
-          <div className="row-container">
-            <img src={PlayerVsCPU} alt="" />
-          </div>
+          <img
+            src={PlayerVsCPU}
+            alt="Image of 2 smileys, both looking forwards. One of them is emotionless."
+          />
         )}
 
         {mode === "online" && (
-          <div className="row-container">
-            <img src={PlayerVsPlayer} alt="" />
-          </div>
+          <img src={PlayerVsPlayer} alt="Image of 2 smileys looking right" />
         )}
 
-        <div className="row-container gap30 pad-bottom-20 medium-font-size">
+        <div className="flex flex-row gap-7 pb-4 text-4xl font-extrabold items-center">
           <label
             htmlFor="switch"
-            className={mode === "online" ? "mode-inactive" : "mode-active"}
+            className={mode === "online" ? "" : "line-through"}
           >
             Local
           </label>
@@ -226,7 +225,7 @@ const StartGameModal = ({
 
           <label
             htmlFor="switch"
-            className={mode === "online" ? "mode-active" : "mode-inactive"}
+            className={mode === "online" ? "line-through" : ""}
           >
             Online
           </label>
@@ -234,7 +233,7 @@ const StartGameModal = ({
 
         {mode !== "online" && (
           <>
-            <div className="column-container grow-h name-label-max-width col-centered">
+            <div className="flex flex-col items-center">
               <label htmlFor="player1Name"> Player One Name:</label>
               <input
                 onChange={player1NameChanged}
@@ -244,7 +243,7 @@ const StartGameModal = ({
               />
             </div>
 
-            <div className="column-container pad-bottom-20 grow-h name-label-max-width col-centered">
+            <div className="flex flex-col items-center pb-6">
               <label htmlFor="player2Name"> Player Two Name:</label>
               <input
                 onChange={player2NameChanged}
@@ -254,20 +253,20 @@ const StartGameModal = ({
               />
             </div>
 
-            <div className="row-container button-holder">
+            <div className="button-holder">
               <button
-                className="button--fancy uppercase"
+                className="button--fancy uppercase font-bold"
                 onClick={startLocalGame}
               >
                 Start Game
               </button>
             </div>
 
-            <div className="row-container button-holder">
+            <div className="button-holder">
               <button className="button--fancy uppercase">Game Rules</button>
             </div>
 
-            <div className="row-container row-centered gap10 pad-top-100  grow-h">
+            <div className="pad-top-100">
               <button onClick={(_e) => onClose()}>Cancel</button>
             </div>
           </>
@@ -275,7 +274,7 @@ const StartGameModal = ({
 
         {mode === "online" && (
           <>
-            <div className="column-container grow-h name-label-max-width col-centered">
+            <div className="flex flex-col items-center">
               <label htmlFor="nameInput">
                 Enter your name to join the lobby:
               </label>
@@ -288,22 +287,20 @@ const StartGameModal = ({
               />
             </div>
 
-            <div className="row-container">
-              <div className="row-container button-holder">
-                <button
-                  disabled={name === ""}
-                  className="button--fancy uppercase"
-                  onClick={joinLobby}
-                >
-                  Join Lobby
-                </button>
-              </div>
+            <div className="button-holder">
+              <button
+                disabled={name === ""}
+                className="button--fancy uppercase"
+                onClick={joinLobby}
+              >
+                Join Lobby
+              </button>
             </div>
 
-            <div className="column-container grow-h gap2 col-centered">
+            <div className="flex flex-col items-center w-full">
               <label htmlFor="availablePlayers"> Available Players:</label>
               <select
-                className="lobby-player-list widthHeight style"
+                className="w-full widthHeight style max-h-24"
                 onChange={playerSelected}
                 name="players"
                 id="availablePlayers"
@@ -312,7 +309,7 @@ const StartGameModal = ({
                 {players}
               </select>
 
-              <div className="row-container row-centered pad-top-7">
+              <div className="pt-2">
                 <button
                   disabled={chosenOpponent === "" || chosenOpponent === name}
                   onClick={sendPlayRequest}
@@ -322,11 +319,11 @@ const StartGameModal = ({
               </div>
             </div>
 
-            <div className="column-container grow-h gap2 col-centered">
+            <div className="flex flex-col w-full items-center">
               <label htmlFor="invitesReceived">Invitations Received:</label>
 
               <select
-                className="lobby-player-list widthHeight style"
+                className="w-full widthHeight style max-h-24"
                 onChange={inviteeSelected}
                 name="invites"
                 size={5}
@@ -336,7 +333,7 @@ const StartGameModal = ({
               </select>
             </div>
 
-            <div className="row-container row-centered gap10  grow-h">
+            <div className="flex flex-row gap-4">
               <button onClick={(_e) => onClose()}>Cancel</button>
 
               <button disabled={invitee === ""} onClick={acceptPlayRequest}>
