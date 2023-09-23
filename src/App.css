@@ -143,10 +143,11 @@ button[disabled] {
 .game-board-container-container-container {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .game-board-container-container {
-  border: 1px solid white;
+  /* border: 3px solid white; */
   margin-top: 50px;
   width: 70vw;
   max-width: min-content;
@@ -155,28 +156,43 @@ button[disabled] {
 .game-board-container {
   position: relative;
   max-width: 70vw;
-  max-height: 70vw;
-  height: 62vh;
+  height: min-content;
+  min-height: 564px;
   min-width: 600px;
-
-  border: 1px solid red;
+  border: 2px solid red;
 }
 
 @media only screen and (max-width: 920px) {
   .game-board-container {
     min-width: 500px;
+    min-height: 470px;
+  }
+  .dropzone {
+    max-width: 500px;
   }
 }
 
 @media only screen and (max-width: 730px) {
   .game-board-container {
     min-width: 400px;
+    min-height: 376px;
+  }
+  .dropzone {
+    max-width: 400px;
+  }
+
+  .player-card {
+    display: none;
   }
 }
 
 @media only screen and (max-width: 580px) {
   .game-board-container {
     min-width: 300px;
+    min-height: 282px;
+  }
+  .dropzone {
+    max-width: 300px;
   }
 }
 
@@ -184,13 +200,14 @@ button[disabled] {
   .game-board-container {
     min-width: 200px;
   }
+  .dropzone {
+    max-width: 200px;
+  }
 }
 .white-board {
   position: absolute;
   top: 0px;
   left: 0px;
-  /* top: calc(100vh / 2 - 292px); */
-  /* left: calc(100vw / 2 - 316px); */
   z-index: -1;
 }
 
@@ -198,15 +215,7 @@ button[disabled] {
   position: absolute;
   top: 0px;
   left: 0px;
-
-  /* left: -50%; */
-  /* top: calc(100vh / 2 - 292px); */
-  /* left: calc(100vw / 2 - 316px); */
   z-index: -3;
-}
-
-.drop-slots {
-  height: 60px;
 }
 
 .bottom-plate {
@@ -231,64 +240,64 @@ button[disabled] {
 
 @keyframes move-0 {
   0% {
-    top: calc(100vh / 2 - 392px);
+    top: 0;
   }
   100% {
-    top: calc(100vh / 2 + 165px);
+    top: 78%;
   }
 }
 
 @keyframes move-1 {
   0% {
-    top: calc(100vh / 2 - 392px);
+    top: 0;
   }
   100% {
-    top: calc(100vh / 2 + 165px - (88px * 1));
+    top: 63%;
   }
 }
 
 @keyframes move-2 {
   0% {
-    top: calc(100vh / 2 - 392px);
+    top: 0;
   }
   100% {
-    top: calc(100vh / 2 + 165px - (88px * 2));
+    top: 48%;
   }
 }
 
 @keyframes move-3 {
   0% {
-    top: calc(100vh / 2 - 392px);
+    top: 0;
   }
   100% {
-    top: calc(100vh / 2 + 165px - (88px * 3));
+    top: 33%;
   }
 }
 
 @keyframes move-4 {
   0% {
-    top: calc(100vh / 2 - 392px);
+    top: 0;
   }
   100% {
-    top: calc(100vh / 2 + 165px - (88px * 4));
+    top: 18%;
   }
 }
 
 @keyframes move-5 {
   0% {
-    top: calc(100vh / 2 - 392px);
+    top: 0;
   }
   100% {
-    top: calc(100vh / 2 + 165px - (88px * 5));
+    top: 3%;
   }
 }
 
 .dropzone {
   position: absolute;
-  top: calc(100vh / 2 - 362px);
-  left: calc(100vw / 2 - 316px);
-  width: 621px;
-  height: 100px;
+  top: -40px;
+  left: 0;
+  width: 600px;
+  height: 40px;
 }
 
 .drop-column {
@@ -299,17 +308,17 @@ button[disabled] {
 .red:hover {
   background-image: url("assets/small-caret-red.svg");
   background-repeat: no-repeat;
-  background-position: center center;
+  background-position: center bottom;
 }
 
 .yellow:hover {
   background-image: url("assets/small-caret-yellow.svg");
   background-repeat: no-repeat;
-  background-position: center center;
+  background-position: center bottom;
 }
 
 .player-card {
-  position: absolute;
+  /* position: absolute; */
   background-color: white;
   border-radius: 30px;
   border: 2px solid black;
@@ -317,17 +326,22 @@ button[disabled] {
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
   width: 141px;
-  height: auto;
+  height: 185px;
+  max-height: 200px;
 }
 
 .player1-card {
-  top: calc(100vh / 2 - 94px);
-  left: calc(100vw / 2 - 316px - 50px - 141px);
+  /* top: calc(100vh / 2 - 94px); */
+  /* left: calc(100vw / 2 - 316px - 0px - 141px); */
+
+  /* left: 5%; */
 }
 
 .player2-card {
-  top: calc(100vh / 2 - 94px);
-  left: calc(100vw / 2 + 316px + 50px - 0px);
+  /* top: calc(100vh / 2 - 94px); */
+  /* left: calc(100vw / 2 + 316px + 0px - 0px); */
+
+  /* right: 5%; */
 }
 
 .caret-container {

@@ -66,7 +66,7 @@ export const App = ({
   // closures within useEffect.
   const stateRef = useRef(initialGameState);
   const [websocket, setWebsocket] = useState<WebSocket | null>(null);
-  const [mode, setMode] = useState("online");
+  const [mode, setMode] = useState("local");
 
   const timerRef = useRef<NodeJS.Timer | undefined>();
 
@@ -86,7 +86,7 @@ export const App = ({
 
   const [opponent, setOpponent] = useState("");
 
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState(true);
 
   const [player1, setPlayer1] = useState("Player 1");
   const [player2, setPlayer2] = useState("Player 2");
@@ -107,7 +107,7 @@ export const App = ({
     };
 
     if (timerRef.current == null && stateRef.current.plays > 1) {
-      timerRef.current = setInterval(decSeconds, 1000);
+      // timerRef.current = setInterval(decSeconds, 1000  );
     }
   }, [lastDroppedColumn]);
 
@@ -363,13 +363,43 @@ export const App = ({
   };
 
   const getTokenStyle = (col: number, row: number) => {
-    const posLeft = window.innerWidth / 2 - 300;
-    const posTop = window.innerHeight / 2 - 275 + 5 * 88;
+    //const posLeft = window.innerWidth / 2 - 300;
+    //const posTop = window.innerHeight / 2 - 275 + 5 * 88;
+    // const posTop = 0;
+    // const posLeft = 0;
+
+    console.log(`col = ${col}`);
+    console.log(`row = ${row}`);
+
+    console.log("left fraction=", Math.floor((col / 7) * 100));
+    console.log("top fraction=", Math.floor((row / 6) * 100));
+
+    let addr;
+    if (col > 3) {
+      addr = 1;
+    } else {
+      addr = 0;
+    }
+
+    const leftPos = Math.floor((col / 7) * 100 + 3 - addr);
+    console.log("leftPos", leftPos);
+
+    const topPos = Math.floor((row / 7) * 100 + 12 + row * 0.8);
+    console.log("topPos", topPos);
 
     const ret: React.CSSProperties = {
       position: "absolute",
-      top: posTop - row * 88,
-      left: col * 88 + posLeft,
+
+      width: "10%",
+      maxWidth: "10%",
+
+      height: "10%",
+
+      // top: posTop - row * 88,
+      // left: col * 88 + posLeft,
+
+      left: `${leftPos}%`,
+      bottom: `${topPos}%`,
     };
 
     if (row === 6) {
@@ -377,7 +407,7 @@ export const App = ({
 
       const merge = {
         animationIterationCount: 1,
-        animationDuration: "0.25s",
+        animationDuration: "0.1s",
         animationName: animationName,
         animationFillMode: "forwards",
         zIndex: -2,
@@ -512,8 +542,8 @@ export const App = ({
         />
       </ReactModal>
 
-      {gameStarted && (
-        <>
+      <div className="game-board-container-container-container">
+        {gameStarted && (
           <div className="player1-card player-card">
             <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
               <img src={Player1} alt="Player One Smiley Face" />
@@ -530,69 +560,64 @@ export const App = ({
               {stateRef.current.redWins}
             </div>
           </div>
+        )}
 
-          <div className="player2-card player-card">
-            <div className="player-container flex flex-row pb-1 justify-center -mt-6">
-              <img src={Player2} alt="Player Two Smiley Face" />
-            </div>
-            <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
-              {player2}
-            </div>
-            <div
-              data-testid="yellow-win-count"
-              className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
-            >
-              {stateRef.current.yellowWins}
-            </div>
-          </div>
-        </>
-      )}
-
-      {(myTurn || mode === "local") && winner == null && gameStarted && (
-        <div className="dropzone flex flex-row w-full justify-between">
-          <div
-            className={`drop-column ${playerTurn}`}
-            data-testid="drop-column-0"
-            onClick={() => animateRow(0)}
-          ></div>
-
-          <div
-            className={`drop-column ${playerTurn}`}
-            data-testid="drop-column-1"
-            onClick={() => animateRow(1)}
-          ></div>
-          <div
-            className={`drop-column ${playerTurn}`}
-            data-testid="drop-column-2"
-            onClick={() => animateRow(2)}
-          ></div>
-          <div
-            className={`drop-column ${playerTurn}`}
-            data-testid="drop-column-3"
-            onClick={() => animateRow(3)}
-          ></div>
-          <div
-            className={`drop-column ${playerTurn}`}
-            data-testid="drop-column-4"
-            onClick={() => animateRow(4)}
-          ></div>
-          <div
-            className={`drop-column ${playerTurn}`}
-            data-testid="drop-column-5"
-            onClick={() => animateRow(5)}
-          ></div>
-          <div
-            className={`drop-column ${playerTurn}`}
-            data-testid="drop-column-6"
-            onClick={() => animateRow(6)}
-          ></div>
-        </div>
-      )}
-
-      <div className="game-board-container-container-container">
         <div className="game-board-container-container">
-          <div className="drop-slots"></div>
           <div className="game-board-container">
+            {(myTurn || mode === "local") && winner == null && gameStarted && (
+              <div className="dropzone flex flex-row w-full justify-between">
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-0"
+                  onClick={() => animateRow(0)}
+                ></div>
+
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-1"
+                  onClick={() => animateRow(1)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-2"
+                  onClick={() => animateRow(2)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-3"
+                  onClick={() => animateRow(3)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-4"
+                  onClick={() => animateRow(4)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-5"
+                  onClick={() => animateRow(5)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-6"
+                  onClick={() => animateRow(6)}
+                ></div>
+              </div>
+            )}
+
+            {tokens}
+            {winningPieces}
+
+            {stateRef.current.animatedPiece != null && (
+              <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
+                {stateRef.current.animatedPieceColor === "yellow" ? (
+                  <img src={YellowPiece} alt="Yellow Token" />
+                ) : (
+                  <img src={OrangePiece} alt="Red Token" />
+                )}
+              </div>
+            )}
+
             <div className="white-board">
               <img src={Board} alt="" />
             </div>
@@ -601,6 +626,24 @@ export const App = ({
             </div>
           </div>
         </div>
+        {gameStarted && (
+          <div className="player2-card player-card">
+            <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
+              <img src={Player2} alt="Player Two Smiley Face" />
+            </div>
+
+            <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
+              {player2}
+            </div>
+
+            <div
+              data-testid="yellow-win-count"
+              className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
+            >
+              {stateRef.current.yellowWins}
+            </div>
+          </div>
+        )}
       </div>
 
       <div
@@ -678,20 +721,6 @@ export const App = ({
           </div>
         </div>
       </ReactModal>
-
-      {tokens}
-
-      {winningPieces}
-
-      {stateRef.current.animatedPiece != null && (
-        <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
-          {stateRef.current.animatedPieceColor === "yellow" ? (
-            <img src={YellowPiece} alt="Yellow Token" />
-          ) : (
-            <img src={OrangePiece} alt="Red Token" />
-          )}
-        </div>
-      )}
     </>
   );
 };
