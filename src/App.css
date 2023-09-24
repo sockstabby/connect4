@@ -65,7 +65,7 @@ button.button--fancy[disabled] {
   color: #aca0a0;
 }
 
-.player-card-small {
+.player-card-small-container {
   height: 100px;
   border: 1px solid black;
   display: none;
@@ -170,11 +170,25 @@ button[disabled] {
 
 @media only screen and (max-width: 920px) {
   .game-board-container {
-    min-width: 500px;
-    min-height: 470px;
+    min-width: 540px;
+    min-height: 508px;
   }
   .dropzone {
-    max-width: 500px;
+    max-width: 540px;
+  }
+
+  .player-card {
+    display: none;
+  }
+
+  .player-card-small-container {
+    display: flex;
+    min-width: 540px;
+  }
+
+  .game-board-container-container {
+    /* border: 3px solid white; */
+    margin-top: 10px;
   }
 }
 
@@ -194,7 +208,7 @@ button[disabled] {
     display: none;
   }
 
-  .player-card-small {
+  .player-card-small-container {
     display: block;
     min-width: 530px;
   }
@@ -258,6 +272,13 @@ button[disabled] {
 
 .bottom-plate.red {
   background-color: var(--player1-color);
+}
+
+.player-card-small {
+  border: 1px white;
+  height: 100px;
+  width: 70px;
+  background-color: greenyellow;
 }
 
 @keyframes move-0 {

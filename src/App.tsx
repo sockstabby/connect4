@@ -543,6 +543,11 @@ export const App = ({
       </ReactModal>
 
       <div className="flex flex-col">
+        <div className="player-card-small-container flex flex-row justify-center pb-30 gap-8">
+          <div className="player-card-small"></div>
+
+          <div className="player-card-small"></div>
+        </div>
         <div className="game-board-container-container-container">
           {gameStarted && (
             <div className="player1-card player-card">
@@ -564,8 +569,6 @@ export const App = ({
           )}
 
           <div className="game-board-container-container">
-            <div className="player-card-small"></div>
-
             <div className="game-board-container">
               {(myTurn || mode === "local") &&
                 winner == null &&
