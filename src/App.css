@@ -65,6 +65,12 @@ button.button--fancy[disabled] {
   color: #aca0a0;
 }
 
+.player-card-small {
+  height: 100px;
+  border: 1px solid black;
+  display: none;
+}
+
 .centered {
   position: absolute;
   top: 50%;
@@ -144,12 +150,12 @@ button[disabled] {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 15px;
 }
 
 .game-board-container-container {
   /* border: 3px solid white; */
   margin-top: 50px;
-  width: 70vw;
   max-width: min-content;
 }
 
@@ -174,15 +180,28 @@ button[disabled] {
 
 @media only screen and (max-width: 730px) {
   .game-board-container {
-    min-width: 400px;
-    min-height: 376px;
+    /* min-width: 400px; */
+
+    min-width: 530px;
+
+    min-height: 499px;
   }
   .dropzone {
-    max-width: 400px;
+    max-width: 530px;
   }
 
   .player-card {
     display: none;
+  }
+
+  .player-card-small {
+    display: block;
+    min-width: 530px;
+  }
+
+  .game-board-container-container {
+    /* border: 3px solid white; */
+    margin-top: 10px;
   }
 }
 
@@ -196,6 +215,9 @@ button[disabled] {
   }
 }
 
+.drop-column {
+  border: 1px solid white;
+}
 @media only screen and (max-width: 440px) {
   .game-board-container {
     min-width: 200px;
@@ -345,14 +367,16 @@ button[disabled] {
 }
 
 .caret-container {
-  position: absolute;
+  /* position: absolute; */
   background-repeat: no-repeat;
   background-position: center center;
-  top: calc(100vh - 150px - 20px);
-  left: calc(100vw / 2 - 96px);
-  z-index: -1;
+
   width: 199px;
   height: 164px;
+}
+
+.caret-container-container {
+  margin-top: -30px;
 }
 
 .winner-card {

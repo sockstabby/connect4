@@ -542,105 +542,134 @@ export const App = ({
         />
       </ReactModal>
 
-      <div className="game-board-container-container-container">
-        {gameStarted && (
-          <div className="player1-card player-card">
-            <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
-              <img src={Player1} alt="Player One Smiley Face" />
-            </div>
-
-            <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
-              {player1}
-            </div>
-
-            <div
-              data-testid="red-win-count"
-              className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
-            >
-              {stateRef.current.redWins}
-            </div>
-          </div>
-        )}
-
-        <div className="game-board-container-container">
-          <div className="game-board-container">
-            {(myTurn || mode === "local") && winner == null && gameStarted && (
-              <div className="dropzone flex flex-row w-full justify-between">
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-0"
-                  onClick={() => animateRow(0)}
-                ></div>
-
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-1"
-                  onClick={() => animateRow(1)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-2"
-                  onClick={() => animateRow(2)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-3"
-                  onClick={() => animateRow(3)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-4"
-                  onClick={() => animateRow(4)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-5"
-                  onClick={() => animateRow(5)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-6"
-                  onClick={() => animateRow(6)}
-                ></div>
+      <div className="flex flex-col">
+        <div className="game-board-container-container-container">
+          {gameStarted && (
+            <div className="player1-card player-card">
+              <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
+                <img src={Player1} alt="Player One Smiley Face" />
               </div>
-            )}
 
-            {tokens}
-            {winningPieces}
+              <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
+                {player1}
+              </div>
 
-            {stateRef.current.animatedPiece != null && (
-              <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
-                {stateRef.current.animatedPieceColor === "yellow" ? (
-                  <img src={YellowPiece} alt="Yellow Token" />
-                ) : (
-                  <img src={OrangePiece} alt="Red Token" />
+              <div
+                data-testid="red-win-count"
+                className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
+              >
+                {stateRef.current.redWins}
+              </div>
+            </div>
+          )}
+
+          <div className="game-board-container-container">
+            <div className="player-card-small"></div>
+
+            <div className="game-board-container">
+              {(myTurn || mode === "local") &&
+                winner == null &&
+                gameStarted && (
+                  <div className="dropzone flex flex-row w-full justify-between">
+                    <div
+                      className={`drop-column ${playerTurn}`}
+                      data-testid="drop-column-0"
+                      onClick={() => animateRow(0)}
+                    ></div>
+
+                    <div
+                      className={`drop-column ${playerTurn}`}
+                      data-testid="drop-column-1"
+                      onClick={() => animateRow(1)}
+                    ></div>
+                    <div
+                      className={`drop-column ${playerTurn}`}
+                      data-testid="drop-column-2"
+                      onClick={() => animateRow(2)}
+                    ></div>
+                    <div
+                      className={`drop-column ${playerTurn}`}
+                      data-testid="drop-column-3"
+                      onClick={() => animateRow(3)}
+                    ></div>
+                    <div
+                      className={`drop-column ${playerTurn}`}
+                      data-testid="drop-column-4"
+                      onClick={() => animateRow(4)}
+                    ></div>
+                    <div
+                      className={`drop-column ${playerTurn}`}
+                      data-testid="drop-column-5"
+                      onClick={() => animateRow(5)}
+                    ></div>
+                    <div
+                      className={`drop-column ${playerTurn}`}
+                      data-testid="drop-column-6"
+                      onClick={() => animateRow(6)}
+                    ></div>
+                  </div>
                 )}
-              </div>
-            )}
 
-            <div className="white-board">
-              <img src={Board} alt="" />
-            </div>
-            <div className="black-board">
-              <img src={BlackBoard} alt="" />
+              {tokens}
+              {winningPieces}
+
+              {stateRef.current.animatedPiece != null && (
+                <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
+                  {stateRef.current.animatedPieceColor === "yellow" ? (
+                    <img src={YellowPiece} alt="Yellow Token" />
+                  ) : (
+                    <img src={OrangePiece} alt="Red Token" />
+                  )}
+                </div>
+              )}
+
+              <div className="white-board">
+                <img src={Board} alt="" />
+              </div>
+              <div className="black-board">
+                <img src={BlackBoard} alt="" />
+              </div>
             </div>
           </div>
+          {gameStarted && (
+            <div className="player2-card player-card">
+              <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
+                <img src={Player2} alt="Player Two Smiley Face" />
+              </div>
+
+              <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
+                {player2}
+              </div>
+
+              <div
+                data-testid="yellow-win-count"
+                className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
+              >
+                {stateRef.current.yellowWins}
+              </div>
+            </div>
+          )}
         </div>
-        {gameStarted && (
-          <div className="player2-card player-card">
-            <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
-              <img src={Player2} alt="Player Two Smiley Face" />
-            </div>
-
-            <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
-              {player2}
-            </div>
-
+        {winner == null && gameStarted && (
+          <div className="caret-container-container flex justify-center">
             <div
-              data-testid="yellow-win-count"
-              className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
+              className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
             >
-              {stateRef.current.yellowWins}
+              <div className="flex flex-row justify-center uppercase pt-5 font-extrabold text-xl pb-3">
+                {playerTurn === "red"
+                  ? `${player1}'s Turn`
+                  : `${player2}'s Turn`}
+              </div>
+
+              {stateRef.current.plays > 1 ? (
+                <div className="flex flex-row justify-center text-5xl font-extrabold">
+                  {timerSeconds != null ? `${timerSeconds}s` : "24s"}
+                </div>
+              ) : (
+                <div className="flex flex-row leading-tight text-xs">
+                  Note: A timer will start after each player has played a turn.
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -649,26 +678,6 @@ export const App = ({
       <div
         className={`bottom-plate ${winner != null ? winner.player : ""} `}
       ></div>
-
-      {winner == null && gameStarted && (
-        <div
-          className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
-        >
-          <div className="flex flex-row justify-center uppercase pt-5 font-extrabold text-xl pb-3">
-            {playerTurn === "red" ? `${player1}'s Turn` : `${player2}'s Turn`}
-          </div>
-
-          {stateRef.current.plays > 1 ? (
-            <div className="flex flex-row justify-center text-5xl font-extrabold">
-              {timerSeconds != null ? `${timerSeconds}s` : "24s"}
-            </div>
-          ) : (
-            <div className="flex flex-row leading-tight text-xs">
-              Note: A timer will start after each player has played a turn.
-            </div>
-          )}
-        </div>
-      )}
 
       <ReactModal
         className="modal winner-card"
