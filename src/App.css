@@ -160,6 +160,10 @@ button[disabled] {
   max-width: min-content;
 }
 
+.caret-container-container {
+  margin-top: -32px;
+}
+
 .game-board-container {
   position: relative;
   max-width: 70vw;
@@ -175,13 +179,25 @@ button[disabled] {
   border: 2px solid red;
 }
 
+.smiley-container {
+  height: clamp(1rem, 10.1vmin, 3.5rem);
+}
+
+.smiley-container-yellow {
+  margin-right: -7vmin;
+}
+
+.smiley-container-red {
+  margin-left: -7vmin;
+}
+
 @media only screen and (min-height: 900px) {
   .player-card-small-container {
     /* margin-top: 40px; */
   }
 }
 
-@media only screen and (max-width: 920px) {
+@media only screen and (max-width: 707px) {
   .game-board-container {
     /* min-width: 62vmax;
     min-height: calc(58.3vmax + 40px); */
@@ -207,7 +223,7 @@ button[disabled] {
   }
 }
 
-@media only screen and (max-width: 730px) {
+@media only screen and (max-width: 640px) {
   .game-board-container {
     min-width: min(80vmin);
     min-height: calc(75.2vmin + 40px);
@@ -227,7 +243,7 @@ button[disabled] {
   }
 }
 
-@media only screen and (max-width: 580px) {
+@media only screen and (max-width: 526px) {
   .game-board-container {
     min-width: min(90vmin);
     min-height: calc(84.5vmin + 40px);
@@ -263,6 +279,7 @@ button[disabled] {
     display: flex;
     min-width: min(62vmax, 92vw);
     margin-top: 40px;
+    margin-bottom: 40px;
   }
 
   .game-board-container-container-container {
@@ -285,11 +302,12 @@ button[disabled] {
 
 .bottom-plate {
   position: absolute;
-  top: calc(100vh - 169px);
+  bottom: 0;
   left: 0px;
-  z-index: -1000;
-  height: 169px;
+  top: 68vh;
+  height: 32vh;
   width: 100%;
+  z-index: -1000;
   background-color: var(--game-background-color2);
   border-top-left-radius: 40px;
   border-top-right-radius: 40px;
@@ -385,10 +403,13 @@ button[disabled] {
   /* position: absolute; */
   background-color: white;
   border-radius: 30px;
+
   border: 2px solid black;
   border-bottom: 10px solid black;
+
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
+
   width: 141px;
   height: 185px;
   max-height: 200px;
@@ -400,11 +421,11 @@ button[disabled] {
   max-width: 240px;
 
   background-color: white;
-  border-radius: 30px;
+  border-radius: 20px;
   border: 2px solid black;
   border-bottom: 10px solid black;
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
+  border-bottom-left-radius: 22px;
+  border-bottom-right-radius: 22px;
 }
 
 .player1-card {
@@ -430,8 +451,12 @@ button[disabled] {
   height: 164px;
 }
 
-.caret-container-container {
+/* .caret-container-container {
   margin-top: -50px;
+} */
+
+.win-count {
+  font-size: 2rem;
 }
 
 .winner-card {

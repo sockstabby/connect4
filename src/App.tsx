@@ -603,9 +603,9 @@ export const App = ({
       </ReactModal>
 
       <div className="flex flex-col">
-        <div className="player-card-small-container flex flex-row justify-center gap-8">
+        <div className="player-card-small-container flex flex-row justify-center gap-4">
           <div className="player-card-small flex flex-row justify-around items-center">
-            <div className="flex flex-row pb-1 justify-center -ml-12 h-14">
+            <div className="flex flex-row pb-1 justify-center  smiley-container smiley-container-red">
               <img src={Player1} alt="Player One Smiley Face" />
             </div>
 
@@ -615,7 +615,7 @@ export const App = ({
 
             <div
               data-testid="red-win-count"
-              className="flex flex-row justify-center uppercase text-6xl font-bold"
+              className="win-count flex flex-row justify-center uppercase font-bold"
             >
               {stateRef.current.redWins}
             </div>
@@ -624,7 +624,7 @@ export const App = ({
           <div className="player-card-small flex flex-row justify-around items-center">
             <div
               data-testid="yellow-win-count"
-              className="flex flex-row justify-center uppercase text-6xl font-bold"
+              className="win-count flex flex-row justify-center uppercase font-bold"
             >
               {stateRef.current.yellowWins}
             </div>
@@ -632,8 +632,8 @@ export const App = ({
               {player2}
             </div>
 
-            <div className="flex flex-row pb-1 justify-center -mr-12 h-14">
-              <img src={Player2} alt="Player One Smiley Face" />
+            <div className="flex flex-row pb-1 justify-center -mr-12 smiley-container smiley-container-yellow">
+              <img src={Player2} alt="Player Two Smiley Face" />
             </div>
           </div>
         </div>
