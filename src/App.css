@@ -187,7 +187,7 @@ button[disabled] {
     min-height: calc(58.3vmax + 40px); */
 
     min-width: min(70vmin);
-    min-height: calc(58.3vmin + 40px);
+    min-height: calc(65.8vmin + 40px);
   }
   .dropzone {
     max-width: 62vmax;
@@ -209,13 +209,8 @@ button[disabled] {
 
 @media only screen and (max-width: 730px) {
   .game-board-container {
-    /* min-width: 62vmax;
-    min-height: calc(58.3vmax + 40px); */
-
-    /* min-width: min(62vmin); */
     min-width: min(80vmin);
-
-    min-height: calc(58.3vmin + 40px);
+    min-height: calc(75.2vmin + 40px);
   }
 
   .player-card {
@@ -234,11 +229,8 @@ button[disabled] {
 
 @media only screen and (max-width: 580px) {
   .game-board-container {
-    /* min-width: min(62vmax, 92vw);
-    min-height: calc(min(62vmax, 92vw) * 1.019); */
     min-width: min(90vmin);
-    /* min-width: min(62vmin); */
-    min-height: calc(58.3vmin + 40px);
+    min-height: calc(84.5vmin + 40px);
   }
 
   .player-card {
@@ -260,11 +252,8 @@ button[disabled] {
 }
 @media only screen and (max-width: 440px) {
   .game-board-container {
-    /* min-width: min(62vmax, 92vw);
-    min-height: calc(min(62vmax, 92vw) * 1.019); */
-
     min-width: min(95vmin);
-    min-height: calc(58.3vmin + 40px);
+    min-height: calc(89vmin + 40px);
   }
 
   .player-card {
