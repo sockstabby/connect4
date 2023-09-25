@@ -66,7 +66,7 @@ button.button--fancy[disabled] {
 }
 
 .player-card-small-container {
-  height: 100px;
+  height: 80px;
   border: 1px solid black;
   display: none;
 }
@@ -151,11 +151,12 @@ button[disabled] {
   justify-content: center;
   align-items: center;
   gap: 15px;
+  margin-top: 20px;
 }
 
 .game-board-container-container {
   /* border: 3px solid white; */
-  margin-top: 50px;
+  margin-top: 0px;
   max-width: min-content;
 }
 
@@ -163,18 +164,33 @@ button[disabled] {
   position: relative;
   max-width: 70vw;
   height: min-content;
-  min-height: 564px;
-  min-width: 600px;
+
+  /* min-height: 604px;
+  min-width: 600px; */
+
+  /* calc(min(62vmax, 92vw) * 1.019); */
+  min-width: min(62vmin);
+  min-height: calc(58.3vmin + 40px);
+
   border: 2px solid red;
+}
+
+@media only screen and (min-height: 900px) {
+  .player-card-small-container {
+    /* margin-top: 40px; */
+  }
 }
 
 @media only screen and (max-width: 920px) {
   .game-board-container {
-    min-width: 540px;
-    min-height: 508px;
+    /* min-width: 62vmax;
+    min-height: calc(58.3vmax + 40px); */
+
+    min-width: min(70vmin);
+    min-height: calc(58.3vmin + 40px);
   }
   .dropzone {
-    max-width: 540px;
+    max-width: 62vmax;
   }
 
   .player-card {
@@ -183,25 +199,23 @@ button[disabled] {
 
   .player-card-small-container {
     display: flex;
-    min-width: 540px;
+    min-width: 62vmax;
   }
 
-  .game-board-container-container {
-    /* border: 3px solid white; */
-    margin-top: 10px;
+  .game-board-container-container-container {
+    margin-top: 0px;
   }
 }
 
 @media only screen and (max-width: 730px) {
   .game-board-container {
-    /* min-width: 400px; */
+    /* min-width: 62vmax;
+    min-height: calc(58.3vmax + 40px); */
 
-    min-width: 530px;
+    /* min-width: min(62vmin); */
+    min-width: min(80vmin);
 
-    min-height: 499px;
-  }
-  .dropzone {
-    max-width: 530px;
+    min-height: calc(58.3vmin + 40px);
   }
 
   .player-card {
@@ -209,23 +223,35 @@ button[disabled] {
   }
 
   .player-card-small-container {
-    display: block;
-    min-width: 530px;
+    display: flex;
+    min-width: 62vmax;
   }
 
-  .game-board-container-container {
-    /* border: 3px solid white; */
-    margin-top: 10px;
+  .game-board-container-container-container {
+    margin-top: 0px;
   }
 }
 
 @media only screen and (max-width: 580px) {
   .game-board-container {
-    min-width: 300px;
-    min-height: 282px;
+    /* min-width: min(62vmax, 92vw);
+    min-height: calc(min(62vmax, 92vw) * 1.019); */
+    min-width: min(90vmin);
+    /* min-width: min(62vmin); */
+    min-height: calc(58.3vmin + 40px);
   }
-  .dropzone {
-    max-width: 300px;
+
+  .player-card {
+    display: none;
+  }
+  .player-card-small-container {
+    display: flex;
+    min-width: min(62vmax, 92vw);
+    margin-top: 40px;
+  }
+
+  .game-board-container-container-container {
+    margin-top: 0px;
   }
 }
 
@@ -234,22 +260,36 @@ button[disabled] {
 }
 @media only screen and (max-width: 440px) {
   .game-board-container {
-    min-width: 200px;
+    /* min-width: min(62vmax, 92vw);
+    min-height: calc(min(62vmax, 92vw) * 1.019); */
+
+    min-width: min(95vmin);
+    min-height: calc(58.3vmin + 40px);
   }
-  .dropzone {
-    max-width: 200px;
+
+  .player-card {
+    display: none;
+  }
+  .player-card-small-container {
+    display: flex;
+    min-width: min(62vmax, 92vw);
+    margin-top: 40px;
+  }
+
+  .game-board-container-container-container {
+    margin-top: 0px;
   }
 }
 .white-board {
   position: absolute;
-  top: 0px;
+  top: 40px;
   left: 0px;
   z-index: -1;
 }
 
 .black-board {
   position: absolute;
-  top: 0px;
+  top: 40px;
   left: 0px;
   z-index: -3;
 }
@@ -272,13 +312,6 @@ button[disabled] {
 
 .bottom-plate.red {
   background-color: var(--player1-color);
-}
-
-.player-card-small {
-  border: 1px white;
-  height: 100px;
-  width: 70px;
-  background-color: greenyellow;
 }
 
 @keyframes move-0 {
@@ -337,9 +370,8 @@ button[disabled] {
 
 .dropzone {
   position: absolute;
-  top: -40px;
+  top: 0px;
   left: 0;
-  width: 600px;
   height: 40px;
 }
 
@@ -373,6 +405,19 @@ button[disabled] {
   max-height: 200px;
 }
 
+.player-card-small {
+  border: 1px white;
+  width: 35vw;
+  max-width: 240px;
+
+  background-color: white;
+  border-radius: 30px;
+  border: 2px solid black;
+  border-bottom: 10px solid black;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+}
+
 .player1-card {
   /* top: calc(100vh / 2 - 94px); */
   /* left: calc(100vw / 2 - 316px - 0px - 141px); */
@@ -397,7 +442,7 @@ button[disabled] {
 }
 
 .caret-container-container {
-  margin-top: -30px;
+  margin-top: -50px;
 }
 
 .winner-card {

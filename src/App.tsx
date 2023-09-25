@@ -363,16 +363,21 @@ export const App = ({
   };
 
   const getTokenStyle = (col: number, row: number) => {
-    //const posLeft = window.innerWidth / 2 - 300;
-    //const posTop = window.innerHeight / 2 - 275 + 5 * 88;
-    // const posTop = 0;
-    // const posLeft = 0;
+    console.log("innerHeight", window.innerHeight);
+    console.log("innerWidth", window.innerWidth);
 
-    console.log(`col = ${col}`);
-    console.log(`row = ${row}`);
+    let topPos;
+    if (window.innerWidth <= 440) {
+      topPos = `calc(40px + 2.7vmin)`;
+    } else {
+      topPos = `calc(40px + 1.7vmin)`;
+    }
 
-    console.log("left fraction=", Math.floor((col / 7) * 100));
-    console.log("top fraction=", Math.floor((row / 6) * 100));
+    // console.log(`col = ${col}`);
+    // console.log(`row = ${row}`);
+
+    // console.log("left fraction=", Math.floor((col / 7) * 100));
+    // console.log("top fraction=", Math.floor((row / 6) * 100));
 
     let addr;
     if (col > 3) {
@@ -382,24 +387,79 @@ export const App = ({
     }
 
     const leftPos = Math.floor((col / 7) * 100 + 3 - addr);
-    console.log("leftPos", leftPos);
+    // console.log("leftPos", leftPos);
 
-    const topPos = Math.floor((row / 7) * 100 + 12 + row * 0.8);
-    console.log("topPos", topPos);
+    // const topPos = Math.floor(((row + 1) / 6) * 100 + 13);
+
+    // let topPos;
+    // if (row === 0) {
+    //   topPos = 0;
+    // } else {
+    //   console.log("WTF");
+    //   console.log("top fraction=", Math.floor(row / 6));
+
+    //   topPos = Math.floor((row / 6) * 100);
+    // }
+
+    // const topPos = Math.floor(((row + 1) / 6) * 100 + 13);
+
+    // 0 , 1/6, 2/6, 3/6
+
+    // 2/10 = .2
+
+    // 0 100
+
+    // 10 90
+
+    // 80 20
+
+    // 70 30
+
+    //top of 0 is really 40 which is
+
+    // height = 470
+    // with dropzone we add 40px ( which dont need to be scaled to the height )
+    // the dropzone will take 8.5106 pct of the entire height.
+
+    // console.log("topPos", topPos);
+
+    //we know width is 92vw when we start having problems
+    //we should be able to compute a height knowing that
+
+    //we have a 79 to 73 width to height aspect ratio
+
+    // what is 92% of 79 =  72.68
+
+    // const wVal = `calc(0px + 90.7vmin)`;
 
     const ret: React.CSSProperties = {
       position: "absolute",
 
       width: "10%",
       maxWidth: "10%",
-
       height: "10%",
 
-      // top: posTop - row * 88,
-      // left: col * 88 + posLeft,
+      // width: wVal,
+      // maxWidth: wVal,
+      // height: wVal,
 
       left: `${leftPos}%`,
-      bottom: `${topPos}%`,
+
+      // each time we go up 8.7% of vmax
+      //row 6 =
+      //doesnt work for large screens
+      // top: `calc(40px + 1.0vmax)`,
+
+      // this works for large screens
+      top: topPos,
+
+      //row 5
+
+      //top: `calc(40px + 10.5vmax)`,
+
+      //when we reach shrinking height we base off of vw
+      // this works for narrow screens
+      //top: `calc(40px + 15.5vw)`,
     };
 
     if (row === 6) {
@@ -543,15 +603,44 @@ export const App = ({
       </ReactModal>
 
       <div className="flex flex-col">
-        <div className="player-card-small-container flex flex-row justify-center pb-30 gap-8">
-          <div className="player-card-small"></div>
+        <div className="player-card-small-container flex flex-row justify-center gap-8">
+          <div className="player-card-small flex flex-row justify-around items-center">
+            <div className="flex flex-row pb-1 justify-center -ml-12 h-14">
+              <img src={Player1} alt="Player One Smiley Face" />
+            </div>
 
-          <div className="player-card-small"></div>
+            <div className="flex flex-row justify-center font-bold text-lg uppercase">
+              {player1}
+            </div>
+
+            <div
+              data-testid="red-win-count"
+              className="flex flex-row justify-center uppercase text-6xl font-bold"
+            >
+              {stateRef.current.redWins}
+            </div>
+          </div>
+
+          <div className="player-card-small flex flex-row justify-around items-center">
+            <div
+              data-testid="yellow-win-count"
+              className="flex flex-row justify-center uppercase text-6xl font-bold"
+            >
+              {stateRef.current.yellowWins}
+            </div>
+            <div className="flex flex-row justify-center font-bold text-lg uppercase">
+              {player2}
+            </div>
+
+            <div className="flex flex-row pb-1 justify-center -mr-12 h-14">
+              <img src={Player2} alt="Player One Smiley Face" />
+            </div>
+          </div>
         </div>
         <div className="game-board-container-container-container">
           {gameStarted && (
             <div className="player1-card player-card">
-              <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
+              <div className="flex flex-row pb-1 justify-center -mt-6 ">
                 <img src={Player1} alt="Player One Smiley Face" />
               </div>
 
@@ -636,7 +725,7 @@ export const App = ({
           </div>
           {gameStarted && (
             <div className="player2-card player-card">
-              <div className="player-container flex flex-row pb-1 justify-center -mt-6 ">
+              <div className="flex flex-row pb-1 justify-center -mt-6 ">
                 <img src={Player2} alt="Player Two Smiley Face" />
               </div>
 
