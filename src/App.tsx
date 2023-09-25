@@ -569,7 +569,7 @@ export const App = ({
 
   return (
     <>
-      <div className="flex flex-row justify-around pt-3 items-center">
+      <div className="nav-bar flex flex-row justify-around pt-3 items-center">
         <button onClick={openMainMenuModal}>Menu</button>
 
         <img src={GameLogo} alt=""></img>
@@ -657,70 +657,66 @@ export const App = ({
             </div>
           )}
 
-          <div className="game-board-container-container">
-            <div className="game-board-container">
-              {(myTurn || mode === "local") &&
-                winner == null &&
-                gameStarted && (
-                  <div className="dropzone flex flex-row w-full justify-between">
-                    <div
-                      className={`drop-column ${playerTurn}`}
-                      data-testid="drop-column-0"
-                      onClick={() => animateRow(0)}
-                    ></div>
+          <div className="game-board-container">
+            {(myTurn || mode === "local") && winner == null && gameStarted && (
+              <div className="dropzone flex flex-row w-full justify-between">
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-0"
+                  onClick={() => animateRow(0)}
+                ></div>
 
-                    <div
-                      className={`drop-column ${playerTurn}`}
-                      data-testid="drop-column-1"
-                      onClick={() => animateRow(1)}
-                    ></div>
-                    <div
-                      className={`drop-column ${playerTurn}`}
-                      data-testid="drop-column-2"
-                      onClick={() => animateRow(2)}
-                    ></div>
-                    <div
-                      className={`drop-column ${playerTurn}`}
-                      data-testid="drop-column-3"
-                      onClick={() => animateRow(3)}
-                    ></div>
-                    <div
-                      className={`drop-column ${playerTurn}`}
-                      data-testid="drop-column-4"
-                      onClick={() => animateRow(4)}
-                    ></div>
-                    <div
-                      className={`drop-column ${playerTurn}`}
-                      data-testid="drop-column-5"
-                      onClick={() => animateRow(5)}
-                    ></div>
-                    <div
-                      className={`drop-column ${playerTurn}`}
-                      data-testid="drop-column-6"
-                      onClick={() => animateRow(6)}
-                    ></div>
-                  </div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-1"
+                  onClick={() => animateRow(1)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-2"
+                  onClick={() => animateRow(2)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-3"
+                  onClick={() => animateRow(3)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-4"
+                  onClick={() => animateRow(4)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-5"
+                  onClick={() => animateRow(5)}
+                ></div>
+                <div
+                  className={`drop-column ${playerTurn}`}
+                  data-testid="drop-column-6"
+                  onClick={() => animateRow(6)}
+                ></div>
+              </div>
+            )}
+
+            {tokens}
+            {winningPieces}
+
+            {stateRef.current.animatedPiece != null && (
+              <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
+                {stateRef.current.animatedPieceColor === "yellow" ? (
+                  <img src={YellowPiece} alt="Yellow Token" />
+                ) : (
+                  <img src={OrangePiece} alt="Red Token" />
                 )}
-
-              {tokens}
-              {winningPieces}
-
-              {stateRef.current.animatedPiece != null && (
-                <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
-                  {stateRef.current.animatedPieceColor === "yellow" ? (
-                    <img src={YellowPiece} alt="Yellow Token" />
-                  ) : (
-                    <img src={OrangePiece} alt="Red Token" />
-                  )}
-                </div>
-              )}
-
-              <div className="white-board">
-                <img src={Board} alt="" />
               </div>
-              <div className="black-board">
-                <img src={BlackBoard} alt="" />
-              </div>
+            )}
+
+            <div className="white-board">
+              <img src={Board} alt="" />
+            </div>
+            <div className="black-board">
+              <img src={BlackBoard} alt="" />
             </div>
           </div>
           {gameStarted && (
