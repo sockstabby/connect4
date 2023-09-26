@@ -71,6 +71,10 @@ button.button--fancy[disabled] {
   display: none;
 }
 
+.nav-bar button {
+  width: 130px;
+}
+
 .centered {
   position: absolute;
   top: 50%;
@@ -146,7 +150,7 @@ button[disabled] {
   --accent-color: #fd6687;
 }
 
-.game-board-container-container-container {
+.game-board-items {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -185,21 +189,18 @@ button[disabled] {
   margin-left: -7vmin;
 }
 
+.nav-bar img {
+  height: 9vmin;
+}
+
 @media only screen and (max-width: 707px) {
   .game-board-container {
-    /* min-width: 62vmax;
-    min-height: calc(58.3vmax + 40px); */
-
     min-width: min(70vmin);
     min-height: calc(65.8vmin + 40px);
   }
 
   .player-card-small-container {
     margin-top: 13px;
-  }
-
-  .nav-bar img {
-    height: 9vmin;
   }
 
   .dropzone {
@@ -215,7 +216,7 @@ button[disabled] {
     min-width: 62vmax;
   }
 
-  .game-board-container-container-container {
+  .game-board-items {
     margin-top: 0px;
   }
 }
@@ -235,7 +236,7 @@ button[disabled] {
     min-width: 62vmax;
   }
 
-  .game-board-container-container-container {
+  .game-board-items {
     margin-top: 0px;
   }
 }
@@ -255,7 +256,7 @@ button[disabled] {
     margin-top: 40px;
   }
 
-  .game-board-container-container-container {
+  .game-board-items {
     margin-top: 0px;
   }
 }
@@ -276,7 +277,7 @@ button[disabled] {
     margin-bottom: 40px;
   }
 
-  .game-board-container-container-container {
+  .game-board-items {
     margin-top: 0px;
   }
 }
@@ -287,6 +288,28 @@ button[disabled] {
     margin-bottom: 10px;
   }
 }
+
+@media screen and (min-width: 810px) and (min-height: 1100px) {
+  .game-board-container {
+    min-width: min(82vmin);
+    min-height: calc(77vmin + 40px);
+  }
+  .player-card {
+    display: none;
+  }
+
+  .player-card-small-container {
+    display: flex;
+    min-width: min(62vmax, 92vw);
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  .game-board-items {
+    margin-top: 5px;
+  }
+}
+
 .white-board {
   position: absolute;
   top: 40px;
@@ -388,6 +411,10 @@ button[disabled] {
   width: 100%;
 }
 
+.drop-column {
+  border: 1px solid white;
+}
+
 .red:hover {
   background-image: url("assets/small-caret-red.svg");
   background-repeat: no-repeat;
@@ -448,8 +475,16 @@ button[disabled] {
   background-repeat: no-repeat;
   background-position: center center;
 
-  width: 199px;
-  height: 164px;
+  background-size: contain;
+
+  min-width: 199px;
+  min-height: 164px;
+
+  width: 30vmin;
+  height: 25vmin;
+
+  /* justify-content: space-between; */
+  padding-block: 5vmin;
 }
 
 /* .caret-container-container {

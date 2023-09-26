@@ -637,7 +637,7 @@ export const App = ({
             </div>
           </div>
         </div>
-        <div className="game-board-container-container-container">
+        <div className="game-board-items">
           {gameStarted && (
             <div className="player1-card player-card">
               <div className="flex flex-row pb-1 justify-center -mt-6 ">
