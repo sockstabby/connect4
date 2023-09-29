@@ -35,7 +35,7 @@ let g_socket;
 websocketServer.on("connection", (socket) => {
   g_socket = socket;
   socket.on("message", (message) => {
-    console.log("Received a message from the client", message);
+    console.log(Date.now(), "Received a message from the client", message);
 
     const payload = JSON.parse(message as any);
 
@@ -87,16 +87,16 @@ websocketServer.on("connection", (socket) => {
   };
 
   // after a short time out we will play our first move
-  setTimeout(async () => {
-    socket.send(JSON.stringify(payload3));
+  //setTimeout(async () => {
+  socket.send(JSON.stringify(payload3));
 
-    await wait(100);
+  //await wait(100);
 
-    const send = getMovePayload(myMovesCount, myMoves);
-    console.log("sending start game move");
-    socket.send(JSON.stringify(send));
-    myMovesCount++;
-  }, 100);
+  const send = getMovePayload(myMovesCount, myMoves);
+  console.log("sending start game move");
+  socket.send(JSON.stringify(send));
+  myMovesCount++;
+  //}, 100);
 });
 
 async function wait(milliseconds: number) {
@@ -125,9 +125,7 @@ describe("Connect4", () => {
       target: { value: MY_NAME },
     });
 
-    //await act(async () => {
     fireEvent.click(await screen.findByText(/join lobby/i));
-    //});
 
     await act(async () => {
       // this is needed to get rid of act warnings :-(
@@ -138,7 +136,6 @@ describe("Connect4", () => {
 
     await act(async () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
-      // await wait(5000);
     });
 
     await act(async () => {
@@ -153,27 +150,114 @@ describe("Connect4", () => {
 
     expect(winner.innerHTML).toEqual("red");
 
-    screen.debug();
-
-    return;
-
     myMovesCount = 0;
 
-    fireEvent.click(screen.getByText(/Play Again/i));
+    await act(async () => {
+      fireEvent.click(screen.getByText(/Play Again/i));
+    });
 
-    await wait(200);
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
+    ////////////////////////////////////////////////////////////
+    console.log("starting new game");
+
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
+
+    await act(async () => {
+      // this is needed to get rid of act warnings :-(
+      await wait(800);
+    });
+
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
+
+    await act(async () => {
+      // this is needed to get rid of act warnings :-(
+      await wait(800);
+    });
+
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
+
+    await act(async () => {
+      // this is needed to get rid of act warnings :-(
+      await wait(500);
+    });
+
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
 
     winner = await screen.findByTestId("winning-player");
 
     expect(winner.innerHTML).toEqual("yellow");
+
+    console.log("myMovesCount", myMovesCount);
+
+    // have to fix some timing bugs fron this point on.
+    return;
+
+    // screen.debug();
+
+    ////////////////////////////////////////////////////////////
+    console.log("starting new game");
+
+    await act(async () => {
+      // this is needed to get rid of act warnings :-(
+      await wait(1000);
+    });
+
+    fireEvent.click(screen.getByText(/Play Again/i));
+    myMovesCount = 0;
+
+    await act(async () => {
+      // this is needed to get rid of act warnings :-(
+      await wait(5000);
+    });
+
+    screen.debug();
+    return;
+
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
+
+    await act(async () => {
+      // this is needed to get rid of act warnings :-(
+      await wait(800);
+    });
+
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
+
+    await act(async () => {
+      // this is needed to get rid of act warnings :-(
+      await wait(800);
+    });
+
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
+
+    // await act(async () => {
+    //   fireEvent.click(await screen.findByTestId("drop-column-1"));
+    // });
+
+    await act(async () => {
+      // this is needed to get rid of act warnings :-(
+      await wait(800);
+    });
+
+    winner = await screen.findByTestId("winning-player");
+
+    expect(winner.innerHTML).toEqual("red");
+
+    console.log("myMovesCount", myMovesCount);
+
+    return;
 
     // play again, but this time since we lose because remote goes first
     myMovesCount = 0;
