@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  render,
-  screen,
-  fireEvent,
-  act,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import App from "../App";
 import { Server } from "mock-socket";
 
@@ -15,8 +9,11 @@ const REMOTE_PLAYER_NAME2 = "somebody who wants to play";
 const MY_NAME = "the best player ever";
 const websocketServer = new Server(TEST_WS_URL);
 
+// second game is weird because we dont we send a turn after a delay
+// to start a fresh game. We need the delay so the client has enough
+// time to press Play again.
+let secondGame = false;
 const myMoves = [0, 0, 0, 0];
-//const remoteMoves = [1, 1, 1, 1];
 
 const getMovePayload = (move: number, moves: number[]) => {
   const payload = {
@@ -41,22 +38,38 @@ websocketServer.on("connection", (socket) => {
 
     console.log("payload = ", payload);
 
-    //when client sends a play move it uses action
-    // but when we send it we must use message
-    if (payload.action === "playTurn") {
-      console.log(
-        Date.now(),
-        "server received a play turn payload = ",
-        payload
-      );
+    console.log("debug myMovesCount", myMovesCount);
 
-      // setTimeout(async () => {
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "server sending playTurn move");
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-      // await wait(500);
-      // }, 100);
+    if (myMovesCount === 3 && secondGame && payload.action === "playTurn") {
+      console.log("on second game so we send after a delay");
+
+      // second game is weird because we send a turn after a delay
+      // to start a fresh game. We need the delay so the client has enough
+      // time to press Play again.
+
+      setTimeout(() => {
+        secondGame = false;
+
+        console.log("sending the first turn of the game");
+
+        const send = getMovePayload(myMovesCount, myMoves);
+        console.log(Date.now(), "server sending playTurn move");
+        socket.send(JSON.stringify(send));
+        myMovesCount++;
+      }, 1000);
+    } else {
+      if (payload.action === "playTurn") {
+        console.log(
+          Date.now(),
+          "server received a play turn payload = ",
+          payload
+        );
+
+        const send = getMovePayload(myMovesCount, myMoves);
+        console.log(Date.now(), "server sending playTurn move");
+        socket.send(JSON.stringify(send));
+        myMovesCount++;
+      }
     }
   });
 
@@ -86,17 +99,11 @@ websocketServer.on("connection", (socket) => {
     },
   };
 
-  // after a short time out we will play our first move
-  //setTimeout(async () => {
   socket.send(JSON.stringify(payload3));
-
-  //await wait(100);
-
   const send = getMovePayload(myMovesCount, myMoves);
   console.log("sending start game move");
   socket.send(JSON.stringify(send));
   myMovesCount++;
-  //}, 100);
 });
 
 async function wait(milliseconds: number) {
@@ -150,14 +157,17 @@ describe("Connect4", () => {
 
     expect(winner.innerHTML).toEqual("red");
 
+    ////////////////////////////////////////////////////////////
+
     myMovesCount = 0;
 
     await act(async () => {
       fireEvent.click(screen.getByText(/Play Again/i));
     });
 
-    ////////////////////////////////////////////////////////////
     console.log("starting new game");
+
+    secondGame = true;
 
     await act(async () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
@@ -196,37 +206,24 @@ describe("Connect4", () => {
 
     console.log("myMovesCount", myMovesCount);
 
-    // have to fix some timing bugs fron this point on.
-    return;
-
     // screen.debug();
 
-    ////////////////////////////////////////////////////////////
-    console.log("starting new game");
-
-    await act(async () => {
-      // this is needed to get rid of act warnings :-(
-      await wait(1000);
-    });
+    let redWinCount = await screen.getByTestId("red-win-count");
+    let yellowWinCount = await screen.getByTestId("yellow-win-count");
+    expect(redWinCount.innerHTML).toEqual("1");
+    expect(yellowWinCount.innerHTML).toEqual("1");
 
     fireEvent.click(screen.getByText(/Play Again/i));
-    myMovesCount = 0;
 
     await act(async () => {
       // this is needed to get rid of act warnings :-(
       await wait(5000);
     });
 
-    screen.debug();
-    return;
+    myMovesCount = 0;
 
     await act(async () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
-    });
-
-    await act(async () => {
-      // this is needed to get rid of act warnings :-(
-      await wait(800);
     });
 
     await act(async () => {
@@ -234,22 +231,10 @@ describe("Connect4", () => {
     });
 
     await act(async () => {
-      // this is needed to get rid of act warnings :-(
-      await wait(800);
-    });
-
-    await act(async () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
     });
 
-    // await act(async () => {
-    //   fireEvent.click(await screen.findByTestId("drop-column-1"));
-    // });
-
-    await act(async () => {
-      // this is needed to get rid of act warnings :-(
-      await wait(800);
-    });
+    await wait(1000);
 
     winner = await screen.findByTestId("winning-player");
 
@@ -257,31 +242,14 @@ describe("Connect4", () => {
 
     console.log("myMovesCount", myMovesCount);
 
-    return;
+    // screen.debug();
 
-    // play again, but this time since we lose because remote goes first
-    myMovesCount = 0;
-    fireEvent.click(screen.getByText(/Play Again/i));
-
-    await wait(200);
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
-
-    winner = await screen.findByTestId("winning-player");
-
-    expect(winner.innerHTML).toEqual("red");
-
-    let redWinCount = await screen.getByTestId("red-win-count");
-    let yellowWinCount = await screen.getByTestId("yellow-win-count");
+    redWinCount = await screen.getByTestId("red-win-count");
+    yellowWinCount = await screen.getByTestId("yellow-win-count");
     expect(redWinCount.innerHTML).toEqual("2");
     expect(yellowWinCount.innerHTML).toEqual("1");
 
-    //finally we test the scenario where remote quits after losing
-
+    //finally we test the scenario where remote quits after it won
     g_socket!.send(
       JSON.stringify({
         message: "playTurn",
