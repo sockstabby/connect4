@@ -10,12 +10,10 @@ import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
 import { testForWin, Locations } from "./utils";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import StartGameModal, { GameMode } from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
-
-ReactModal.setAppElement("body");
 
 type Column = string[];
 
@@ -86,7 +84,7 @@ export const App = ({
 
   const [opponent, setOpponent] = useState("");
 
-  const [gameStarted, setGameStarted] = useState(true);
+  const [gameStarted, setGameStarted] = useState(false);
 
   const [player1, setPlayer1] = useState("Player 1");
   const [player2, setPlayer2] = useState("Player 2");
@@ -99,6 +97,10 @@ export const App = ({
   const [forceRender, setForceRender] = useState(false);
 
   useEffect(() => {
+    ReactModal.setAppElement("body");
+  });
+
+  useEffect(() => {
     const decSeconds = () => {
       setTimerSeconds((t) => {
         const ret = t != null ? t! - 1 : null;
@@ -107,7 +109,7 @@ export const App = ({
     };
 
     if (timerRef.current == null && stateRef.current.plays > 1) {
-      // timerRef.current = setInterval(decSeconds, 1000  );
+      timerRef.current = setInterval(decSeconds, 1000);
     }
   }, [lastDroppedColumn]);
 
@@ -127,8 +129,35 @@ export const App = ({
     }
   }, [timerSeconds]);
 
+  const terminateGame = useCallback(
+    (notifyRemote = true) => {
+      console.log("terminating game");
+      setWinner(null);
+      setGameStarted(false);
+
+      if (websocket != null) {
+        // tell the other player that we quit
+
+        if (notifyRemote) {
+          const payload = {
+            service: "chat",
+            action: "playTurn",
+            data: {
+              turn: -1,
+              opponent,
+            },
+          };
+          websocket!.send(JSON.stringify(payload));
+        }
+
+        websocket.close();
+      }
+    },
+    [websocket, opponent]
+  );
+
   useEffect(() => {
-    function closeHandler(_event: any) {
+    function closeHandler() {
       console.error("The Websocket is closed.");
       // we need to tell the user what to do when this happens
 
@@ -138,13 +167,14 @@ export const App = ({
     function messageHandler(event: MessageEvent<any>) {
       const payload = JSON.parse(event.data);
 
-      console.log("event=", payload);
-
       if (payload.message === "playTurn") {
         if (payload.data.turn === -1) {
           setRemoteDisconnected(true);
           terminateGame(false);
         } else {
+          const x = document.getElementById("drop-sound") as HTMLAudioElement;
+          x?.play();
+
           animateRow(payload.data.turn.col, true);
         }
       }
@@ -167,6 +197,12 @@ export const App = ({
 
   useEffect(() => {
     if (stateRef.current.animatedPiece !== null) {
+      const x = document.getElementById("drop-sound") as HTMLAudioElement;
+
+      if (x != null) {
+        x?.play();
+      }
+
       const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
       colState[stateRef.current.animatedPiece].push(
         stateRef.current.animatedPieceColor
@@ -252,7 +288,10 @@ export const App = ({
     websocket!.send(JSON.stringify(payload));
   };
 
-  const animateRow = (col: number, remote: boolean = false) => {
+  function animateRow(col: number, remote: boolean = false) {
+    if (stateRef.current.colState[col].length === 6) {
+      return;
+    }
     //creates the animation of the piece
     let player;
     if (mode === "online") {
@@ -297,7 +336,7 @@ export const App = ({
       setWinnerHelper(player);
       setWinner({ player, pieces: winningSet });
     }
-  };
+  }
 
   const startGame = (
     initiator: boolean,
@@ -363,74 +402,120 @@ export const App = ({
   };
 
   const getTokenStyle = (col: number, row: number) => {
-    console.log("innerHeight", window.innerHeight);
-    console.log("innerWidth", window.innerWidth);
+    const breakPoints = [
+      {
+        upper: 440,
+        lower: -Infinity,
+        top_positions: [
+          "calc(40px + 69vmin)",
+          "calc(40px + 55.7vmin)",
+          "calc(40px + 42.5vmin)",
+          "calc(40px + 29.3vmin)",
+          "calc(40px + 16.3vmin)",
+          "calc(40px + 2.7vmin)",
+        ],
+        left_positions: [
+          "calc(3.04vmin)",
+          "calc(16.23vmin)",
+          "calc(29.5vmin)",
+          "calc(42.75vmin)",
+          "calc(56vmin)",
+          "calc(69.2vmin)",
+          "calc(82.5vmin)",
+        ],
+      },
+      {
+        upper: 526,
+        lower: 440,
+        top_positions: [
+          "calc(40px + 65.3vmin)",
+          "calc(40px + 52.9vmin)",
+          "calc(40px + 40.5vmin)",
+          "calc(40px + 27.9vmin)",
+          "calc(40px + 15.3vmin)",
+          "calc(40px + 2.57vmin)",
+        ],
+        left_positions: [
+          "calc(2.9vmin)",
+          "calc(15.4vmin)",
+          "calc(27.95vmin)",
+          "calc(40.5vmin)",
+          "calc(53.08vmin)",
+          "calc(65.6vmin)",
+          "calc(78.1vmin)",
+        ],
+      },
+      {
+        upper: 640,
+        lower: 526,
+        top_positions: [
+          "calc(40px + 58.0vmin)",
+          "calc(40px + 46.9vmin)",
+          "calc(40px + 35.7vmin)",
+          "calc(40px + 24.7vmin)",
+          "calc(40px + 13.6vmin)",
+          "calc(40px + 2.4vmin)",
+        ],
+        left_positions: [
+          "calc(2.55vmin)",
+          "calc(13.7vmin)",
+          "calc(24.85vmin)",
+          "calc(36vmin)",
+          "calc(47.15vmin)",
+          "calc(58.3vmin)",
+          "calc(69.4vmin)",
+        ],
+      },
+      {
+        upper: 707,
+        lower: 640,
+        top_positions: [
+          "calc(40px + 50.95vmin)",
+          "calc(40px + 41.2vmin)",
+          "calc(40px + 31.5vmin)",
+          "calc(40px + 21.7vmin)",
+          "calc(40px + 11.86vmin)",
+          "calc(40px + 2.3vmin)",
+        ],
+        left_positions: [
+          "calc(2.23vmin)",
+          "calc(12vmin)",
+          "calc(21.75vmin)",
+          "calc(31.5vmin)",
+          "calc(41.25vmin)",
+          "calc(51vmin)",
+          "calc(60.75vmin)",
+        ],
+      },
+      {
+        upper: +Infinity,
+        lower: 707,
+        top_positions: [
+          "calc(40px + 44.99vmin)",
+          "calc(40px + 36.27vmin)",
+          "calc(40px + 27.65vmin)",
+          "calc(40px + 18.99vmin)",
+          "calc(40px + 10.38vmin)",
+          "calc(40px + 1.75vmin)",
+        ],
+        left_positions: [
+          "calc(2.02vmin)",
+          "calc(10.65vmin)",
+          "calc(19.28vmin)",
+          "calc(27.90vmin)",
+          "calc(36.52vmin)",
+          "calc(45.15vmin)",
+          "calc(53.78vmin)",
+        ],
+      },
+    ];
 
-    let topPos;
-    if (window.innerWidth <= 440) {
-      topPos = `calc(40px + 2.7vmin)`;
-    } else {
-      topPos = `calc(40px + 1.7vmin)`;
-    }
+    const breakPoint = breakPoints.find(
+      (i) => window.innerWidth <= i.upper && window.innerWidth > i.lower
+    );
 
-    // console.log(`col = ${col}`);
-    // console.log(`row = ${row}`);
-
-    // console.log("left fraction=", Math.floor((col / 7) * 100));
-    // console.log("top fraction=", Math.floor((row / 6) * 100));
-
-    let addr;
-    if (col > 3) {
-      addr = 1;
-    } else {
-      addr = 0;
-    }
-
-    const leftPos = Math.floor((col / 7) * 100 + 3 - addr);
-    // console.log("leftPos", leftPos);
-
-    // const topPos = Math.floor(((row + 1) / 6) * 100 + 13);
-
-    // let topPos;
-    // if (row === 0) {
-    //   topPos = 0;
-    // } else {
-    //   console.log("WTF");
-    //   console.log("top fraction=", Math.floor(row / 6));
-
-    //   topPos = Math.floor((row / 6) * 100);
-    // }
-
-    // const topPos = Math.floor(((row + 1) / 6) * 100 + 13);
-
-    // 0 , 1/6, 2/6, 3/6
-
-    // 2/10 = .2
-
-    // 0 100
-
-    // 10 90
-
-    // 80 20
-
-    // 70 30
-
-    //top of 0 is really 40 which is
-
-    // height = 470
-    // with dropzone we add 40px ( which dont need to be scaled to the height )
-    // the dropzone will take 8.5106 pct of the entire height.
-
-    // console.log("topPos", topPos);
-
-    //we know width is 92vw when we start having problems
-    //we should be able to compute a height knowing that
-
-    //we have a 79 to 73 width to height aspect ratio
-
-    // what is 92% of 79 =  72.68
-
-    // const wVal = `calc(0px + 90.7vmin)`;
+    const topPos = breakPoint!.top_positions[row];
+    const leftPos = breakPoint!.left_positions[col];
 
     const ret: React.CSSProperties = {
       position: "absolute",
@@ -438,28 +523,8 @@ export const App = ({
       width: "10%",
       maxWidth: "10%",
       height: "10%",
-
-      // width: wVal,
-      // maxWidth: wVal,
-      // height: wVal,
-
-      left: `${leftPos}%`,
-
-      // each time we go up 8.7% of vmax
-      //row 6 =
-      //doesnt work for large screens
-      // top: `calc(40px + 1.0vmax)`,
-
-      // this works for large screens
+      left: leftPos,
       top: topPos,
-
-      //row 5
-
-      //top: `calc(40px + 10.5vmax)`,
-
-      //when we reach shrinking height we base off of vw
-      // this works for narrow screens
-      //top: `calc(40px + 15.5vw)`,
     };
 
     if (row === 6) {
@@ -470,6 +535,7 @@ export const App = ({
         animationDuration: "0.1s",
         animationName: animationName,
         animationFillMode: "forwards",
+        // animationTimingFunction: "cubic-bezier(0.175, 0.885, 0.32, 1.275);",
         zIndex: -2,
       };
 
@@ -501,29 +567,29 @@ export const App = ({
     return [myTurn, playerTurn];
   };
 
-  const terminateGame = (notifyRemote = true) => {
-    console.log("terminating game");
-    setWinner(null);
-    setGameStarted(false);
+  // function terminateGameWrapped(notifyRemote = true) {
+  //   console.log("terminating game");
+  //   setWinner(null);
+  //   setGameStarted(false);
 
-    if (websocket != null) {
-      // tell the other player that we quit
+  //   if (websocket != null) {
+  //     // tell the other player that we quit
 
-      if (notifyRemote) {
-        const payload = {
-          service: "chat",
-          action: "playTurn",
-          data: {
-            turn: -1,
-            opponent,
-          },
-        };
-        websocket!.send(JSON.stringify(payload));
-      }
+  //     if (notifyRemote) {
+  //       const payload = {
+  //         service: "chat",
+  //         action: "playTurn",
+  //         data: {
+  //           turn: -1,
+  //           opponent,
+  //         },
+  //       };
+  //       websocket!.send(JSON.stringify(payload));
+  //     }
 
-      websocket.close();
-    }
-  };
+  //     websocket.close();
+  //   }
+  // }
 
   const tokens: any = [];
   const colState = winner != null ? winnerGameState : stateRef.current.colState;
@@ -566,6 +632,11 @@ export const App = ({
   const [myTurn, playerTurn] = getCurrentTurn();
 
   console.log("myTurn", myTurn);
+  console.log("mode", mode);
+  console.log("plays", stateRef.current.plays);
+  console.log(stateRef.current.colState);
+  console.log("modal open = ", stateRef.current.mainMenuOpen);
+  console.log("forceRender", forceRender);
 
   return (
     <>
@@ -591,6 +662,7 @@ export const App = ({
         <StartGameModal
           websocketUrl={websocketUrl}
           onStartGame={startGame}
+          setSocket={setWebsocket}
           onClose={() => {
             stateRef.current = {
               ...stateRef.current,
@@ -614,7 +686,7 @@ export const App = ({
             </div>
 
             <div
-              data-testid="red-win-count"
+              data-testid="red-win-count-small"
               className="win-count flex flex-row justify-center uppercase font-bold"
             >
               {stateRef.current.redWins}
@@ -623,7 +695,7 @@ export const App = ({
 
           <div className="player-card-small flex flex-row justify-around items-center">
             <div
-              data-testid="yellow-win-count"
+              data-testid="yellow-win-count-small"
               className="win-count flex flex-row justify-center uppercase font-bold"
             >
               {stateRef.current.yellowWins}
@@ -739,7 +811,7 @@ export const App = ({
           )}
         </div>
         {winner == null && gameStarted && (
-          <div className="caret-container-container flex justify-center">
+          <div className="flex justify-center -mt-8">
             <div
               className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
             >

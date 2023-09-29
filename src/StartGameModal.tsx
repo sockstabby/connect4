@@ -19,12 +19,14 @@ type StartGameModalProps = {
   ) => void;
   onClose: () => void;
   websocketUrl: string;
+  setSocket: any;
 };
 
 const StartGameModal = ({
   onStartGame,
   onClose,
   websocketUrl,
+  setSocket,
 }: StartGameModalProps) => {
   const [name, setName] = useState("");
   const [participants, setParticipants] = useState<Player[]>([]);
@@ -158,7 +160,9 @@ const StartGameModal = ({
 
   const joinLobby = () => {
     if (websocket === null) {
-      setWebsocket(new WebSocket(websocketUrl));
+      const ws = new WebSocket(websocketUrl);
+      setSocket(ws);
+      setWebsocket(ws);
     }
   };
 
@@ -208,7 +212,7 @@ const StartGameModal = ({
         <div className="flex flex-row gap-7 pb-4 text-4xl font-extrabold items-center">
           <label
             htmlFor="switch"
-            className={mode === "online" ? "" : "line-through"}
+            className={mode === "online" ? "line-through" : ""}
           >
             Local
           </label>
@@ -225,7 +229,7 @@ const StartGameModal = ({
 
           <label
             htmlFor="switch"
-            className={mode === "online" ? "line-through" : ""}
+            className={mode === "local" ? "line-through" : ""}
           >
             Online
           </label>
@@ -233,41 +237,41 @@ const StartGameModal = ({
 
         {mode !== "online" && (
           <>
-            <div className="flex flex-col items-center">
-              <label htmlFor="player1Name"> Player One Name:</label>
-              <input
-                onChange={player1NameChanged}
-                type="text"
-                value={player1}
-                id="player1Name"
-              />
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center">
+                <label htmlFor="player1Name"> Player One Name:</label>
+                <input
+                  onChange={player1NameChanged}
+                  type="text"
+                  value={player1}
+                  id="player1Name"
+                />
+              </div>
+
+              <div className="flex flex-col items-center pb-3">
+                <label htmlFor="player2Name"> Player Two Name:</label>
+                <input
+                  onChange={player2NameChanged}
+                  type="text"
+                  value={player2}
+                  id="player2Name"
+                />
+              </div>
             </div>
 
-            <div className="flex flex-col items-center pb-6">
-              <label htmlFor="player2Name"> Player Two Name:</label>
-              <input
-                onChange={player2NameChanged}
-                type="text"
-                value={player2}
-                id="player2Name"
-              />
-            </div>
-
-            <div className="button-holder">
+            <div className="flex flex-col items-center gap-8">
               <button
                 className="button--fancy uppercase font-bold"
                 onClick={startLocalGame}
               >
                 Start Game
               </button>
-            </div>
 
-            <div className="button-holder">
               <button className="button--fancy uppercase">Game Rules</button>
-            </div>
 
-            <div className="pad-top-100">
-              <button onClick={(_e) => onClose()}>Cancel</button>
+              <div className="pad-top-100">
+                <button onClick={(_e) => onClose()}>Cancel</button>
+              </div>
             </div>
           </>
         )}
@@ -287,7 +291,7 @@ const StartGameModal = ({
               />
             </div>
 
-            <div className="button-holder">
+            <div className="pb-3">
               <button
                 disabled={name === ""}
                 className="button--fancy uppercase"
@@ -320,7 +324,9 @@ const StartGameModal = ({
             </div>
 
             <div className="flex flex-col w-full items-center">
-              <label htmlFor="invitesReceived">Invitations Received:</label>
+              <label htmlFor="invitesReceived">
+                {`${invitesToPlay.length} Invitations Received:`}
+              </label>
 
               <select
                 className="w-full widthHeight style max-h-24"
