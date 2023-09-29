@@ -44,14 +44,19 @@ websocketServer.on("connection", (socket) => {
     //when client sends a play move it uses action
     // but when we send it we must use message
     if (payload.action === "playTurn") {
-      console.log("payload = ", payload);
+      console.log(
+        Date.now(),
+        "server received a play turn payload = ",
+        payload
+      );
 
-      setTimeout(async () => {
-        const send = getMovePayload(myMovesCount, myMoves);
-        socket.send(JSON.stringify(send));
-        myMovesCount++;
-        await wait(100);
-      }, 100);
+      // setTimeout(async () => {
+      const send = getMovePayload(myMovesCount, myMoves);
+      console.log(Date.now(), "server sending playTurn move");
+      socket.send(JSON.stringify(send));
+      myMovesCount++;
+      // await wait(500);
+      // }, 100);
     }
   });
 
@@ -85,9 +90,10 @@ websocketServer.on("connection", (socket) => {
   setTimeout(async () => {
     socket.send(JSON.stringify(payload3));
 
-    await wait(200);
+    await wait(100);
 
     const send = getMovePayload(myMovesCount, myMoves);
+    console.log("sending start game move");
     socket.send(JSON.stringify(send));
     myMovesCount++;
   }, 100);
@@ -119,64 +125,37 @@ describe("Connect4", () => {
       target: { value: MY_NAME },
     });
 
-    await act(async () => {
-      fireEvent.click(await screen.findByText(/join lobby/i));
-    });
+    //await act(async () => {
+    fireEvent.click(await screen.findByText(/join lobby/i));
+    //});
 
     await act(async () => {
       // this is needed to get rid of act warnings :-(
-      await wait(400);
+      await wait(1000);
     });
 
-    //await waitFor(() => {
-    // expect(screen.getByText(REMOTE_PLAYER_NAME)).toBeInTheDocument();
-    //expect(screen.getByText("A timer will start")).toBeInTheDocument();
-    //});
+    await screen.findByText(/note: a timer/i);
 
-    // await waitFor(() => {
-    //   expect(screen.getByText(REMOTE_PLAYER_NAME2)).toBeInTheDocument();
-    // });
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+      // await wait(5000);
+    });
 
-    //let rwc = screen.getByTestId("red-win-count").innerHTML;
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
 
-    //this works
-    await screen.findByText(/note/i);
-
-    // screen.debug();
-
-    // await screen.findByText(REMOTE_PLAYER_NAME);
-    // await screen.findByText(REMOTE_PLAYER_NAME2);
-
-    //await wait(400);
-
-    // await screen.findByText(REMOTE_PLAYER_NAME);
-    // await screen.findByText(REMOTE_PLAYER_NAME2);
-
-    // await act(async () => {
-    //   fireEvent.click(await screen.findByTestId("drop-column-1"));
-    //   await wait(1000);
-    // });
-
-    //await screen.findByText(REMOTE_PLAYER_NAME);
-
-    await wait(400);
-
-    return;
-
-    // fireEvent.click(await screen.findByTestId("drop-column-1"));
-    // await wait(200);
-
-    return;
-
-    return;
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
-    fireEvent.click(await screen.findByTestId("drop-column-1"));
-    await wait(200);
+    await act(async () => {
+      fireEvent.click(await screen.findByTestId("drop-column-1"));
+    });
 
     let winner = await screen.findByTestId("winning-player");
 
     expect(winner.innerHTML).toEqual("red");
+
+    screen.debug();
+
+    return;
 
     myMovesCount = 0;
 
@@ -236,7 +215,7 @@ describe("Connect4", () => {
 
     // we should also test the scenario where we quit after a game
     screen.debug();
-  });
+  }, 10000);
 
   it("connect4 local gameplay", () => {
     // render(<App />);
