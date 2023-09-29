@@ -89,6 +89,8 @@ export const App = ({
   const [player1, setPlayer1] = useState("Player 1");
   const [player2, setPlayer2] = useState("Player 2");
 
+  const [draw, setDraw] = useState(false);
+
   const [timerSeconds, setTimerSeconds] = useState<number | null>(null);
 
   // this is a hack. if we ever need to set a reference and trigger a rerender we can
@@ -309,6 +311,10 @@ export const App = ({
       plays: stateRef.current.plays + 1,
     };
 
+    if (stateRef.current.plays === 42) {
+      setDraw(true);
+    }
+
     const [win, winningSet] = testForWin(
       col,
       stateRef.current.colState[col].length,
@@ -377,17 +383,22 @@ export const App = ({
   };
 
   const playAgain = () => {
+    console.log("play again");
     stateRef.current = {
       ...stateRef.current,
       ...{
         initiator: !stateRef.current.initiator,
+        plays: 0,
+        colState: [[], [], [], [], [], [], []],
         mainMenuOpen: false,
         initiatorColor:
           stateRef.current.initiatorColor === "red" ? "yellow" : "red",
       },
     };
 
+    setDraw(false);
     setWinner(null);
+    toggleRender();
   };
 
   const restartGame = () => {
@@ -631,12 +642,12 @@ export const App = ({
 
   const [myTurn, playerTurn] = getCurrentTurn();
 
-  console.log("myTurn", myTurn);
-  console.log("mode", mode);
+  // console.log("myTurn", myTurn);
+  // console.log("mode", mode);
   console.log("plays", stateRef.current.plays);
-  console.log(stateRef.current.colState);
-  console.log("modal open = ", stateRef.current.mainMenuOpen);
-  console.log("forceRender", forceRender);
+  // console.log(stateRef.current.colState);
+  // console.log("modal open = ", stateRef.current.mainMenuOpen);
+  // console.log("forceRender", forceRender);
 
   return (
     <>
@@ -864,7 +875,7 @@ export const App = ({
 
       <ReactModal
         className="modal winner-card"
-        isOpen={winner != null && !remoteDisconnected}
+        isOpen={(winner != null || draw) && !remoteDisconnected}
         shouldCloseOnOverlayClick={false}
         overlayClassName="disabled-background"
       >
@@ -877,7 +888,7 @@ export const App = ({
           </div>
 
           <div className="uppercase text-center text-5xl font-bold pt-1 text-black">
-            WINS
+            {`${draw && "Nobody"} WINS`}
           </div>
           <div className="flex flex-row justify-center gap-5 pt-6">
             <button onClick={() => terminateGame()} className="uppercase">
