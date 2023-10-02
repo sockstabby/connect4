@@ -35,10 +35,21 @@ type GameState = {
   animatedPieceColor: string | null;
   // this nees to be here because of useKeyBoard hook.
   mainMenuOpen: boolean;
+  mode: GameMode;
+  draw: boolean;
+  player1: string;
+  player2: string;
+  gameStarted: boolean;
+  opponent: string;
+  remoteDisconnected: boolean;
+  timerRef: NodeJS.Timer | undefined;
+  timerSeconds: number | null;
+  forceRender: boolean;
 };
 
-// This is intended to store refs where ordinary state wont suffice due to
-// closures within useEffect.
+// For this app we store state in a ref. This drastically simplifies our useEffect hooks
+// as they dont need to care so much about dependencies. Just note that you are responsible
+// for rendering and can trigger a render with toggleRender function.
 const initialGameState: GameState = {
   colState: [[], [], [], [], [], [], []],
   yellowWins: 0,
@@ -50,6 +61,16 @@ const initialGameState: GameState = {
   animatedPieceColor: null,
   // this nees to be here because of useKeyBoard hook. For toggling the pause modal
   mainMenuOpen: false,
+  mode: "local",
+  draw: false,
+  player1: "Player 1",
+  player2: "Player 2",
+  gameStarted: false,
+  opponent: "",
+  remoteDisconnected: false,
+  timerRef: undefined,
+  timerSeconds: null,
+  forceRender: false,
 };
 
 type Connect4Props = {
@@ -57,16 +78,13 @@ type Connect4Props = {
   websocketUrl?: string;
 };
 export const App = ({
-  gameTimerConfig = 40,
+  gameTimerConfig = 5,
   websocketUrl = "wss://connect4.isomarkets.com",
 }: Connect4Props) => {
-  // stateRef is intended to store refs where ordinary state wont suffice due to
-  // closures within useEffect.
+  // stateRef is intended to store refs in one single ref.
+
   const stateRef = useRef(initialGameState);
   const [websocket, setWebsocket] = useState<WebSocket | null>(null);
-  const [mode, setMode] = useState("local");
-
-  const timerRef = useRef<NodeJS.Timer | undefined>();
 
   // THE ONLY REASON WE NEED THIS IS BECAUSE WE HAVE A USEEFFECT DEPENDENCY THAT
   // TAKES CARE OF CLEANING UP THE ANIMATED PIECE. OTHERWISE A PLAIN OLD REF WOULD DO.
@@ -76,50 +94,73 @@ export const App = ({
 
   const [winner, setWinner] = useState<Winner | null>(null);
 
-  const [remoteDisconnected, setRemoteDisconnected] = useState(false);
-
   // we store the state of the board here so that players can reflect on the game until
   // they decide to play again.
   const [winnerGameState, setWinnerGameState] = useState<ColState | null>(null);
 
-  const [opponent, setOpponent] = useState("");
-
-  const [gameStarted, setGameStarted] = useState(false);
-
-  const [player1, setPlayer1] = useState("Player 1");
-  const [player2, setPlayer2] = useState("Player 2");
-
-  const [draw, setDraw] = useState(false);
-
-  const [timerSeconds, setTimerSeconds] = useState<number | null>(null);
-
   // this is a hack. if we ever need to set a reference and trigger a rerender we can
-  // call this function. This is only used for Toggling the main menu's visibility state.
-  // for our useKeyboard hook.
+  // call this function.
   const [forceRender, setForceRender] = useState(false);
 
   useEffect(() => {
     ReactModal.setAppElement("body");
-  });
+  }, []);
+
+  const toggleRender = useCallback(() => {
+    stateRef.current.forceRender = !stateRef.current.forceRender;
+    setForceRender(stateRef.current.forceRender);
+  }, []);
 
   useEffect(() => {
     const decSeconds = () => {
-      setTimerSeconds((t) => {
-        const ret = t != null ? t! - 1 : null;
-        return ret;
-      });
+      if (
+        stateRef.current.timerSeconds != null &&
+        stateRef.current.timerSeconds != -1
+      ) {
+        console.log("decseconds", stateRef.current.timerSeconds);
+        --stateRef.current.timerSeconds;
+        toggleRender();
+      }
     };
 
-    if (timerRef.current == null && stateRef.current.plays > 1) {
-      timerRef.current = setInterval(decSeconds, 1000);
+    if (stateRef.current.timerRef == null && stateRef.current.plays > 1) {
+      stateRef.current.timerRef = setInterval(decSeconds, 1000);
     }
-  }, [lastDroppedColumn]);
+  }, [toggleRender]);
+
+  const getCurrentTurn = useCallback(() => {
+    const getCurrentTurnWrapped: () => [boolean, string] = function (): [
+      boolean,
+      string
+    ] {
+      let myTurn = false;
+
+      if (stateRef.current.initiator) {
+        myTurn = stateRef.current.plays % 2 === 0;
+      } else {
+        myTurn = stateRef.current.plays % 2 !== 0;
+      }
+
+      let playerTurn;
+
+      if (myTurn) {
+        playerTurn = getLocalColor();
+      } else {
+        playerTurn = getRemoteColor();
+      }
+      return [myTurn, playerTurn];
+    };
+
+    return getCurrentTurnWrapped();
+  }, []);
 
   useEffect(() => {
-    if (timerSeconds === 0) {
-      clearInterval(timerRef.current);
-      timerRef.current = undefined;
+    if (stateRef.current.timerSeconds === 0) {
+      console.log("setting winner");
+      clearInterval(stateRef.current.timerRef);
+      stateRef.current.timerRef = undefined;
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [_myTurn, playerTurn] = getCurrentTurn();
 
       setWinnerHelper(playerTurn === "yellow" ? "red" : "yellow");
@@ -129,13 +170,14 @@ export const App = ({
         pieces: [],
       });
     }
-  }, [timerSeconds]);
+  }, [stateRef.current.timerSeconds, getCurrentTurn]);
 
   const terminateGame = useCallback(
     (notifyRemote = true) => {
       console.log("terminating game");
       setWinner(null);
-      setGameStarted(false);
+      stateRef.current.gameStarted = false;
+      toggleRender();
 
       if (websocket != null) {
         // tell the other player that we quit
@@ -146,7 +188,7 @@ export const App = ({
             action: "playTurn",
             data: {
               turn: -1,
-              opponent,
+              opponent: stateRef.current.opponent,
             },
           };
           websocket!.send(JSON.stringify(payload));
@@ -155,7 +197,84 @@ export const App = ({
         websocket.close();
       }
     },
-    [websocket, opponent]
+    [toggleRender, websocket]
+  );
+
+  const sendMove = useCallback(
+    (col: number) => {
+      const payload = {
+        service: "chat",
+        action: "playTurn",
+        data: {
+          turn: { col },
+          opponent: stateRef.current.opponent,
+        },
+      };
+
+      websocket!.send(JSON.stringify(payload));
+    },
+    [websocket]
+  );
+
+  const animateRow = useCallback(
+    (col: number, remote: boolean = false) => {
+      function animateRowWrapped(col: number, remote: boolean = false) {
+        if (stateRef.current.colState[col].length === 6) {
+          return;
+        }
+        //creates the animation of the piece
+        let player;
+        if (stateRef.current.mode === "online") {
+          player = remote === true ? getRemoteColor() : getLocalColor();
+        } else {
+          if (stateRef.current.initiatorColor === "yellow") {
+            player = stateRef.current.plays % 2 === 0 ? "yellow" : "red";
+          } else {
+            player = stateRef.current.plays % 2 === 0 ? "red" : "yellow";
+          }
+        }
+
+        stateRef.current = {
+          ...stateRef.current,
+          plays: stateRef.current.plays + 1,
+        };
+
+        if (stateRef.current.plays === 42) {
+          stateRef.current.draw = true;
+        }
+
+        const [win, winningSet] = testForWin(
+          col,
+          stateRef.current.colState[col].length,
+          player,
+          stateRef.current.colState
+        );
+
+        if (!win) {
+          stateRef.current = {
+            ...stateRef.current,
+            timerSeconds: gameTimerConfig,
+            ...{ animatedPiece: col, animatedPieceColor: player },
+          };
+
+          setLastDroppedColumn(col);
+        }
+
+        if (!remote) {
+          if (stateRef.current.mode === "online") {
+            sendMove(col);
+          }
+        }
+
+        if (win) {
+          setWinnerHelper(player);
+          setWinner({ player, pieces: winningSet });
+        }
+      }
+
+      return animateRowWrapped(col, remote);
+    },
+    [sendMove, gameTimerConfig]
   );
 
   useEffect(() => {
@@ -171,7 +290,7 @@ export const App = ({
 
       if (payload.message === "playTurn") {
         if (payload.data.turn === -1) {
-          setRemoteDisconnected(true);
+          stateRef.current.remoteDisconnected = true;
           terminateGame(false);
         } else {
           const x = document.getElementById("drop-sound") as HTMLAudioElement;
@@ -193,7 +312,7 @@ export const App = ({
         websocket!.removeEventListener("message", closeHandler);
       }
     };
-  }, [websocket]);
+  }, [websocket, terminateGame, animateRow]);
 
   useScreenSize();
 
@@ -221,10 +340,6 @@ export const App = ({
       }, 100);
     }
   }, [lastDroppedColumn]);
-
-  const toggleRender = () => {
-    setForceRender(!forceRender);
-  };
 
   const openMainMenuModal = () => {
     stateRef.current = { ...stateRef.current, ...{ mainMenuOpen: true } };
@@ -254,8 +369,8 @@ export const App = ({
       ...{ colState: [[], [], [], [], [], [], []], plays: 0 },
     };
 
-    clearInterval(timerRef.current);
-    timerRef.current = undefined;
+    clearInterval(stateRef.current.timerRef);
+    stateRef.current.timerRef = undefined;
 
     setWinnerGameState(colState);
   }
@@ -277,73 +392,6 @@ export const App = ({
     return stateRef.current.initiatorColor === "red" ? "yellow" : "red";
   };
 
-  const sendMove = (col: number) => {
-    const payload = {
-      service: "chat",
-      action: "playTurn",
-      data: {
-        turn: { col },
-        opponent,
-      },
-    };
-
-    websocket!.send(JSON.stringify(payload));
-  };
-
-  function animateRow(col: number, remote: boolean = false) {
-    if (stateRef.current.colState[col].length === 6) {
-      return;
-    }
-    //creates the animation of the piece
-    let player;
-    if (mode === "online") {
-      player = remote === true ? getRemoteColor() : getLocalColor();
-    } else {
-      if (stateRef.current.initiatorColor === "yellow") {
-        player = stateRef.current.plays % 2 === 0 ? "yellow" : "red";
-      } else {
-        player = stateRef.current.plays % 2 === 0 ? "red" : "yellow";
-      }
-    }
-
-    stateRef.current = {
-      ...stateRef.current,
-      plays: stateRef.current.plays + 1,
-    };
-
-    if (stateRef.current.plays === 42) {
-      setDraw(true);
-    }
-
-    const [win, winningSet] = testForWin(
-      col,
-      stateRef.current.colState[col].length,
-      player,
-      stateRef.current.colState
-    );
-
-    if (!win) {
-      stateRef.current = {
-        ...stateRef.current,
-        ...{ animatedPiece: col, animatedPieceColor: player },
-      };
-
-      setTimerSeconds(gameTimerConfig);
-      setLastDroppedColumn(col);
-    }
-
-    if (!remote) {
-      if (mode === "online") {
-        sendMove(col);
-      }
-    }
-
-    if (win) {
-      setWinnerHelper(player);
-      setWinner({ player, pieces: winningSet });
-    }
-  }
-
   const startGame = (
     initiator: boolean,
     opponent: string,
@@ -360,6 +408,12 @@ export const App = ({
         redWins: 0,
         initiator,
         mainMenuOpen: false,
+        mode,
+        player1,
+        player2,
+        gameStarted: true,
+        opponent,
+        remoteDisconnected: false,
       },
     };
 
@@ -369,13 +423,8 @@ export const App = ({
     console.log("player1", player1);
     console.log("player2", player2);
 
-    setRemoteDisconnected(false);
-    setGameStarted(true);
     toggleRender();
-    setOpponent(opponent);
-    setPlayer1(player1);
-    setPlayer2(player2);
-    setMode(mode);
+
     if (socket != null) {
       console.log("websocket not null");
       setWebsocket(socket);
@@ -391,12 +440,12 @@ export const App = ({
         plays: 0,
         colState: [[], [], [], [], [], [], []],
         mainMenuOpen: false,
+        draw: false,
         initiatorColor:
           stateRef.current.initiatorColor === "red" ? "yellow" : "red",
       },
     };
 
-    setDraw(false);
     setWinner(null);
     toggleRender();
   };
@@ -556,51 +605,7 @@ export const App = ({
     return ret;
   };
 
-  const getCurrentTurn: () => [boolean, string] = function (): [
-    boolean,
-    string
-  ] {
-    let myTurn = false;
-
-    if (stateRef.current.initiator) {
-      myTurn = stateRef.current.plays % 2 === 0;
-    } else {
-      myTurn = stateRef.current.plays % 2 !== 0;
-    }
-
-    let playerTurn;
-
-    if (myTurn) {
-      playerTurn = getLocalColor();
-    } else {
-      playerTurn = getRemoteColor();
-    }
-    return [myTurn, playerTurn];
-  };
-
-  // function terminateGameWrapped(notifyRemote = true) {
-  //   console.log("terminating game");
-  //   setWinner(null);
-  //   setGameStarted(false);
-
-  //   if (websocket != null) {
-  //     // tell the other player that we quit
-
-  //     if (notifyRemote) {
-  //       const payload = {
-  //         service: "chat",
-  //         action: "playTurn",
-  //         data: {
-  //           turn: -1,
-  //           opponent,
-  //         },
-  //       };
-  //       websocket!.send(JSON.stringify(payload));
-  //     }
-
-  //     websocket.close();
-  //   }
-  // }
+  //React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
 
   const tokens: any = [];
   const colState = winner != null ? winnerGameState : stateRef.current.colState;
@@ -647,7 +652,7 @@ export const App = ({
   console.log("plays", stateRef.current.plays);
   // console.log(stateRef.current.colState);
   // console.log("modal open = ", stateRef.current.mainMenuOpen);
-  // console.log("forceRender", forceRender);
+  console.log("forceRender", forceRender);
 
   return (
     <>
@@ -656,7 +661,10 @@ export const App = ({
 
         <img src={GameLogo} alt=""></img>
 
-        <button onClick={restartGame} disabled={mode === "online"}>
+        <button
+          onClick={restartGame}
+          disabled={stateRef.current.mode === "online"}
+        >
           Restart
         </button>
       </div>
@@ -693,7 +701,7 @@ export const App = ({
             </div>
 
             <div className="flex flex-row justify-center font-bold text-lg uppercase">
-              {player1}
+              {stateRef.current.player1}
             </div>
 
             <div
@@ -712,7 +720,7 @@ export const App = ({
               {stateRef.current.yellowWins}
             </div>
             <div className="flex flex-row justify-center font-bold text-lg uppercase">
-              {player2}
+              {stateRef.current.player2}
             </div>
 
             <div className="flex flex-row pb-1 justify-center -mr-12 smiley-container smiley-container-yellow">
@@ -721,14 +729,14 @@ export const App = ({
           </div>
         </div>
         <div className="game-board-items">
-          {gameStarted && (
+          {stateRef.current.gameStarted && (
             <div className="player1-card player-card">
               <div className="flex flex-row pb-1 justify-center -mt-6 ">
                 <img src={Player1} alt="Player One Smiley Face" />
               </div>
 
               <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
-                {player1}
+                {stateRef.current.player1}
               </div>
 
               <div
@@ -741,46 +749,48 @@ export const App = ({
           )}
 
           <div className="game-board-container">
-            {(myTurn || mode === "local") && winner == null && gameStarted && (
-              <div className="dropzone flex flex-row w-full justify-between">
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-0"
-                  onClick={() => animateRow(0)}
-                ></div>
+            {(myTurn || stateRef.current.mode === "local") &&
+              winner == null &&
+              stateRef.current.gameStarted && (
+                <div className="dropzone flex flex-row w-full justify-between">
+                  <div
+                    className={`drop-column ${playerTurn}`}
+                    data-testid="drop-column-0"
+                    onClick={() => animateRow(0)}
+                  ></div>
 
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-1"
-                  onClick={() => animateRow(1)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-2"
-                  onClick={() => animateRow(2)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-3"
-                  onClick={() => animateRow(3)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-4"
-                  onClick={() => animateRow(4)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-5"
-                  onClick={() => animateRow(5)}
-                ></div>
-                <div
-                  className={`drop-column ${playerTurn}`}
-                  data-testid="drop-column-6"
-                  onClick={() => animateRow(6)}
-                ></div>
-              </div>
-            )}
+                  <div
+                    className={`drop-column ${playerTurn}`}
+                    data-testid="drop-column-1"
+                    onClick={() => animateRow(1)}
+                  ></div>
+                  <div
+                    className={`drop-column ${playerTurn}`}
+                    data-testid="drop-column-2"
+                    onClick={() => animateRow(2)}
+                  ></div>
+                  <div
+                    className={`drop-column ${playerTurn}`}
+                    data-testid="drop-column-3"
+                    onClick={() => animateRow(3)}
+                  ></div>
+                  <div
+                    className={`drop-column ${playerTurn}`}
+                    data-testid="drop-column-4"
+                    onClick={() => animateRow(4)}
+                  ></div>
+                  <div
+                    className={`drop-column ${playerTurn}`}
+                    data-testid="drop-column-5"
+                    onClick={() => animateRow(5)}
+                  ></div>
+                  <div
+                    className={`drop-column ${playerTurn}`}
+                    data-testid="drop-column-6"
+                    onClick={() => animateRow(6)}
+                  ></div>
+                </div>
+              )}
 
             {tokens}
             {winningPieces}
@@ -802,14 +812,14 @@ export const App = ({
               <img src={BlackBoard} alt="" />
             </div>
           </div>
-          {gameStarted && (
+          {stateRef.current.gameStarted && (
             <div className="player2-card player-card">
               <div className="flex flex-row pb-1 justify-center -mt-6 ">
                 <img src={Player2} alt="Player Two Smiley Face" />
               </div>
 
               <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
-                {player2}
+                {stateRef.current.player2}
               </div>
 
               <div
@@ -821,20 +831,22 @@ export const App = ({
             </div>
           )}
         </div>
-        {winner == null && gameStarted && (
+        {winner == null && stateRef.current.gameStarted && (
           <div className="flex justify-center -mt-8">
             <div
               className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
             >
               <div className="flex flex-row justify-center uppercase pt-5 font-extrabold text-xl pb-3">
                 {playerTurn === "red"
-                  ? `${player1}'s Turn`
-                  : `${player2}'s Turn`}
+                  ? `${stateRef.current.player1}'s Turn`
+                  : `${stateRef.current.player2}'s Turn`}
               </div>
 
               {stateRef.current.plays > 1 ? (
                 <div className="flex flex-row justify-center text-5xl font-extrabold">
-                  {timerSeconds != null ? `${timerSeconds}s` : "24s"}
+                  {stateRef.current.timerSeconds != null
+                    ? `${stateRef.current.timerSeconds}s`
+                    : "24s"}
                 </div>
               ) : (
                 <div className="flex flex-row leading-tight text-xs">
@@ -852,9 +864,12 @@ export const App = ({
 
       <ReactModal
         className="modal winner-card"
-        isOpen={remoteDisconnected}
+        isOpen={stateRef.current.remoteDisconnected}
         shouldCloseOnOverlayClick={true}
-        onRequestClose={() => setRemoteDisconnected(false)}
+        onRequestClose={() => {
+          stateRef.current.remoteDisconnected = false;
+          toggleRender();
+        }}
         overlayClassName="disabled-background"
       >
         <div className="column-container col-centered gap15">
@@ -864,7 +879,8 @@ export const App = ({
 
           <button
             onClick={() => {
-              setRemoteDisconnected(false);
+              stateRef.current.remoteDisconnected = false;
+              toggleRender();
             }}
             className="uppercase"
           >
@@ -875,7 +891,10 @@ export const App = ({
 
       <ReactModal
         className="modal winner-card"
-        isOpen={(winner != null || draw) && !remoteDisconnected}
+        isOpen={
+          (winner != null || stateRef.current.draw) &&
+          !stateRef.current.remoteDisconnected
+        }
         shouldCloseOnOverlayClick={false}
         overlayClassName="disabled-background"
       >
@@ -888,7 +907,7 @@ export const App = ({
           </div>
 
           <div className="uppercase text-center text-5xl font-bold pt-1 text-black">
-            {`${draw && "Nobody"} WINS`}
+            {`${stateRef.current.draw && "Nobody"} WINS`}
           </div>
           <div className="flex flex-row justify-center gap-5 pt-6">
             <button onClick={() => terminateGame()} className="uppercase">

@@ -173,10 +173,10 @@ describe("Connect4", () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
     });
 
-    // await act(async () => {
-    //   // this is needed to get rid of act warnings :-(
-    //   // await wait(800);
-    // });
+    await act(async () => {
+      //this is needed to get rid of act warnings :-(
+      await wait(800);
+    });
 
     await act(async () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
