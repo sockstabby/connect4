@@ -173,10 +173,10 @@ describe("Connect4", () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
     });
 
-    await act(async () => {
-      // this is needed to get rid of act warnings :-(
-      await wait(800);
-    });
+    // await act(async () => {
+    //   // this is needed to get rid of act warnings :-(
+    //   // await wait(800);
+    // });
 
     await act(async () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
@@ -220,6 +220,8 @@ describe("Connect4", () => {
       await wait(5000);
     });
 
+    ////////////////////////////////////////////////////////////
+
     myMovesCount = 0;
 
     await act(async () => {
@@ -232,9 +234,8 @@ describe("Connect4", () => {
 
     await act(async () => {
       fireEvent.click(await screen.findByTestId("drop-column-1"));
+      await wait(1000);
     });
-
-    await wait(1000);
 
     winner = await screen.findByTestId("winning-player");
 
@@ -242,32 +243,31 @@ describe("Connect4", () => {
 
     console.log("myMovesCount", myMovesCount);
 
-    // screen.debug();
-
     redWinCount = await screen.getByTestId("red-win-count");
     yellowWinCount = await screen.getByTestId("yellow-win-count");
     expect(redWinCount.innerHTML).toEqual("2");
     expect(yellowWinCount.innerHTML).toEqual("1");
 
-    //finally we test the scenario where remote quits after it won
-    g_socket!.send(
-      JSON.stringify({
-        message: "playTurn",
+    await act(async () => {
+      //finally we test the scenario where remote quits after it won
+      g_socket!.send(
+        JSON.stringify({
+          message: "playTurn",
 
-        data: {
-          turn: -1,
-        },
-      })
-    );
-
-    await wait(200);
+          data: {
+            turn: -1,
+          },
+        })
+      );
+      await wait(500);
+    });
 
     const div = await screen.queryByText("Remote Player Quit");
     expect(div).toBeInTheDocument();
 
     // we should also test the scenario where we quit after a game
-    screen.debug();
-  }, 10000);
+    //screen.debug();
+  }, 12000);
 
   it("connect4 local gameplay", () => {
     // render(<App />);
