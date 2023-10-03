@@ -70,40 +70,45 @@ websocketServer.on("connection", (socket) => {
         socket.send(JSON.stringify(send));
         myMovesCount++;
       }
+
+      if (payload.action === "joinLobby") {
+        const payload1 = {
+          message: "lobbyParticipants",
+          data: [{ name: REMOTE_PLAYER_NAME }],
+        };
+
+        socket.send(JSON.stringify(payload1));
+
+        const payload2 = {
+          message: "playRequested",
+          data: REMOTE_PLAYER_NAME2,
+        };
+
+        socket.send(JSON.stringify(payload2));
+
+        const payload3 = {
+          message: "startGame",
+
+          data: {
+            initiator: false,
+            initiatorName: REMOTE_PLAYER_NAME2,
+            nonInitiatorName: "me",
+          },
+        };
+
+        console.log(Date.now(), "sending start game move");
+        socket.send(JSON.stringify(payload3));
+
+        const send = getMovePayload(myMovesCount, myMoves);
+
+        console.log(Date.now(), "sending first move of the game", send);
+        socket.send(JSON.stringify(send));
+        myMovesCount++;
+      }
     }
   });
 
   // this following code will start up a game and play the first turn
-
-  const payload1 = {
-    message: "lobbyParticipants",
-    data: [{ name: REMOTE_PLAYER_NAME }],
-  };
-
-  socket.send(JSON.stringify(payload1));
-
-  const payload2 = {
-    message: "playRequested",
-    data: REMOTE_PLAYER_NAME2,
-  };
-
-  socket.send(JSON.stringify(payload2));
-
-  const payload3 = {
-    message: "startGame",
-
-    data: {
-      initiator: false,
-      initiatorName: REMOTE_PLAYER_NAME2,
-      nonInitiatorName: "me",
-    },
-  };
-
-  socket.send(JSON.stringify(payload3));
-  const send = getMovePayload(myMovesCount, myMoves);
-  console.log("sending start game move");
-  socket.send(JSON.stringify(send));
-  myMovesCount++;
 });
 
 async function wait(milliseconds: number) {
@@ -113,7 +118,7 @@ async function wait(milliseconds: number) {
 }
 
 describe("Connect4", () => {
-  it("connect4 online gameplay play alternatess", async () => {
+  it("connect4 online gameplay play alternates turns player to make first move after each  game", async () => {
     render(<App websocketUrl={TEST_WS_URL} />);
 
     fireEvent.click(await screen.findByText(/menu/i));

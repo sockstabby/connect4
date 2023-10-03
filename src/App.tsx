@@ -45,9 +45,12 @@ type GameState = {
   timerRef: NodeJS.Timer | undefined;
   timerSeconds: number | null;
   forceRender: boolean;
+  websocket: WebSocket | undefined;
+  winner: Winner | null;
+  winnerGameState: ColState | null;
 };
 
-// For this app we store state in a ref. This drastically simplifies our useEffect hooks
+// For this app we store state in a ref. This drastically simplifies our useEffect dependencies
 // as they dont need to care so much about dependencies. Just note that you are responsible
 // for rendering and can trigger a render with toggleRender function.
 const initialGameState: GameState = {
@@ -71,6 +74,9 @@ const initialGameState: GameState = {
   timerRef: undefined,
   timerSeconds: null,
   forceRender: false,
+  websocket: undefined,
+  winner: null,
+  winnerGameState: null,
 };
 
 type Connect4Props = {
@@ -84,22 +90,13 @@ export const App = ({
   // stateRef is intended to store refs in one single ref.
 
   const stateRef = useRef(initialGameState);
-  const [websocket, setWebsocket] = useState<WebSocket | null>(null);
-
-  // THE ONLY REASON WE NEED THIS IS BECAUSE WE HAVE A USEEFFECT DEPENDENCY THAT
-  // TAKES CARE OF CLEANING UP THE ANIMATED PIECE. OTHERWISE A PLAIN OLD REF WOULD DO.
   const [lastDroppedColumn, setLastDroppedColumn] = useState<null | number>(
     null
   );
 
-  const [winner, setWinner] = useState<Winner | null>(null);
-
-  // we store the state of the board here so that players can reflect on the game until
-  // they decide to play again.
-  const [winnerGameState, setWinnerGameState] = useState<ColState | null>(null);
-
   // this is a hack. if we ever need to set a reference and trigger a rerender we can
-  // call this function.
+  // call this function. Only needed because i chose to use references instead of setState
+  // hooks to store state.
   const [forceRender, setForceRender] = useState(false);
 
   useEffect(() => {
@@ -165,21 +162,26 @@ export const App = ({
 
       setWinnerHelper(playerTurn === "yellow" ? "red" : "yellow");
 
-      setWinner({
+      stateRef.current.winner = {
         player: playerTurn === "yellow" ? "red" : "yellow",
         pieces: [],
-      });
+      };
+      // setWinner({
+      //   player: playerTurn === "yellow" ? "red" : "yellow",
+      //   pieces: [],
+      // });
     }
   }, [stateRef.current.timerSeconds, getCurrentTurn]);
 
   const terminateGame = useCallback(
     (notifyRemote = true) => {
       console.log("terminating game");
-      setWinner(null);
+      // setWinner(null);
+      stateRef.current.winner = null;
       stateRef.current.gameStarted = false;
       toggleRender();
 
-      if (websocket != null) {
+      if (stateRef.current.websocket != null) {
         // tell the other player that we quit
 
         if (notifyRemote) {
@@ -191,30 +193,27 @@ export const App = ({
               opponent: stateRef.current.opponent,
             },
           };
-          websocket!.send(JSON.stringify(payload));
+          stateRef.current.websocket!.send(JSON.stringify(payload));
         }
 
-        websocket.close();
+        stateRef.current.websocket.close();
       }
     },
-    [toggleRender, websocket]
+    [toggleRender]
   );
 
-  const sendMove = useCallback(
-    (col: number) => {
-      const payload = {
-        service: "chat",
-        action: "playTurn",
-        data: {
-          turn: { col },
-          opponent: stateRef.current.opponent,
-        },
-      };
+  const sendMove = useCallback((col: number) => {
+    const payload = {
+      service: "chat",
+      action: "playTurn",
+      data: {
+        turn: { col },
+        opponent: stateRef.current.opponent,
+      },
+    };
 
-      websocket!.send(JSON.stringify(payload));
-    },
-    [websocket]
-  );
+    stateRef.current.websocket!.send(JSON.stringify(payload));
+  }, []);
 
   const animateRow = useCallback(
     (col: number, remote: boolean = false) => {
@@ -268,7 +267,8 @@ export const App = ({
 
         if (win) {
           setWinnerHelper(player);
-          setWinner({ player, pieces: winningSet });
+          stateRef.current.winner = { player, pieces: winningSet };
+          toggleRender();
         }
       }
 
@@ -281,8 +281,7 @@ export const App = ({
     function closeHandler() {
       console.error("The Websocket is closed.");
       // we need to tell the user what to do when this happens
-
-      setWebsocket(null);
+      stateRef.current.websocket = undefined;
     }
 
     function messageHandler(event: MessageEvent<any>) {
@@ -295,24 +294,26 @@ export const App = ({
         } else {
           const x = document.getElementById("drop-sound") as HTMLAudioElement;
           x?.play();
-
           animateRow(payload.data.turn.col, true);
         }
       }
     }
 
-    if (websocket != null) {
-      websocket!.addEventListener("close", closeHandler);
-      websocket!.addEventListener("message", messageHandler);
+    if (stateRef.current.websocket != null) {
+      stateRef.current.websocket!.addEventListener("close", closeHandler);
+      stateRef.current.websocket!.addEventListener("message", messageHandler);
     }
 
     return () => {
-      if (websocket != null) {
-        websocket!.removeEventListener("close", closeHandler);
-        websocket!.removeEventListener("message", closeHandler);
+      if (stateRef.current.websocket != null) {
+        stateRef.current.websocket!.removeEventListener("close", closeHandler);
+        stateRef.current.websocket!.removeEventListener(
+          "message",
+          closeHandler
+        );
       }
     };
-  }, [websocket, terminateGame, animateRow]);
+  }, [stateRef.current.websocket, terminateGame, animateRow]);
 
   useScreenSize();
 
@@ -372,7 +373,7 @@ export const App = ({
     clearInterval(stateRef.current.timerRef);
     stateRef.current.timerRef = undefined;
 
-    setWinnerGameState(colState);
+    stateRef.current.winnerGameState = colState;
   }
 
   const getRemoteColor = () => {
@@ -398,7 +399,7 @@ export const App = ({
     mode: GameMode,
     player1: string,
     player2: string,
-    socket?: WebSocket
+    websocket?: WebSocket
   ) => {
     stateRef.current = {
       ...stateRef.current,
@@ -414,6 +415,7 @@ export const App = ({
         gameStarted: true,
         opponent,
         remoteDisconnected: false,
+        websocket,
       },
     };
 
@@ -424,11 +426,6 @@ export const App = ({
     console.log("player2", player2);
 
     toggleRender();
-
-    if (socket != null) {
-      console.log("websocket not null");
-      setWebsocket(socket);
-    }
   };
 
   const playAgain = () => {
@@ -446,7 +443,8 @@ export const App = ({
       },
     };
 
-    setWinner(null);
+    // setWinner(null);
+    stateRef.current.winner = null;
     toggleRender();
   };
 
@@ -605,10 +603,11 @@ export const App = ({
     return ret;
   };
 
-  //React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
-
   const tokens: any = [];
-  const colState = winner != null ? winnerGameState : stateRef.current.colState;
+  const colState =
+    stateRef.current.winner != null
+      ? stateRef.current.winnerGameState
+      : stateRef.current.colState;
 
   colState!.forEach((column, i) => {
     column.forEach((row, j) => {
@@ -631,11 +630,13 @@ export const App = ({
 
   let winningPieces: any = [];
 
-  if (winner != null) {
-    winningPieces = winner.pieces.map((piece) => {
+  if (stateRef.current.winner != null) {
+    winningPieces = stateRef.current.winner.pieces.map((piece) => {
       const style = getTokenStyle(piece.col, piece.row);
       const image =
-        winner.player === "red" ? RedWinningPiece : YellowWinningPiece;
+        stateRef.current.winner!.player === "red"
+          ? RedWinningPiece
+          : YellowWinningPiece;
 
       return (
         <div key={`winningtoken${piece.col}${piece.row}orange`} style={style}>
@@ -647,12 +648,12 @@ export const App = ({
 
   const [myTurn, playerTurn] = getCurrentTurn();
 
-  // console.log("myTurn", myTurn);
+  console.log("myTurn", myTurn);
   // console.log("mode", mode);
-  console.log("plays", stateRef.current.plays);
+  // console.log("plays", stateRef.current.plays);
   // console.log(stateRef.current.colState);
   // console.log("modal open = ", stateRef.current.mainMenuOpen);
-  console.log("forceRender", forceRender);
+  // console.log("forceRender", forceRender);
 
   return (
     <>
@@ -681,7 +682,10 @@ export const App = ({
         <StartGameModal
           websocketUrl={websocketUrl}
           onStartGame={startGame}
-          setSocket={setWebsocket}
+          setSocket={(socket: WebSocket) => {
+            stateRef.current.websocket = socket;
+            toggleRender();
+          }}
           onClose={() => {
             stateRef.current = {
               ...stateRef.current,
@@ -750,7 +754,7 @@ export const App = ({
 
           <div className="game-board-container">
             {(myTurn || stateRef.current.mode === "local") &&
-              winner == null &&
+              stateRef.current.winner == null &&
               stateRef.current.gameStarted && (
                 <div className="dropzone flex flex-row w-full justify-between">
                   <div
@@ -831,7 +835,7 @@ export const App = ({
             </div>
           )}
         </div>
-        {winner == null && stateRef.current.gameStarted && (
+        {stateRef.current.winner == null && stateRef.current.gameStarted && (
           <div className="flex justify-center -mt-8">
             <div
               className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
@@ -859,7 +863,9 @@ export const App = ({
       </div>
 
       <div
-        className={`bottom-plate ${winner != null ? winner.player : ""} `}
+        className={`bottom-plate ${
+          stateRef.current.winner != null ? stateRef.current.winner.player : ""
+        } `}
       ></div>
 
       <ReactModal
@@ -892,7 +898,7 @@ export const App = ({
       <ReactModal
         className="modal winner-card"
         isOpen={
-          (winner != null || stateRef.current.draw) &&
+          (stateRef.current.winner != null || stateRef.current.draw) &&
           !stateRef.current.remoteDisconnected
         }
         shouldCloseOnOverlayClick={false}
@@ -903,7 +909,7 @@ export const App = ({
             className="uppercase text-black text-center"
             data-testid="winning-player"
           >
-            {winner && `${winner!.player}`}
+            {stateRef.current.winner && `${stateRef.current.winner!.player}`}
           </div>
 
           <div className="uppercase text-center text-5xl font-bold pt-1 text-black">

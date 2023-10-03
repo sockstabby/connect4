@@ -19,7 +19,7 @@ type StartGameModalProps = {
   ) => void;
   onClose: () => void;
   websocketUrl: string;
-  setSocket: any;
+  setSocket: (socket: WebSocket) => void;
 };
 
 const StartGameModal = ({
@@ -72,6 +72,8 @@ const StartGameModal = ({
       }
 
       if (payload.message === "startGame") {
+        console.log("got a startgame");
+
         let player1Name;
         let player2Name;
 
