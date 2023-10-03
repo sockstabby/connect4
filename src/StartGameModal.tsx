@@ -72,8 +72,6 @@ const StartGameModal = ({
       }
 
       if (payload.message === "startGame") {
-        console.log("got a startgame");
-
         let player1Name;
         let player2Name;
 
@@ -109,7 +107,7 @@ const StartGameModal = ({
         websocket!.removeEventListener("message", closeHandler);
       }
     };
-  }, [websocket]);
+  }, [websocket, name, onStartGame]);
 
   const nameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
