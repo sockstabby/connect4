@@ -10,7 +10,7 @@ import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
 import { testForWin, Locations } from "./utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import StartGameModal, { GameMode } from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
@@ -49,6 +49,52 @@ type GameState = {
   winner: Winner | null;
   winnerGameState: ColState | null;
 };
+
+type Connect4State = {
+  addonOnlineService: boolean;
+  addonStorage: boolean;
+  addonCustomProfile: boolean;
+  name: string;
+  email: string;
+  phone: string;
+  nextButtonEnabled: boolean;
+  yearlyPlan: boolean;
+};
+
+type Action =
+  | { type: "setArcadePlan" }
+  | { type: "setAdvancedPlan" }
+  | { type: "setProPlan" }
+  | { type: "toggleOnlineService" }
+  | { type: "toggleStorage" }
+  | { type: "toggleCustomProfile" }
+  | { type: "setName"; value: string }
+  | { type: "setEmail"; value: string }
+  | { type: "setPhone"; value: string }
+  | { type: "setNextButtonEnabled"; value: boolean }
+  | { type: "toggleYearly" };
+
+const initialState: Connect4State = {
+  addonOnlineService: false,
+  addonStorage: false,
+  addonCustomProfile: false,
+  name: "",
+  email: "",
+  phone: "",
+  nextButtonEnabled: true, //fix me,
+  yearlyPlan: false,
+};
+
+function reducer(state: GameState, action: Action) {
+  console.log("Reducer called ", action.type);
+  if (action.type === "setArcadePlan") {
+    return {
+      ...state,
+    };
+  }
+
+  return state;
+}
 
 // For this app we store state in a ref. This drastically simplifies our useEffect dependencies
 // as they dont need to care so much about dependencies. Just note that you are responsible
@@ -89,6 +135,8 @@ export const App = ({
 }: Connect4Props) => {
   // stateRef is intended to store refs in one single ref.
 
+  const [state, dispatch] = useReducer(reducer, initialGameState);
+
   const stateRef = useRef(initialGameState);
   const [lastDroppedColumn, setLastDroppedColumn] = useState<null | number>(
     null
@@ -121,9 +169,15 @@ export const App = ({
     };
 
     if (stateRef.current.timerRef == null && stateRef.current.plays > 1) {
+      console.log("createing interval timer");
       stateRef.current.timerRef = setInterval(decSeconds, 1000);
     }
-  }, [toggleRender]);
+  }, [
+    toggleRender,
+    stateRef.current.timerSeconds,
+    stateRef.current.timerRef,
+    stateRef.current.plays,
+  ]);
 
   const getCurrentTurn = useCallback(() => {
     const getCurrentTurnWrapped: () => [boolean, string] = function (): [
