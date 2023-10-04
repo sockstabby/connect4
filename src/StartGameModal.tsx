@@ -41,6 +41,8 @@ const StartGameModal = ({
 
   const [websocket, setWebsocket] = useState<WebSocket | null>(null);
 
+  const [listenerAdded, setListenerAdded] = useState(false);
+
   useEffect(() => {
     function closeHandler(_event: any) {
       console.error("The Websocket is closed.");
@@ -94,20 +96,22 @@ const StartGameModal = ({
       }
     }
 
-    if (websocket !== null) {
+    if (websocket !== null && !listenerAdded) {
       websocket!.addEventListener("close", closeHandler);
       websocket!.addEventListener("open", openHandler);
       websocket!.addEventListener("message", messageHandler);
+      setListenerAdded(true);
     }
 
     return () => {
       if (websocket !== null) {
+        console.log("modal cleaning up websocket listeners");
         websocket!.removeEventListener("close", closeHandler);
         websocket!.removeEventListener("open", closeHandler);
         websocket!.removeEventListener("message", closeHandler);
       }
     };
-  }, [websocket, name, onStartGame]);
+  }, [websocket, name, listenerAdded, onStartGame]);
 
   const nameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);

@@ -9,11 +9,20 @@ import RedWinningPiece from "../src/assets/red-winning-piece.svg";
 import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
-import { testForWin, Locations } from "./utils";
+import { Locations } from "./utils";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import StartGameModal, { GameMode } from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
+
+import {
+  diskDropped,
+  getLocalColor,
+  getRemoteColor,
+  setWinnerHelper,
+  terminateGame,
+  getTokenStyle,
+} from "./reducerFunctions";
 
 type Column = string[];
 
@@ -24,7 +33,7 @@ type Winner = {
 
 export type ColState = Column[];
 
-type GameState = {
+export type GameState = {
   colState: ColState;
   yellowWins: number;
   redWins: number;
@@ -48,49 +57,156 @@ type GameState = {
   websocket: WebSocket | undefined;
   winner: Winner | null;
   winnerGameState: ColState | null;
-};
-
-type Connect4State = {
-  addonOnlineService: boolean;
-  addonStorage: boolean;
-  addonCustomProfile: boolean;
-  name: string;
-  email: string;
-  phone: string;
-  nextButtonEnabled: boolean;
-  yearlyPlan: boolean;
+  lastDroppedColumn: null | number;
+  listenerAdded: boolean;
 };
 
 type Action =
-  | { type: "setArcadePlan" }
-  | { type: "setAdvancedPlan" }
-  | { type: "setProPlan" }
-  | { type: "toggleOnlineService" }
-  | { type: "toggleStorage" }
-  | { type: "toggleCustomProfile" }
-  | { type: "setName"; value: string }
-  | { type: "setEmail"; value: string }
-  | { type: "setPhone"; value: string }
-  | { type: "setNextButtonEnabled"; value: boolean }
-  | { type: "toggleYearly" };
-
-const initialState: Connect4State = {
-  addonOnlineService: false,
-  addonStorage: false,
-  addonCustomProfile: false,
-  name: "",
-  email: "",
-  phone: "",
-  nextButtonEnabled: true, //fix me,
-  yearlyPlan: false,
-};
+  | {
+      type: "startGame";
+      value: {
+        initiator: boolean;
+        opponent: string;
+        mode: GameMode;
+        player1: string;
+        player2: string;
+        websocket?: WebSocket;
+      };
+    }
+  | {
+      type: "diskDropped";
+      value: { col: number; remote: boolean; gameTimerConfig: number };
+    }
+  | { type: "decrementSeconds" }
+  | { type: "setWinner"; value: { player: string; pieces: Locations } }
+  | { type: "terminateGame"; value: { notifyRemote: boolean } }
+  | { type: "socketClosed" }
+  | { type: "messageReceived"; value: any }
+  | { type: "setAnimatedDisk" }
+  | { type: "clearAnimatedDisk" }
+  | { type: "mainMenuModalVisible"; value: boolean }
+  | { type: "playAgain" }
+  | { type: "restartGame" }
+  | { type: "listenerAdded"; value: boolean }
+  | { type: "setWebsocket"; value: WebSocket };
 
 function reducer(state: GameState, action: Action) {
   console.log("Reducer called ", action.type);
-  if (action.type === "setArcadePlan") {
+  if (action.type === "startGame") {
+    const { initiator, opponent, mode, player1, player2, websocket } =
+      action.value;
+
     return {
       ...state,
+      ...{
+        colState: [[], [], [], [], [], [], []],
+        yellowWins: 0,
+        redWins: 0,
+        initiator,
+        mainMenuOpen: false,
+        mode,
+        player1,
+        player2,
+        gameStarted: true,
+        opponent,
+        remoteDisconnected: false,
+        websocket,
+      },
     };
+  } else if (action.type === "diskDropped") {
+    const { col, remote, gameTimerConfig } = action.value;
+    return diskDropped(state, col, remote, gameTimerConfig);
+  } else if (action.type === "decrementSeconds") {
+    return {
+      ...state,
+      ...(state.timerSeconds !== null
+        ? { timerSeconds: state.timerSeconds - 1 }
+        : {}),
+    };
+  } else if (action.type === "setWinner") {
+    const { player, pieces } = action.value;
+
+    if (state.timerRef != null) {
+      console.log("clearing timer");
+
+      clearInterval(state.timerRef);
+    }
+
+    const newState = setWinnerHelper(state, player, false);
+
+    return {
+      ...state,
+      ...newState,
+      winner: { pieces, player },
+      timerRef: undefined,
+      timerSeconds: null,
+    };
+  } else if (action.type === "terminateGame") {
+    const { notifyRemote } = action.value;
+
+    return terminateGame(state, notifyRemote);
+  } else if (action.type === "socketClosed") {
+    return { ...state, websocket: undefined };
+  } else if (action.type === "messageReceived") {
+    const { payload, gameTimerConfig } = action.value;
+    console.log("client received message", payload);
+
+    if (payload.message === "playTurn") {
+      if (payload.data.turn === -1) {
+        // stateRef.current.remoteDisconnected = true;
+        const newState = terminateGame(state, false);
+        return { ...newState, remoteDisconnected: true };
+      } else {
+        const x = document.getElementById("drop-sound") as HTMLAudioElement;
+        x?.play();
+        // animateRow(payload.data.turn.col, true);
+
+        return diskDropped(state, payload.data.turn.col, true, gameTimerConfig);
+      }
+    }
+
+    return state;
+  } else if (action.type === "setAnimatedDisk") {
+    const colState = JSON.parse(JSON.stringify(state.colState));
+
+    if (state.animatedPiece != null) {
+      colState[state.animatedPiece].push(state.animatedPieceColor);
+    }
+
+    return { ...state, colState };
+  } else if (action.type === "clearAnimatedDisk") {
+    return { ...state, animatedPiece: null, lastDroppedColumn: null };
+  } else if (action.type === "mainMenuModalVisible") {
+    const visible = action.value;
+
+    return { ...state, mainMenuOpen: visible };
+  } else if (action.type === "playAgain") {
+    return {
+      ...state,
+      ...{
+        initiator: !state.initiator,
+        plays: state.plays !== 1 ? 0 : state.plays,
+        // colState: [[], [], [], [], [], [], []],
+        mainMenuOpen: false,
+        draw: false,
+        initiatorColor: state.initiatorColor === "red" ? "yellow" : "red",
+        winner: null,
+      },
+    };
+  } else if (action.type === "restartGame") {
+    return {
+      ...state,
+      ...{
+        plays: 0,
+        colState: [[], [], [], [], [], [], []],
+      },
+    };
+  } else if (action.type === "setWebsocket") {
+    const websocket = action.value;
+    return { ...state, websocket };
+  } else if (action.type === "listenerAdded") {
+    const added = action.value;
+    return { ...state, listenerAdded: added };
   }
 
   return state;
@@ -123,6 +239,8 @@ const initialGameState: GameState = {
   websocket: undefined,
   winner: null,
   winnerGameState: null,
+  lastDroppedColumn: null,
+  listenerAdded: false,
 };
 
 type Connect4Props = {
@@ -130,7 +248,7 @@ type Connect4Props = {
   websocketUrl?: string;
 };
 export const App = ({
-  gameTimerConfig = 5,
+  gameTimerConfig = 24,
   websocketUrl = "wss://connect4.isomarkets.com",
 }: Connect4Props) => {
   // stateRef is intended to store refs in one single ref.
@@ -138,14 +256,12 @@ export const App = ({
   const [state, dispatch] = useReducer(reducer, initialGameState);
 
   const stateRef = useRef(initialGameState);
-  const [lastDroppedColumn, setLastDroppedColumn] = useState<null | number>(
-    null
-  );
 
   // this is a hack. if we ever need to set a reference and trigger a rerender we can
   // call this function. Only needed because i chose to use references instead of setState
   // hooks to store state.
-  const [forceRender, setForceRender] = useState(false);
+
+  const [, setForceRender] = useState(false);
 
   useEffect(() => {
     ReactModal.setAppElement("body");
@@ -158,26 +274,19 @@ export const App = ({
 
   useEffect(() => {
     const decSeconds = () => {
-      if (
-        stateRef.current.timerSeconds != null &&
-        stateRef.current.timerSeconds != -1
-      ) {
-        console.log("decseconds", stateRef.current.timerSeconds);
-        --stateRef.current.timerSeconds;
-        toggleRender();
+      if (state.timerSeconds != null && state.timerSeconds != -1) {
+        console.log("decseconds", state.timerSeconds);
+        // --stateRef.current.timerSeconds;
+        dispatch({ type: "decrementSeconds" });
+        // toggleRender();
       }
     };
 
-    if (stateRef.current.timerRef == null && stateRef.current.plays > 1) {
+    if (state.timerRef == null && state.plays > 1) {
       console.log("createing interval timer");
-      stateRef.current.timerRef = setInterval(decSeconds, 1000);
+      state.timerRef = setInterval(decSeconds, 1000);
     }
-  }, [
-    toggleRender,
-    stateRef.current.timerSeconds,
-    stateRef.current.timerRef,
-    stateRef.current.plays,
-  ]);
+  }, [toggleRender, state]);
 
   const getCurrentTurn = useCallback(() => {
     const getCurrentTurnWrapped: () => [boolean, string] = function (): [
@@ -186,265 +295,120 @@ export const App = ({
     ] {
       let myTurn = false;
 
-      if (stateRef.current.initiator) {
-        myTurn = stateRef.current.plays % 2 === 0;
+      if (state.initiator) {
+        myTurn = state.plays % 2 === 0;
       } else {
-        myTurn = stateRef.current.plays % 2 !== 0;
+        myTurn = state.plays % 2 !== 0;
       }
 
       let playerTurn;
 
       if (myTurn) {
-        playerTurn = getLocalColor();
+        playerTurn = getLocalColor(state);
       } else {
-        playerTurn = getRemoteColor();
+        playerTurn = getRemoteColor(state);
       }
       return [myTurn, playerTurn];
     };
 
     return getCurrentTurnWrapped();
-  }, []);
+  }, [state]);
 
   useEffect(() => {
-    if (stateRef.current.timerSeconds === 0) {
+    if (state.timerSeconds === 0) {
       console.log("setting winner");
-      clearInterval(stateRef.current.timerRef);
-      stateRef.current.timerRef = undefined;
+      clearInterval(state.timerRef);
+      // state.timerRef = undefined;
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [_myTurn, playerTurn] = getCurrentTurn();
 
-      setWinnerHelper(playerTurn === "yellow" ? "red" : "yellow");
+      // setWinnerHelper(state, playerTurn === "yellow" ? "red" : "yellow");
 
-      stateRef.current.winner = {
-        player: playerTurn === "yellow" ? "red" : "yellow",
-        pieces: [],
-      };
+      dispatch({
+        type: "setWinner",
+        value: {
+          player: playerTurn === "yellow" ? "red" : "yellow",
+          pieces: [],
+        },
+      });
+
       // setWinner({
       //   player: playerTurn === "yellow" ? "red" : "yellow",
       //   pieces: [],
       // });
     }
-  }, [stateRef.current.timerSeconds, getCurrentTurn]);
+  }, [state.timerSeconds, getCurrentTurn, state.timerRef]);
 
-  const terminateGame = useCallback(
-    (notifyRemote = true) => {
-      console.log("terminating game");
-      // setWinner(null);
-      stateRef.current.winner = null;
-      stateRef.current.gameStarted = false;
-      toggleRender();
-
-      if (stateRef.current.websocket != null) {
-        // tell the other player that we quit
-
-        if (notifyRemote) {
-          const payload = {
-            service: "chat",
-            action: "playTurn",
-            data: {
-              turn: -1,
-              opponent: stateRef.current.opponent,
-            },
-          };
-          stateRef.current.websocket!.send(JSON.stringify(payload));
-        }
-
-        stateRef.current.websocket.close();
-      }
-    },
-    [toggleRender]
-  );
-
-  const sendMove = useCallback((col: number) => {
-    const payload = {
-      service: "chat",
-      action: "playTurn",
-      data: {
-        turn: { col },
-        opponent: stateRef.current.opponent,
-      },
-    };
-
-    stateRef.current.websocket!.send(JSON.stringify(payload));
+  const terminateGame = useCallback((notifyRemote = true) => {
+    dispatch({ type: "terminateGame", value: { notifyRemote } });
   }, []);
 
   const animateRow = useCallback(
     (col: number, remote: boolean = false) => {
-      function animateRowWrapped(col: number, remote: boolean = false) {
-        if (stateRef.current.colState[col].length === 6) {
-          return;
-        }
-        //creates the animation of the piece
-        let player;
-        if (stateRef.current.mode === "online") {
-          player = remote === true ? getRemoteColor() : getLocalColor();
-        } else {
-          if (stateRef.current.initiatorColor === "yellow") {
-            player = stateRef.current.plays % 2 === 0 ? "yellow" : "red";
-          } else {
-            player = stateRef.current.plays % 2 === 0 ? "red" : "yellow";
-          }
-        }
-
-        stateRef.current = {
-          ...stateRef.current,
-          plays: stateRef.current.plays + 1,
-        };
-
-        if (stateRef.current.plays === 42) {
-          stateRef.current.draw = true;
-        }
-
-        const [win, winningSet] = testForWin(
-          col,
-          stateRef.current.colState[col].length,
-          player,
-          stateRef.current.colState
-        );
-
-        if (!win) {
-          stateRef.current = {
-            ...stateRef.current,
-            timerSeconds: gameTimerConfig,
-            ...{ animatedPiece: col, animatedPieceColor: player },
-          };
-
-          setLastDroppedColumn(col);
-        }
-
-        if (!remote) {
-          if (stateRef.current.mode === "online") {
-            sendMove(col);
-          }
-        }
-
-        if (win) {
-          setWinnerHelper(player);
-          stateRef.current.winner = { player, pieces: winningSet };
-          toggleRender();
-        }
-      }
-
-      return animateRowWrapped(col, remote);
+      dispatch({
+        type: "diskDropped",
+        value: { col, remote, gameTimerConfig },
+      });
     },
-    [sendMove, gameTimerConfig]
+    [gameTimerConfig]
   );
 
   useEffect(() => {
     function closeHandler() {
       console.error("The Websocket is closed.");
       // we need to tell the user what to do when this happens
-      stateRef.current.websocket = undefined;
+      dispatch({ type: "socketClosed" });
     }
 
     function messageHandler(event: MessageEvent<any>) {
       const payload = JSON.parse(event.data);
 
-      if (payload.message === "playTurn") {
-        if (payload.data.turn === -1) {
-          stateRef.current.remoteDisconnected = true;
-          terminateGame(false);
-        } else {
-          const x = document.getElementById("drop-sound") as HTMLAudioElement;
-          x?.play();
-          animateRow(payload.data.turn.col, true);
-        }
-      }
+      dispatch({
+        type: "messageReceived",
+        value: { payload, gameTimerConfig },
+      });
     }
 
-    if (stateRef.current.websocket != null) {
-      stateRef.current.websocket!.addEventListener("close", closeHandler);
-      stateRef.current.websocket!.addEventListener("message", messageHandler);
+    if (state.websocket != null && !state.listenerAdded) {
+      console.log("adding event listener");
+      state.websocket!.addEventListener("close", closeHandler);
+      state.websocket!.addEventListener("message", messageHandler);
+      dispatch({ type: "listenerAdded", value: true });
     }
 
     return () => {
-      if (stateRef.current.websocket != null) {
-        stateRef.current.websocket!.removeEventListener("close", closeHandler);
-        stateRef.current.websocket!.removeEventListener(
-          "message",
-          closeHandler
-        );
+      if (state.websocket != null) {
+        state.websocket!.removeEventListener("close", closeHandler);
+        state.websocket!.removeEventListener("message", closeHandler);
       }
     };
-  }, [stateRef.current.websocket, terminateGame, animateRow]);
+  }, [state, terminateGame, animateRow, gameTimerConfig]);
 
   useScreenSize();
 
   useEffect(() => {
-    if (stateRef.current.animatedPiece !== null) {
+    if (state.animatedPiece !== null) {
       const x = document.getElementById("drop-sound") as HTMLAudioElement;
 
       if (x != null) {
         x?.play();
       }
 
-      const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
-      colState[stateRef.current.animatedPiece].push(
-        stateRef.current.animatedPieceColor
-      );
-      stateRef.current = { ...stateRef.current, ...{ colState } };
+      dispatch({ type: "setAnimatedDisk" });
 
       setTimeout(() => {
-        stateRef.current = {
-          ...stateRef.current,
-          ...{ animatedPiece: null },
-        };
-
-        setLastDroppedColumn(null);
+        dispatch({ type: "clearAnimatedDisk" });
       }, 100);
     }
-  }, [lastDroppedColumn]);
+  }, [state.lastDroppedColumn, state.animatedPiece]);
 
   const openMainMenuModal = () => {
-    stateRef.current = { ...stateRef.current, ...{ mainMenuOpen: true } };
-    toggleRender();
+    dispatch({ type: "mainMenuModalVisible", value: true });
   };
 
   const closeMainMenuModal = () => {
-    stateRef.current = { ...stateRef.current, ...{ mainMenuOpen: false } };
-    toggleRender();
-  };
-
-  function setWinnerHelper(player: string) {
-    const objectToMerge =
-      player === "yellow"
-        ? { yellowWins: stateRef.current.yellowWins + 1 }
-        : { redWins: stateRef.current.redWins + 1 };
-
-    stateRef.current = {
-      ...stateRef.current,
-      ...objectToMerge,
-    };
-
-    const colState = JSON.parse(JSON.stringify(stateRef.current.colState));
-
-    stateRef.current = {
-      ...stateRef.current,
-      ...{ colState: [[], [], [], [], [], [], []], plays: 0 },
-    };
-
-    clearInterval(stateRef.current.timerRef);
-    stateRef.current.timerRef = undefined;
-
-    stateRef.current.winnerGameState = colState;
-  }
-
-  const getRemoteColor = () => {
-    if (stateRef.current.initiator) {
-      return stateRef.current.initiatorColor === "red" ? "yellow" : "red";
-    }
-
-    // i am not the initiator and we know the initiator color
-    return stateRef.current.initiatorColor;
-  };
-
-  const getLocalColor = () => {
-    if (stateRef.current.initiator) {
-      return stateRef.current.initiatorColor;
-    }
-
-    return stateRef.current.initiatorColor === "red" ? "yellow" : "red";
+    dispatch({ type: "mainMenuModalVisible", value: true });
   };
 
   const startGame = (
@@ -455,217 +419,35 @@ export const App = ({
     player2: string,
     websocket?: WebSocket
   ) => {
-    stateRef.current = {
-      ...stateRef.current,
-      ...{
-        colState: [[], [], [], [], [], [], []],
-        yellowWins: 0,
-        redWins: 0,
-        initiator,
-        mainMenuOpen: false,
-        mode,
-        player1,
-        player2,
-        gameStarted: true,
-        opponent,
-        remoteDisconnected: false,
-        websocket,
-      },
-    };
-
     console.log("start game");
     console.log("initiator", initiator);
     console.log("mode", mode);
     console.log("player1", player1);
     console.log("player2", player2);
 
-    toggleRender();
+    dispatch({
+      type: "startGame",
+      value: { initiator, opponent, mode, player1, player2, websocket },
+    });
   };
 
   const playAgain = () => {
     console.log("play again");
-    stateRef.current = {
-      ...stateRef.current,
-      ...{
-        initiator: !stateRef.current.initiator,
-        plays: 0,
-        colState: [[], [], [], [], [], [], []],
-        mainMenuOpen: false,
-        draw: false,
-        initiatorColor:
-          stateRef.current.initiatorColor === "red" ? "yellow" : "red",
-      },
-    };
 
-    // setWinner(null);
-    stateRef.current.winner = null;
-    toggleRender();
+    dispatch({ type: "playAgain" });
   };
 
   const restartGame = () => {
-    stateRef.current = {
-      ...stateRef.current,
-      ...{
-        colState: [[], [], [], [], [], [], []],
-        plays: 0,
-      },
-    };
-    toggleRender();
-  };
-
-  const getTokenStyle = (col: number, row: number) => {
-    const breakPoints = [
-      {
-        upper: 440,
-        lower: -Infinity,
-        top_positions: [
-          "calc(40px + 69vmin)",
-          "calc(40px + 55.7vmin)",
-          "calc(40px + 42.5vmin)",
-          "calc(40px + 29.3vmin)",
-          "calc(40px + 16.3vmin)",
-          "calc(40px + 2.7vmin)",
-        ],
-        left_positions: [
-          "calc(3.04vmin)",
-          "calc(16.23vmin)",
-          "calc(29.5vmin)",
-          "calc(42.75vmin)",
-          "calc(56vmin)",
-          "calc(69.2vmin)",
-          "calc(82.5vmin)",
-        ],
-      },
-      {
-        upper: 526,
-        lower: 440,
-        top_positions: [
-          "calc(40px + 65.3vmin)",
-          "calc(40px + 52.9vmin)",
-          "calc(40px + 40.5vmin)",
-          "calc(40px + 27.9vmin)",
-          "calc(40px + 15.3vmin)",
-          "calc(40px + 2.57vmin)",
-        ],
-        left_positions: [
-          "calc(2.9vmin)",
-          "calc(15.4vmin)",
-          "calc(27.95vmin)",
-          "calc(40.5vmin)",
-          "calc(53.08vmin)",
-          "calc(65.6vmin)",
-          "calc(78.1vmin)",
-        ],
-      },
-      {
-        upper: 640,
-        lower: 526,
-        top_positions: [
-          "calc(40px + 58.0vmin)",
-          "calc(40px + 46.9vmin)",
-          "calc(40px + 35.7vmin)",
-          "calc(40px + 24.7vmin)",
-          "calc(40px + 13.6vmin)",
-          "calc(40px + 2.4vmin)",
-        ],
-        left_positions: [
-          "calc(2.55vmin)",
-          "calc(13.7vmin)",
-          "calc(24.85vmin)",
-          "calc(36vmin)",
-          "calc(47.15vmin)",
-          "calc(58.3vmin)",
-          "calc(69.4vmin)",
-        ],
-      },
-      {
-        upper: 707,
-        lower: 640,
-        top_positions: [
-          "calc(40px + 50.95vmin)",
-          "calc(40px + 41.2vmin)",
-          "calc(40px + 31.5vmin)",
-          "calc(40px + 21.7vmin)",
-          "calc(40px + 11.86vmin)",
-          "calc(40px + 2.3vmin)",
-        ],
-        left_positions: [
-          "calc(2.23vmin)",
-          "calc(12vmin)",
-          "calc(21.75vmin)",
-          "calc(31.5vmin)",
-          "calc(41.25vmin)",
-          "calc(51vmin)",
-          "calc(60.75vmin)",
-        ],
-      },
-      {
-        upper: +Infinity,
-        lower: 707,
-        top_positions: [
-          "calc(40px + 44.99vmin)",
-          "calc(40px + 36.27vmin)",
-          "calc(40px + 27.65vmin)",
-          "calc(40px + 18.99vmin)",
-          "calc(40px + 10.38vmin)",
-          "calc(40px + 1.75vmin)",
-        ],
-        left_positions: [
-          "calc(2.02vmin)",
-          "calc(10.65vmin)",
-          "calc(19.28vmin)",
-          "calc(27.90vmin)",
-          "calc(36.52vmin)",
-          "calc(45.15vmin)",
-          "calc(53.78vmin)",
-        ],
-      },
-    ];
-
-    const breakPoint = breakPoints.find(
-      (i) => window.innerWidth <= i.upper && window.innerWidth > i.lower
-    );
-
-    const topPos = breakPoint!.top_positions[row];
-    const leftPos = breakPoint!.left_positions[col];
-
-    const ret: React.CSSProperties = {
-      position: "absolute",
-
-      width: "10%",
-      maxWidth: "10%",
-      height: "10%",
-      left: leftPos,
-      top: topPos,
-    };
-
-    if (row === 6) {
-      const animationName = `move-${stateRef.current.colState[col].length}`;
-
-      const merge = {
-        animationIterationCount: 1,
-        animationDuration: "0.1s",
-        animationName: animationName,
-        animationFillMode: "forwards",
-        // animationTimingFunction: "cubic-bezier(0.175, 0.885, 0.32, 1.275);",
-        zIndex: -2,
-      };
-
-      return { ...ret, ...merge };
-    }
-
-    return ret;
+    dispatch({ type: "restartGame" });
   };
 
   const tokens: any = [];
   const colState =
-    stateRef.current.winner != null
-      ? stateRef.current.winnerGameState
-      : stateRef.current.colState;
+    state.winner != null ? state.winnerGameState : state.colState;
 
-  colState!.forEach((column, i) => {
-    column.forEach((row, j) => {
-      const style = getTokenStyle(i, j);
+  colState!.forEach((column: string[], i: number) => {
+    column.forEach((row: string, j) => {
+      const style = getTokenStyle(state, i, j);
       if (row === "red") {
         tokens.push(
           <div key={`token${i}${j}orange`} style={style}>
@@ -684,13 +466,11 @@ export const App = ({
 
   let winningPieces: any = [];
 
-  if (stateRef.current.winner != null) {
-    winningPieces = stateRef.current.winner.pieces.map((piece) => {
-      const style = getTokenStyle(piece.col, piece.row);
+  if (state.winner != null) {
+    winningPieces = state.winner.pieces.map((piece) => {
+      const style = getTokenStyle(state, piece.col, piece.row);
       const image =
-        stateRef.current.winner!.player === "red"
-          ? RedWinningPiece
-          : YellowWinningPiece;
+        state.winner!.player === "red" ? RedWinningPiece : YellowWinningPiece;
 
       return (
         <div key={`winningtoken${piece.col}${piece.row}orange`} style={style}>
@@ -711,22 +491,19 @@ export const App = ({
 
   return (
     <>
+      version 0.1
       <div className="nav-bar flex flex-row justify-around pt-3 items-center">
         <button onClick={openMainMenuModal}>Menu</button>
 
         <img src={GameLogo} alt=""></img>
 
-        <button
-          onClick={restartGame}
-          disabled={stateRef.current.mode === "online"}
-        >
+        <button onClick={restartGame} disabled={state.mode === "online"}>
           Restart
         </button>
       </div>
-
       <ReactModal
         className="modal centered"
-        isOpen={stateRef.current.mainMenuOpen}
+        isOpen={state.mainMenuOpen}
         shouldCloseOnOverlayClick={true}
         onRequestClose={() => {
           closeMainMenuModal();
@@ -737,20 +514,13 @@ export const App = ({
           websocketUrl={websocketUrl}
           onStartGame={startGame}
           setSocket={(socket: WebSocket) => {
-            stateRef.current.websocket = socket;
-            toggleRender();
+            dispatch({ type: "setWebsocket", value: socket });
           }}
           onClose={() => {
-            stateRef.current = {
-              ...stateRef.current,
-              ...{ mainMenuOpen: false },
-            };
-
-            toggleRender();
+            dispatch({ type: "mainMenuModalVisible", value: false });
           }}
         />
       </ReactModal>
-
       <div className="flex flex-col">
         <div className="player-card-small-container flex flex-row justify-center gap-4">
           <div className="player-card-small flex flex-row justify-around items-center">
@@ -759,14 +529,14 @@ export const App = ({
             </div>
 
             <div className="flex flex-row justify-center font-bold text-lg uppercase">
-              {stateRef.current.player1}
+              {state.player1}
             </div>
 
             <div
               data-testid="red-win-count-small"
               className="win-count flex flex-row justify-center uppercase font-bold"
             >
-              {stateRef.current.redWins}
+              {state.redWins}
             </div>
           </div>
 
@@ -775,10 +545,10 @@ export const App = ({
               data-testid="yellow-win-count-small"
               className="win-count flex flex-row justify-center uppercase font-bold"
             >
-              {stateRef.current.yellowWins}
+              {state.yellowWins}
             </div>
             <div className="flex flex-row justify-center font-bold text-lg uppercase">
-              {stateRef.current.player2}
+              {state.player2}
             </div>
 
             <div className="flex flex-row pb-1 justify-center -mr-12 smiley-container smiley-container-yellow">
@@ -787,29 +557,29 @@ export const App = ({
           </div>
         </div>
         <div className="game-board-items">
-          {stateRef.current.gameStarted && (
+          {state.gameStarted && (
             <div className="player1-card player-card">
               <div className="flex flex-row pb-1 justify-center -mt-6 ">
                 <img src={Player1} alt="Player One Smiley Face" />
               </div>
 
               <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
-                {stateRef.current.player1}
+                {state.player1}
               </div>
 
               <div
                 data-testid="red-win-count"
                 className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
               >
-                {stateRef.current.redWins}
+                {state.redWins}
               </div>
             </div>
           )}
 
           <div className="game-board-container">
-            {(myTurn || stateRef.current.mode === "local") &&
-              stateRef.current.winner == null &&
-              stateRef.current.gameStarted && (
+            {(myTurn || state.mode === "local") &&
+              state.winner == null &&
+              state.gameStarted && (
                 <div className="dropzone flex flex-row w-full justify-between">
                   <div
                     className={`drop-column ${playerTurn}`}
@@ -853,9 +623,9 @@ export const App = ({
             {tokens}
             {winningPieces}
 
-            {stateRef.current.animatedPiece != null && (
-              <div style={getTokenStyle(stateRef.current.animatedPiece, 6)}>
-                {stateRef.current.animatedPieceColor === "yellow" ? (
+            {state.animatedPiece != null && (
+              <div style={getTokenStyle(state, state.animatedPiece, 6)}>
+                {state.animatedPieceColor === "yellow" ? (
                   <img src={YellowPiece} alt="Yellow Token" />
                 ) : (
                   <img src={OrangePiece} alt="Red Token" />
@@ -870,40 +640,40 @@ export const App = ({
               <img src={BlackBoard} alt="" />
             </div>
           </div>
-          {stateRef.current.gameStarted && (
+          {state.gameStarted && (
             <div className="player2-card player-card">
               <div className="flex flex-row pb-1 justify-center -mt-6 ">
                 <img src={Player2} alt="Player Two Smiley Face" />
               </div>
 
               <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
-                {stateRef.current.player2}
+                {state.player2}
               </div>
 
               <div
                 data-testid="yellow-win-count"
                 className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
               >
-                {stateRef.current.yellowWins}
+                {state.yellowWins}
               </div>
             </div>
           )}
         </div>
-        {stateRef.current.winner == null && stateRef.current.gameStarted && (
+        {state.winner == null && state.gameStarted && (
           <div className="flex justify-center -mt-8">
             <div
               className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
             >
               <div className="flex flex-row justify-center uppercase pt-5 font-extrabold text-xl pb-3">
                 {playerTurn === "red"
-                  ? `${stateRef.current.player1}'s Turn`
-                  : `${stateRef.current.player2}'s Turn`}
+                  ? `${state.player1}'s Turn`
+                  : `${state.player2}'s Turn`}
               </div>
 
-              {stateRef.current.plays > 1 ? (
+              {state.plays > 1 ? (
                 <div className="flex flex-row justify-center text-5xl font-extrabold">
-                  {stateRef.current.timerSeconds != null
-                    ? `${stateRef.current.timerSeconds}s`
+                  {state.timerSeconds != null
+                    ? `${state.timerSeconds}s`
                     : "24s"}
                 </div>
               ) : (
@@ -915,19 +685,17 @@ export const App = ({
           </div>
         )}
       </div>
-
       <div
         className={`bottom-plate ${
-          stateRef.current.winner != null ? stateRef.current.winner.player : ""
+          state.winner != null ? state.winner.player : ""
         } `}
       ></div>
-
       <ReactModal
         className="modal winner-card"
-        isOpen={stateRef.current.remoteDisconnected}
+        isOpen={state.remoteDisconnected}
         shouldCloseOnOverlayClick={true}
         onRequestClose={() => {
-          stateRef.current.remoteDisconnected = false;
+          state.remoteDisconnected = false;
           toggleRender();
         }}
         overlayClassName="disabled-background"
@@ -939,7 +707,7 @@ export const App = ({
 
           <button
             onClick={() => {
-              stateRef.current.remoteDisconnected = false;
+              state.remoteDisconnected = false;
               toggleRender();
             }}
             className="uppercase"
@@ -948,12 +716,10 @@ export const App = ({
           </button>
         </div>
       </ReactModal>
-
       <ReactModal
         className="modal winner-card"
         isOpen={
-          (stateRef.current.winner != null || stateRef.current.draw) &&
-          !stateRef.current.remoteDisconnected
+          (state.winner != null || state.draw) && !state.remoteDisconnected
         }
         shouldCloseOnOverlayClick={false}
         overlayClassName="disabled-background"
@@ -963,12 +729,18 @@ export const App = ({
             className="uppercase text-black text-center"
             data-testid="winning-player"
           >
-            {stateRef.current.winner && `${stateRef.current.winner!.player}`}
+            {state.winner && `${state.winner!.player}`}
           </div>
-
-          <div className="uppercase text-center text-5xl font-bold pt-1 text-black">
-            {`${stateRef.current.draw && "Nobody"} WINS`}
-          </div>
+          {state.draw && (
+            <div className="uppercase text-center text-5xl font-bold pt-1 text-black">
+              Draw
+            </div>
+          )}
+          {!state.draw && (
+            <div className="uppercase text-center text-5xl font-bold pt-1 text-black">
+              Wins
+            </div>
+          )}
           <div className="flex flex-row justify-center gap-5 pt-6">
             <button onClick={() => terminateGame()} className="uppercase">
               Quit

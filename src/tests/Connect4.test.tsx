@@ -11,7 +11,7 @@ const websocketServer = new Server(TEST_WS_URL);
 
 // second game is weird because we dont we send a turn after a delay
 // to start a fresh game. We need the delay so the client has enough
-// time to press Play again.
+// time to press Play again and send its move
 let secondGame = false;
 const myMoves = [0, 0, 0, 0];
 
@@ -72,6 +72,7 @@ websocketServer.on("connection", (socket) => {
       }
 
       if (payload.action === "joinLobby") {
+        console.log(" got a join lobby request");
         const payload1 = {
           message: "lobbyParticipants",
           data: [{ name: REMOTE_PLAYER_NAME }],
@@ -180,7 +181,7 @@ describe("Connect4", () => {
 
     await act(async () => {
       //this is needed to get rid of act warnings :-(
-      await wait(800);
+      await wait(3000);
     });
 
     await act(async () => {
@@ -210,8 +211,6 @@ describe("Connect4", () => {
     expect(winner.innerHTML).toEqual("yellow");
 
     console.log("myMovesCount", myMovesCount);
-
-    // screen.debug();
 
     let redWinCount = await screen.getByTestId("red-win-count");
     let yellowWinCount = await screen.getByTestId("yellow-win-count");
@@ -272,7 +271,7 @@ describe("Connect4", () => {
 
     // we should also test the scenario where we quit after a game
     //screen.debug();
-  }, 12000);
+  }, 13000);
 
   it("connect4 local gameplay", () => {
     // render(<App />);
