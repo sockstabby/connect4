@@ -53,6 +53,7 @@ export function mainReducer(state: GameState, action: GameActions) {
         opponent,
         remoteDisconnected: false,
         websocket,
+        animatedDisks: [],
       },
     };
   } else if (action.type === "diskDropped") {
@@ -208,7 +209,7 @@ export function setWinnerHelper(
   // New plays go on in the cleared orignal colState and we dont flip over to that state until the user
   // presses Play Again.
 
-  const copy = JSON.parse(JSON.stringify(state.colState));
+  const copy = JSON.parse(JSON.stringify(state.animatedDisks));
 
   clearInterval(state.timerRef);
 
@@ -221,7 +222,8 @@ export function setWinnerHelper(
 
     colState: [[], [], [], [], [], [], []],
     plays: 0,
-    winnerGameState: copy,
+    animatedDisksCopy: copy,
+    animatedDisks: [],
     timerRef: undefined,
   };
 }
@@ -268,13 +270,18 @@ export function diskDropped(
     }
   }
 
-  let newState = {};
-  if (win || state.plays + 1 === 42) {
-    newState = setWinnerHelper(state, player, state.plays + 1 === 42);
-  }
-
   const row = state.colState[col].length;
   const newDisk: AnimatedDisk = { row, col, color: player };
+
+  let newState = {};
+  if (win || state.plays + 1 === 42) {
+    newState = setWinnerHelper(
+      { ...state, animatedDisks: [...state.animatedDisks, newDisk] },
+      player,
+      state.plays + 1 === 42
+    );
+  }
+
   const copy = JSON.parse(JSON.stringify(state.colState));
 
   copy[col].push(player);
@@ -292,7 +299,8 @@ export function diskDropped(
     ...newState,
     draw: state.plays + 1 === 42,
     colState: copy,
-    animatedDisks: [...state.animatedDisks, newDisk],
+    ...(win ? { colState: [[], [], [], [], [], [], []] } : {}),
+    ...(!win ? { animatedDisks: [...state.animatedDisks, newDisk] } : {}),
     ...(!win ? { plays: state.plays + 1 } : {}),
     ...(win ? { plays: 0 } : {}),
     ...(win ? { winner: { player, pieces: winningSet } } : {}),
@@ -307,8 +315,12 @@ export function diskDropped(
   };
 }
 
-export const getTokenStyle = (state: GameState, col: number, row: number) => {
-  console.log("getToken Style");
+export const getTokenStyle = (
+  state: GameState,
+  col: number,
+  row: number,
+  animate: boolean = true
+) => {
   const breakPoints = [
     {
       upper: 440,
@@ -485,8 +497,5 @@ export const getTokenStyle = (state: GameState, col: number, row: number) => {
     zIndex: -2,
   };
 
-  return { ...ret, ...merge };
-  //   }
-
-  return ret;
+  return { ...ret, ...(animate ? { ...merge } : {}) };
 };

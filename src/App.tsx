@@ -65,6 +65,7 @@ export type GameState = {
   lastDroppedColumn: null | number;
   listenerAdded: boolean;
   animatedDisks: AnimatedDisk[];
+  animatedDisksCopy: AnimatedDisk[];
 };
 
 const initialGameState: GameState = {
@@ -93,6 +94,8 @@ const initialGameState: GameState = {
   lastDroppedColumn: null,
   listenerAdded: false,
   animatedDisks: [],
+  //this is a copy of animatedDisks at the moment somebody won or their is a draw.
+  animatedDisksCopy: [],
 };
 
 type Connect4Props = {
@@ -117,7 +120,7 @@ export const App = ({
       }
     };
 
-    if (state.timerRef == null && state.plays > 1 && !DEBUG) {
+    if (state.timerRef == null && state.plays > 1) {
       state.timerRef = setInterval(decSeconds, 1000);
     }
   }, [state]);
@@ -257,14 +260,24 @@ export const App = ({
         return acc.add(key);
       }, new Set());
 
-  const tokens = state.animatedDisks.map((disk) => {
-    const style = getTokenStyle(state, disk.col, disk.row);
+  const disks = state.winner ? state.animatedDisksCopy : state.animatedDisks;
+
+  const tokens = disks.map((disk: AnimatedDisk) => {
+    const style = getTokenStyle(
+      state,
+      disk.col,
+      disk.row,
+      state.winner == null
+    );
     const key = `${disk.col}${disk.row}`;
 
     const winningDisk = winningDiskSet.has(key);
 
     return (
-      <div key={`disk${disk.col}${disk.row}${disk.color}`} style={style}>
+      <div
+        key={`disk${disk.col}${disk.row}${disk.color}${state.winner}`}
+        style={style}
+      >
         {!winningDisk ? (
           <img
             src={disk.color === "red" ? OrangePiece : YellowPiece}
@@ -291,12 +304,7 @@ export const App = ({
   const [myTurn, playerTurn] = getCurrentTurn();
 
   if (DEBUG) {
-    console.log("total disks = ", tokens.length);
-    console.log("myTurn", myTurn);
-    console.log("mode", state.mode);
-    console.log("plays", state.plays);
-    console.log(state.colState);
-    console.log("modal open = ", state.mainMenuOpen);
+    console.log("state= ", state);
   }
 
   return (
