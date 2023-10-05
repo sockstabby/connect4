@@ -10,18 +10,18 @@ import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
 import { Locations } from "./utils";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 import StartGameModal, { GameMode } from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
 
+const DEBUG = true;
+
 import {
-  diskDropped,
   getLocalColor,
   getRemoteColor,
-  setWinnerHelper,
-  terminateGame,
   getTokenStyle,
+  mainReducer,
 } from "./reducerFunctions";
 
 type Column = string[];
@@ -33,6 +33,12 @@ type Winner = {
 
 export type ColState = Column[];
 
+export type AnimatedDisk = {
+  color: string;
+  row: number;
+  col: number;
+};
+
 export type GameState = {
   colState: ColState;
   yellowWins: number;
@@ -42,7 +48,6 @@ export type GameState = {
   plays: number;
   animatedPiece: number | null;
   animatedPieceColor: string | null;
-  // this nees to be here because of useKeyBoard hook.
   mainMenuOpen: boolean;
   mode: GameMode;
   draw: boolean;
@@ -59,162 +64,9 @@ export type GameState = {
   winnerGameState: ColState | null;
   lastDroppedColumn: null | number;
   listenerAdded: boolean;
+  animatedDisks: AnimatedDisk[];
 };
 
-type Action =
-  | {
-      type: "startGame";
-      value: {
-        initiator: boolean;
-        opponent: string;
-        mode: GameMode;
-        player1: string;
-        player2: string;
-        websocket?: WebSocket;
-      };
-    }
-  | {
-      type: "diskDropped";
-      value: { col: number; remote: boolean; gameTimerConfig: number };
-    }
-  | { type: "decrementSeconds" }
-  | { type: "setWinner"; value: { player: string; pieces: Locations } }
-  | { type: "terminateGame"; value: { notifyRemote: boolean } }
-  | { type: "socketClosed" }
-  | { type: "messageReceived"; value: any }
-  | { type: "setAnimatedDisk" }
-  | { type: "clearAnimatedDisk" }
-  | { type: "mainMenuModalVisible"; value: boolean }
-  | { type: "playAgain" }
-  | { type: "restartGame" }
-  | { type: "listenerAdded"; value: boolean }
-  | { type: "setWebsocket"; value: WebSocket };
-
-function reducer(state: GameState, action: Action) {
-  console.log("Reducer called ", action.type);
-  if (action.type === "startGame") {
-    const { initiator, opponent, mode, player1, player2, websocket } =
-      action.value;
-
-    return {
-      ...state,
-      ...{
-        colState: [[], [], [], [], [], [], []],
-        yellowWins: 0,
-        redWins: 0,
-        initiator,
-        mainMenuOpen: false,
-        mode,
-        player1,
-        player2,
-        gameStarted: true,
-        opponent,
-        remoteDisconnected: false,
-        websocket,
-      },
-    };
-  } else if (action.type === "diskDropped") {
-    const { col, remote, gameTimerConfig } = action.value;
-    return diskDropped(state, col, remote, gameTimerConfig);
-  } else if (action.type === "decrementSeconds") {
-    return {
-      ...state,
-      ...(state.timerSeconds !== null
-        ? { timerSeconds: state.timerSeconds - 1 }
-        : {}),
-    };
-  } else if (action.type === "setWinner") {
-    const { player, pieces } = action.value;
-
-    if (state.timerRef != null) {
-      console.log("clearing timer");
-
-      clearInterval(state.timerRef);
-    }
-
-    const newState = setWinnerHelper(state, player, false);
-
-    return {
-      ...state,
-      ...newState,
-      winner: { pieces, player },
-      timerRef: undefined,
-      timerSeconds: null,
-    };
-  } else if (action.type === "terminateGame") {
-    const { notifyRemote } = action.value;
-
-    return terminateGame(state, notifyRemote);
-  } else if (action.type === "socketClosed") {
-    return { ...state, websocket: undefined };
-  } else if (action.type === "messageReceived") {
-    const { payload, gameTimerConfig } = action.value;
-    console.log("client received message", payload);
-
-    if (payload.message === "playTurn") {
-      if (payload.data.turn === -1) {
-        // stateRef.current.remoteDisconnected = true;
-        const newState = terminateGame(state, false);
-        return { ...newState, remoteDisconnected: true };
-      } else {
-        const x = document.getElementById("drop-sound") as HTMLAudioElement;
-        x?.play();
-        // animateRow(payload.data.turn.col, true);
-
-        return diskDropped(state, payload.data.turn.col, true, gameTimerConfig);
-      }
-    }
-
-    return state;
-  } else if (action.type === "setAnimatedDisk") {
-    const colState = JSON.parse(JSON.stringify(state.colState));
-
-    if (state.animatedPiece != null) {
-      colState[state.animatedPiece].push(state.animatedPieceColor);
-    }
-
-    return { ...state, colState };
-  } else if (action.type === "clearAnimatedDisk") {
-    return { ...state, animatedPiece: null, lastDroppedColumn: null };
-  } else if (action.type === "mainMenuModalVisible") {
-    const visible = action.value;
-
-    return { ...state, mainMenuOpen: visible };
-  } else if (action.type === "playAgain") {
-    return {
-      ...state,
-      ...{
-        initiator: !state.initiator,
-        plays: state.plays !== 1 ? 0 : state.plays,
-        // colState: [[], [], [], [], [], [], []],
-        mainMenuOpen: false,
-        draw: false,
-        initiatorColor: state.initiatorColor === "red" ? "yellow" : "red",
-        winner: null,
-      },
-    };
-  } else if (action.type === "restartGame") {
-    return {
-      ...state,
-      ...{
-        plays: 0,
-        colState: [[], [], [], [], [], [], []],
-      },
-    };
-  } else if (action.type === "setWebsocket") {
-    const websocket = action.value;
-    return { ...state, websocket };
-  } else if (action.type === "listenerAdded") {
-    const added = action.value;
-    return { ...state, listenerAdded: added };
-  }
-
-  return state;
-}
-
-// For this app we store state in a ref. This drastically simplifies our useEffect dependencies
-// as they dont need to care so much about dependencies. Just note that you are responsible
-// for rendering and can trigger a render with toggleRender function.
 const initialGameState: GameState = {
   colState: [[], [], [], [], [], [], []],
   yellowWins: 0,
@@ -224,7 +76,6 @@ const initialGameState: GameState = {
   plays: 0,
   animatedPiece: null,
   animatedPieceColor: null,
-  // this nees to be here because of useKeyBoard hook. For toggling the pause modal
   mainMenuOpen: false,
   mode: "local",
   draw: false,
@@ -241,6 +92,7 @@ const initialGameState: GameState = {
   winnerGameState: null,
   lastDroppedColumn: null,
   listenerAdded: false,
+  animatedDisks: [],
 };
 
 type Connect4Props = {
@@ -251,42 +103,25 @@ export const App = ({
   gameTimerConfig = 24,
   websocketUrl = "wss://connect4.isomarkets.com",
 }: Connect4Props) => {
-  // stateRef is intended to store refs in one single ref.
-
-  const [state, dispatch] = useReducer(reducer, initialGameState);
-
-  const stateRef = useRef(initialGameState);
-
-  // this is a hack. if we ever need to set a reference and trigger a rerender we can
-  // call this function. Only needed because i chose to use references instead of setState
-  // hooks to store state.
-
-  const [, setForceRender] = useState(false);
+  const [state, dispatch] = useReducer(mainReducer, initialGameState);
 
   useEffect(() => {
     ReactModal.setAppElement("body");
-  }, []);
-
-  const toggleRender = useCallback(() => {
-    stateRef.current.forceRender = !stateRef.current.forceRender;
-    setForceRender(stateRef.current.forceRender);
   }, []);
 
   useEffect(() => {
     const decSeconds = () => {
       if (state.timerSeconds != null && state.timerSeconds != -1) {
         console.log("decseconds", state.timerSeconds);
-        // --stateRef.current.timerSeconds;
         dispatch({ type: "decrementSeconds" });
-        // toggleRender();
       }
     };
 
-    if (state.timerRef == null && state.plays > 1) {
+    if (state.timerRef == null && state.plays > 1 && !DEBUG) {
       console.log("createing interval timer");
       state.timerRef = setInterval(decSeconds, 1000);
     }
-  }, [toggleRender, state]);
+  }, [state]);
 
   const getCurrentTurn = useCallback(() => {
     const getCurrentTurnWrapped: () => [boolean, string] = function (): [
@@ -318,12 +153,8 @@ export const App = ({
     if (state.timerSeconds === 0) {
       console.log("setting winner");
       clearInterval(state.timerRef);
-      // state.timerRef = undefined;
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [_myTurn, playerTurn] = getCurrentTurn();
-
-      // setWinnerHelper(state, playerTurn === "yellow" ? "red" : "yellow");
+      const [, playerTurn] = getCurrentTurn();
 
       dispatch({
         type: "setWinner",
@@ -332,11 +163,6 @@ export const App = ({
           pieces: [],
         },
       });
-
-      // setWinner({
-      //   player: playerTurn === "yellow" ? "red" : "yellow",
-      //   pieces: [],
-      // });
     }
   }, [state.timerSeconds, getCurrentTurn, state.timerRef]);
 
@@ -387,22 +213,6 @@ export const App = ({
 
   useScreenSize();
 
-  useEffect(() => {
-    if (state.animatedPiece !== null) {
-      const x = document.getElementById("drop-sound") as HTMLAudioElement;
-
-      if (x != null) {
-        x?.play();
-      }
-
-      dispatch({ type: "setAnimatedDisk" });
-
-      setTimeout(() => {
-        dispatch({ type: "clearAnimatedDisk" });
-      }, 100);
-    }
-  }, [state.lastDroppedColumn, state.animatedPiece]);
-
   const openMainMenuModal = () => {
     dispatch({ type: "mainMenuModalVisible", value: true });
   };
@@ -441,28 +251,51 @@ export const App = ({
     dispatch({ type: "restartGame" });
   };
 
-  const tokens: any = [];
+  // const tokens: any = [];
   const colState =
     state.winner != null ? state.winnerGameState : state.colState;
 
-  colState!.forEach((column: string[], i: number) => {
-    column.forEach((row: string, j) => {
-      const style = getTokenStyle(state, i, j);
-      if (row === "red") {
-        tokens.push(
-          <div key={`token${i}${j}orange`} style={style}>
-            <img src={OrangePiece} alt="" />
-          </div>
-        );
-      } else {
-        tokens.push(
-          <div key={`token${i}${j}yellow`} style={style}>
-            <img src={YellowPiece} alt="" />
-          </div>
-        );
-      }
-    });
+  const tokens = state.animatedDisks.map((disk) => {
+    const style = getTokenStyle(state, disk.col, disk.row);
+
+    return (
+      <div key={`disk${disk.col}${disk.row}${disk.color}`} style={style}>
+        <img
+          src={disk.color === "red" ? OrangePiece : YellowPiece}
+          alt={
+            disk.color === "red"
+              ? `Red disk at row ${disk.row}, colimn ${disk.col} `
+              : `Yellow disk at row ${disk.row}, colimn ${disk.col} `
+          }
+        />
+      </div>
+    );
   });
+
+  //getTokenStyle(state, state.animatedPiece, 6)
+
+  // colState!.forEach((column: string[], i: number) => {
+  //   column.forEach((row: string, j) => {
+  //     const style = getTokenStyle(state, i, j);
+  //     if (row === "red") {
+  //       tokens.push(
+  //         <div key={`token${i}${j}orange`} style={style}>
+  //           <img src={OrangePiece} alt="" />
+  //         </div>
+  //       );
+  //     } else {
+  //       tokens.push(
+  //         <div key={`token${i}${j}yellow`} style={style}>
+  //           <img src={YellowPiece} alt="" />
+  //         </div>
+  //       );
+  //     }
+  //   });
+  // });
+
+  if (DEBUG) {
+    console.log("total disks = ", tokens.length);
+  }
 
   let winningPieces: any = [];
 
@@ -483,11 +316,13 @@ export const App = ({
   const [myTurn, playerTurn] = getCurrentTurn();
 
   console.log("myTurn", myTurn);
-  // console.log("mode", mode);
-  // console.log("plays", stateRef.current.plays);
-  // console.log(stateRef.current.colState);
-  // console.log("modal open = ", stateRef.current.mainMenuOpen);
-  // console.log("forceRender", forceRender);
+
+  if (DEBUG) {
+    console.log("mode", state.mode);
+    console.log("plays", state.plays);
+    console.log(state.colState);
+    console.log("modal open = ", state.mainMenuOpen);
+  }
 
   return (
     <>
@@ -623,15 +458,18 @@ export const App = ({
             {tokens}
             {winningPieces}
 
-            {state.animatedPiece != null && (
-              <div style={getTokenStyle(state, state.animatedPiece, 6)}>
+            {/* {state.animatedPiece != null && (
+              <div
+                key={state.animatedPiece}
+                style={getTokenStyle(state, state.animatedPiece, 6)}
+              >
                 {state.animatedPieceColor === "yellow" ? (
                   <img src={YellowPiece} alt="Yellow Token" />
                 ) : (
                   <img src={OrangePiece} alt="Red Token" />
                 )}
               </div>
-            )}
+            )} */}
 
             <div className="white-board">
               <img src={Board} alt="" />
@@ -695,8 +533,7 @@ export const App = ({
         isOpen={state.remoteDisconnected}
         shouldCloseOnOverlayClick={true}
         onRequestClose={() => {
-          state.remoteDisconnected = false;
-          toggleRender();
+          dispatch({ type: "remoteDisconnected", value: false });
         }}
         overlayClassName="disabled-background"
       >
@@ -707,8 +544,7 @@ export const App = ({
 
           <button
             onClick={() => {
-              state.remoteDisconnected = false;
-              toggleRender();
+              dispatch({ type: "remoteDisconnected", value: false });
             }}
             className="uppercase"
           >

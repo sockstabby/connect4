@@ -1,5 +1,152 @@
-import { GameState } from "./App";
+import { GameState, AnimatedDisk } from "./App";
 import { testForWin } from "./utils";
+import { GameMode } from "./StartGameModal";
+import { Locations } from "./utils";
+
+export type GameActions =
+  | {
+      type: "startGame";
+      value: {
+        initiator: boolean;
+        opponent: string;
+        mode: GameMode;
+        player1: string;
+        player2: string;
+        websocket?: WebSocket;
+      };
+    }
+  | {
+      type: "diskDropped";
+      value: { col: number; remote: boolean; gameTimerConfig: number };
+    }
+  | { type: "decrementSeconds" }
+  | { type: "setWinner"; value: { player: string; pieces: Locations } }
+  | { type: "terminateGame"; value: { notifyRemote: boolean } }
+  | { type: "socketClosed" }
+  | { type: "messageReceived"; value: any }
+  | { type: "setAnimatedDisk" }
+  | { type: "clearAnimatedDisk" }
+  | { type: "mainMenuModalVisible"; value: boolean }
+  | { type: "playAgain" }
+  | { type: "restartGame" }
+  | { type: "listenerAdded"; value: boolean }
+  | { type: "remoteDisconnected"; value: boolean }
+  | { type: "setWebsocket"; value: WebSocket };
+
+export function mainReducer(state: GameState, action: GameActions) {
+  if (action.type === "startGame") {
+    const { initiator, opponent, mode, player1, player2, websocket } =
+      action.value;
+
+    return {
+      ...state,
+      ...{
+        colState: [[], [], [], [], [], [], []],
+        yellowWins: 0,
+        redWins: 0,
+        initiator,
+        mainMenuOpen: false,
+        mode,
+        player1,
+        player2,
+        gameStarted: true,
+        opponent,
+        remoteDisconnected: false,
+        websocket,
+      },
+    };
+  } else if (action.type === "diskDropped") {
+    const { col, remote, gameTimerConfig } = action.value;
+    return diskDropped(state, col, remote, gameTimerConfig);
+  } else if (action.type === "decrementSeconds") {
+    return {
+      ...state,
+      ...(state.timerSeconds !== null
+        ? { timerSeconds: state.timerSeconds - 1 }
+        : {}),
+    };
+  } else if (action.type === "setWinner") {
+    const { player, pieces } = action.value;
+
+    if (state.timerRef != null) {
+      console.log("clearing timer");
+
+      clearInterval(state.timerRef);
+    }
+
+    const newState = setWinnerHelper(state, player, false);
+
+    return {
+      ...state,
+      ...newState,
+      winner: { pieces, player },
+      timerRef: undefined,
+      timerSeconds: null,
+    };
+  } else if (action.type === "terminateGame") {
+    const { notifyRemote } = action.value;
+
+    return terminateGame(state, notifyRemote);
+  } else if (action.type === "socketClosed") {
+    return { ...state, websocket: undefined };
+  } else if (action.type === "messageReceived") {
+    const { payload, gameTimerConfig } = action.value;
+    console.log("client received message", payload);
+    if (payload.message === "playTurn") {
+      if (payload.data.turn === -1) {
+        const newState = terminateGame(state, false);
+        return { ...newState, remoteDisconnected: true };
+      } else {
+        const x = document.getElementById("drop-sound") as HTMLAudioElement;
+        x?.play();
+        return diskDropped(state, payload.data.turn.col, true, gameTimerConfig);
+      }
+    }
+    return state;
+  } else if (action.type === "setAnimatedDisk") {
+    const colState = JSON.parse(JSON.stringify(state.colState));
+    if (state.animatedPiece != null) {
+      colState[state.animatedPiece].push(state.animatedPieceColor);
+    }
+    return { ...state, colState };
+  } else if (action.type === "clearAnimatedDisk") {
+    return { ...state, animatedPiece: null, lastDroppedColumn: null };
+  } else if (action.type === "mainMenuModalVisible") {
+    const visible = action.value;
+    return { ...state, mainMenuOpen: visible };
+  } else if (action.type === "playAgain") {
+    return {
+      ...state,
+      ...{
+        initiator: !state.initiator,
+        plays: state.plays !== 1 ? 0 : state.plays,
+        mainMenuOpen: false,
+        draw: false,
+        initiatorColor: state.initiatorColor === "red" ? "yellow" : "red",
+        winner: null,
+      },
+    };
+  } else if (action.type === "restartGame") {
+    return {
+      ...state,
+      ...{
+        plays: 0,
+        colState: [[], [], [], [], [], [], []],
+      },
+    };
+  } else if (action.type === "setWebsocket") {
+    const websocket = action.value;
+    return { ...state, websocket };
+  } else if (action.type === "listenerAdded") {
+    const listenerAdded = action.value;
+    return { ...state, listenerAdded };
+  } else if (action.type === "remoteDisconnected") {
+    const remoteDisconnected = action.value;
+    return { ...state, remoteDisconnected };
+  }
+
+  return state;
+}
 
 export const terminateGame = (state: GameState, notifyRemote: boolean) => {
   console.log("terminating game");
@@ -102,10 +249,6 @@ export function diskDropped(
   remote: boolean = false,
   gameTimerConfig: number
 ): GameState {
-  // if (stateRef.current.colState[col].length === 6) {
-  //   return;
-  // }
-
   if (state.colState[col].length === 6) {
     return state;
   }
@@ -121,33 +264,12 @@ export function diskDropped(
     }
   }
 
-  //   stateRef.current = {
-  //     ...stateRef.current,
-  //     plays: stateRef.current.plays + 1,
-  //   };
-
-  //   if (stateRef.current.plays === 42) {
-  //     stateRef.current.draw = true;
-  //   }
-
   const [win, winningSet] = testForWin(
     col,
-    //stateRef.current.colState[col].length,
     state.colState[col].length,
     player,
-    //stateRef.current.colState
     state.colState
   );
-
-  //   if (!win) {
-  //     stateRef.current = {
-  //       ...stateRef.current,
-  //       timerSeconds: gameTimerConfig,
-  //       ...{ animatedPiece: col, animatedPieceColor: player },
-  //     };
-
-  //     // setLastDroppedColumn(col);
-  //   }
 
   if (!remote) {
     if (state.mode === "online") {
@@ -158,15 +280,30 @@ export function diskDropped(
   let newState = {};
   if (win || state.plays + 1 === 42) {
     newState = setWinnerHelper(state, player, state.plays + 1 === 42);
-    // stateRef.current.winner = { player, pieces: winningSet };
-    // toggleRender();
   }
+
+  const row = state.colState[col].length;
+
+  const newDisk: AnimatedDisk = { row, col, color: player };
+
+  const copy = JSON.parse(JSON.stringify(state.colState));
+
+  copy[col].push(player);
+
+  setTimeout(() => {
+    const x = document.getElementById("drop-sound") as HTMLAudioElement;
+
+    if (x != null) {
+      x?.play();
+    }
+  }, 1200);
 
   return {
     ...state,
     ...newState,
     draw: state.plays + 1 === 42,
-    // plays: state.plays + 1,
+    colState: copy,
+    animatedDisks: [...state.animatedDisks, newDisk],
     ...(!win ? { plays: state.plays + 1 } : {}),
     ...(win ? { plays: 0 } : {}),
     ...(win ? { winner: { player, pieces: winningSet } } : {}),
@@ -182,10 +319,12 @@ export function diskDropped(
 }
 
 export const getTokenStyle = (state: GameState, col: number, row: number) => {
+  console.log("getToken Style");
   const breakPoints = [
     {
       upper: 440,
       lower: -Infinity,
+      heightUpper: 1023,
       top_positions: [
         "calc(40px + 69vmin)",
         "calc(40px + 55.7vmin)",
@@ -207,6 +346,7 @@ export const getTokenStyle = (state: GameState, col: number, row: number) => {
     {
       upper: 526,
       lower: 440,
+      heightUpper: 1023,
       top_positions: [
         "calc(40px + 65.3vmin)",
         "calc(40px + 52.9vmin)",
@@ -228,6 +368,7 @@ export const getTokenStyle = (state: GameState, col: number, row: number) => {
     {
       upper: 640,
       lower: 526,
+      heightUpper: 1023,
       top_positions: [
         "calc(40px + 58.0vmin)",
         "calc(40px + 46.9vmin)",
@@ -249,6 +390,7 @@ export const getTokenStyle = (state: GameState, col: number, row: number) => {
     {
       upper: 707,
       lower: 640,
+      heightUpper: 1023,
       top_positions: [
         "calc(40px + 50.95vmin)",
         "calc(40px + 41.2vmin)",
@@ -270,6 +412,7 @@ export const getTokenStyle = (state: GameState, col: number, row: number) => {
     {
       upper: +Infinity,
       lower: 707,
+      heightUpper: 1023,
       top_positions: [
         "calc(40px + 44.99vmin)",
         "calc(40px + 36.27vmin)",
@@ -288,11 +431,41 @@ export const getTokenStyle = (state: GameState, col: number, row: number) => {
         "calc(53.78vmin)",
       ],
     },
+    {
+      name: "ipad air",
+      upper: +Infinity,
+      lower: 767,
+      heightUpper: +Infinity,
+      top_positions: [
+        "calc(40px + 59.5vmin)",
+        "calc(40px + 48vmin)",
+        "calc(40px + 36.7vmin)",
+        "calc(40px + 25.4vmin)",
+        "calc(40px + 13.9vmin)",
+        "calc(40px + 2.8vmin)",
+      ],
+      left_positions: [
+        "calc(2.7vmin)",
+        "calc(14vmin)",
+        "calc(25.4vmin)",
+        "calc(36.8vmin)",
+        "calc(48.2vmin)",
+        "calc(59.55vmin)",
+        "calc(70.9vmin)",
+      ],
+    },
   ];
 
   const breakPoint = breakPoints.find(
-    (i) => window.innerWidth <= i.upper && window.innerWidth > i.lower
+    (i) =>
+      window.innerWidth <= i.upper &&
+      window.innerWidth > i.lower &&
+      window.innerHeight <= i.heightUpper
   );
+
+  if (breakPoint!.name) {
+    console.log("Chosen breakpoint = ", breakPoint!.name);
+  }
 
   const topPos = breakPoint!.top_positions[row];
   const leftPos = breakPoint!.left_positions[col];
@@ -307,20 +480,24 @@ export const getTokenStyle = (state: GameState, col: number, row: number) => {
     top: topPos,
   };
 
-  if (row === 6) {
-    const animationName = `move-${state.colState[col].length}`;
+  console.log(`move-${state.colState[col].length}`);
 
-    const merge = {
-      animationIterationCount: 1,
-      animationDuration: "0.1s",
-      animationName: animationName,
-      animationFillMode: "forwards",
-      // animationTimingFunction: "cubic-bezier(0.175, 0.885, 0.32, 1.275);",
-      zIndex: -2,
-    };
+  //   if (row === 6) {
+  const animationName = `move-${row}`;
 
-    return { ...ret, ...merge };
-  }
+  // const animationName = "move-0";
+
+  const merge = {
+    animationTimingFunction: "linear",
+    animationIterationCount: 1,
+    animationDuration: "2s",
+    animationName: animationName,
+    animationFillMode: "forwards",
+    zIndex: -2,
+  };
+
+  return { ...ret, ...merge };
+  //   }
 
   return ret;
 };
