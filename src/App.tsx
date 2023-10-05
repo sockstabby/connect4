@@ -118,7 +118,6 @@ export const App = ({
     };
 
     if (state.timerRef == null && state.plays > 1 && !DEBUG) {
-      console.log("createing interval timer");
       state.timerRef = setInterval(decSeconds, 1000);
     }
   }, [state]);
@@ -251,73 +250,49 @@ export const App = ({
     dispatch({ type: "restartGame" });
   };
 
-  // const tokens: any = [];
-  const colState =
-    state.winner != null ? state.winnerGameState : state.colState;
+  const winningDiskSet = !state.winner
+    ? new Set()
+    : state.winner.pieces.reduce((acc, current) => {
+        const key = `${current.col}${current.row}`;
+        return acc.add(key);
+      }, new Set());
 
   const tokens = state.animatedDisks.map((disk) => {
     const style = getTokenStyle(state, disk.col, disk.row);
+    const key = `${disk.col}${disk.row}`;
+
+    const winningDisk = winningDiskSet.has(key);
 
     return (
       <div key={`disk${disk.col}${disk.row}${disk.color}`} style={style}>
-        <img
-          src={disk.color === "red" ? OrangePiece : YellowPiece}
-          alt={
-            disk.color === "red"
-              ? `Red disk at row ${disk.row}, colimn ${disk.col} `
-              : `Yellow disk at row ${disk.row}, colimn ${disk.col} `
-          }
-        />
+        {!winningDisk ? (
+          <img
+            src={disk.color === "red" ? OrangePiece : YellowPiece}
+            alt={
+              disk.color === "red"
+                ? `Red disk at row ${disk.row}, colimn ${disk.col} `
+                : `Yellow disk at row ${disk.row}, colimn ${disk.col} `
+            }
+          />
+        ) : (
+          <img
+            src={disk.color === "red" ? RedWinningPiece : YellowWinningPiece}
+            alt={
+              disk.color === "red"
+                ? `Red disk at row ${disk.row}, colimn ${disk.col} `
+                : `Yellow disk at row ${disk.row}, colimn ${disk.col} `
+            }
+          />
+        )}
       </div>
     );
   });
 
-  //getTokenStyle(state, state.animatedPiece, 6)
-
-  // colState!.forEach((column: string[], i: number) => {
-  //   column.forEach((row: string, j) => {
-  //     const style = getTokenStyle(state, i, j);
-  //     if (row === "red") {
-  //       tokens.push(
-  //         <div key={`token${i}${j}orange`} style={style}>
-  //           <img src={OrangePiece} alt="" />
-  //         </div>
-  //       );
-  //     } else {
-  //       tokens.push(
-  //         <div key={`token${i}${j}yellow`} style={style}>
-  //           <img src={YellowPiece} alt="" />
-  //         </div>
-  //       );
-  //     }
-  //   });
-  // });
+  const [myTurn, playerTurn] = getCurrentTurn();
 
   if (DEBUG) {
     console.log("total disks = ", tokens.length);
-  }
-
-  let winningPieces: any = [];
-
-  if (state.winner != null) {
-    winningPieces = state.winner.pieces.map((piece) => {
-      const style = getTokenStyle(state, piece.col, piece.row);
-      const image =
-        state.winner!.player === "red" ? RedWinningPiece : YellowWinningPiece;
-
-      return (
-        <div key={`winningtoken${piece.col}${piece.row}orange`} style={style}>
-          <img src={image} alt="" />
-        </div>
-      );
-    });
-  }
-
-  const [myTurn, playerTurn] = getCurrentTurn();
-
-  console.log("myTurn", myTurn);
-
-  if (DEBUG) {
+    console.log("myTurn", myTurn);
     console.log("mode", state.mode);
     console.log("plays", state.plays);
     console.log(state.colState);
@@ -456,20 +431,6 @@ export const App = ({
               )}
 
             {tokens}
-            {winningPieces}
-
-            {/* {state.animatedPiece != null && (
-              <div
-                key={state.animatedPiece}
-                style={getTokenStyle(state, state.animatedPiece, 6)}
-              >
-                {state.animatedPieceColor === "yellow" ? (
-                  <img src={YellowPiece} alt="Yellow Token" />
-                ) : (
-                  <img src={OrangePiece} alt="Red Token" />
-                )}
-              </div>
-            )} */}
 
             <div className="white-board">
               <img src={Board} alt="" />

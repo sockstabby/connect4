@@ -202,24 +202,15 @@ export function setWinnerHelper(
   player: string,
   draw: boolean
 ) {
-  //   const winCounts =
-  //     player === "yellow"
-  //       ? { yellowWins: state.yellowWins + 1 }
-  //       : { redWins: state.redWins + 1 };
+  // the reason we make a copy here is because a new game could be started by the opponent. When
+  // theres a winner we want the players to be able to reflect on how they lost. So at this time,
+  // the state of the board is a copy of the board whenever somebody won or there was a draw.
+  // New plays go on in the cleared orignal colState and we dont flip over to that state until the user
+  // presses Play Again.
 
   const copy = JSON.parse(JSON.stringify(state.colState));
 
-  //   stateRef.current = {
-  //     ...stateRef.current,
-  //     ...{ colState: [[], [], [], [], [], [], []], plays: 0 },
-  //   };
-
   clearInterval(state.timerRef);
-  //   state.timerRef = undefined;
-
-  //   state.winnerGameState = copy;
-
-  console.log("we have a winner", player);
 
   return {
     ...state,
@@ -283,9 +274,7 @@ export function diskDropped(
   }
 
   const row = state.colState[col].length;
-
   const newDisk: AnimatedDisk = { row, col, color: player };
-
   const copy = JSON.parse(JSON.stringify(state.colState));
 
   copy[col].push(player);
