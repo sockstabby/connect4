@@ -278,6 +278,7 @@ export const App = ({
       <div
         key={`disk${disk.col}${disk.row}${disk.color}${state.winner}`}
         style={style}
+        className="disk-container"
       >
         {!winningDisk ? (
           <img
