@@ -138,24 +138,23 @@ button[disabled] {
 
 /* Desktop */
 .game-board-container {
-  border: 1px solid red;
   position: relative;
   min-width: min(62vmin);
   min-height: calc(58.3vmin + 40px);
 
-  --row0-top-100pct: calc(45vmin + 40px);
+  --row0-top-100pct: calc(44.94vmin + 40px);
   --row0-top-90pct: calc(40vmin + 40px);
 
-  --row1-top-100pct: calc(36.5vmin + 40px);
+  --row1-top-100pct: calc(36.38vmin + 40px);
   --row1-top-90pct: calc(34vmin + 40px);
 
-  --row2-top-100pct: calc(28vmin + 40px);
+  --row2-top-100pct: calc(27.8vmin + 40px);
   --row2-top-90pct: calc(26vmin + 40px);
 
-  --row3-top-100pct: calc(19.3vmin + 40px);
+  --row3-top-100pct: calc(19.2vmin + 40px);
   --row3-top-90pct: calc(17.5vmin + 40px);
 
-  --row4-top-100pct: calc(10.7vmin + 40px);
+  --row4-top-100pct: calc(10.6vmin + 40px);
   --row4-top-90pct: calc(8.8vmin + 40px);
 
   --row5-top-100pct: calc(2vmin + 40px);
@@ -247,16 +246,16 @@ button[disabled] {
 
   /* (max-width: 640px) { */
   .game-board-container {
-    --row0-top-100pct: calc(58vmin + 40px);
+    --row0-top-100pct: calc(58.2vmin + 40px);
     --row0-top-90pct: calc(53vmin + 40px);
 
-    --row1-top-100pct: calc(47vmin + 40px);
+    --row1-top-100pct: calc(47.1vmin + 40px);
     --row1-top-90pct: calc(42vmin + 40px);
 
-    --row2-top-100pct: calc(36vmin + 40px);
+    --row2-top-100pct: calc(35.95vmin + 40px);
     --row2-top-90pct: calc(31vmin + 40px);
 
-    --row3-top-100pct: calc(24.8vmin + 40px);
+    --row3-top-100pct: calc(24.7vmin + 40px);
     --row3-top-90pct: calc(20vmin + 40px);
 
     --row4-top-100pct: calc(13.7vmin + 40px);
@@ -330,7 +329,7 @@ button[disabled] {
 
   /* (max-width: 440px) { */
   .game-board-container {
-    --row0-top-100pct: calc(68.8vmin + 40px);
+    --row0-top-100pct: calc(68.9vmin + 40px);
     --row0-top-90pct: calc(64vmin + 40px);
 
     --row1-top-100pct: calc(55.7vmin + 40px);
@@ -395,7 +394,7 @@ button[disabled] {
     --row4-top-100pct: calc(13.9vmin + 40px);
     --row4-top-90pct: calc(8.9vmin + 40px);
 
-    --row5-top-100pct: calc(2.8vmin + 40px);
+    --row5-top-100pct: calc(2.56vmin + 40px);
     --row5-top-90pct: calc(0vmin + 40px);
   }
 }
