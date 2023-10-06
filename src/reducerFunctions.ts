@@ -337,11 +337,11 @@ export const getTokenStyle = (
       left_positions: [
         "calc(3.04vmin)",
         "calc(16.23vmin)",
-        "calc(29.5vmin)",
-        "calc(42.75vmin)",
-        "calc(56vmin)",
-        "calc(69.2vmin)",
-        "calc(82.5vmin)",
+        "calc(29.4vmin)",
+        "calc(42.48vmin)",
+        "calc(55.6vmin)",
+        "calc(68.7vmin)",
+        "calc(81.9vmin)",
       ],
     },
     {
@@ -474,8 +474,8 @@ export const getTokenStyle = (
   const ret: React.CSSProperties = {
     position: "absolute",
 
-    width: "10%",
-    maxWidth: "10%",
+    width: "10.1%",
+    maxWidth: "10.1%",
     height: "10%",
     left: leftPos,
     top: topPos,

@@ -330,22 +330,22 @@ button[disabled] {
 
   /* (max-width: 440px) { */
   .game-board-container {
-    --row0-top-100pct: calc(69vmin + 40px);
+    --row0-top-100pct: calc(68.8vmin + 40px);
     --row0-top-90pct: calc(64vmin + 40px);
 
-    --row1-top-100pct: calc(55.8vmin + 40px);
+    --row1-top-100pct: calc(55.7vmin + 40px);
     --row1-top-90pct: calc(50.8.8vmin + 40px);
 
     --row2-top-100pct: calc(42.5vmin + 40px);
     --row2-top-90pct: calc(37.5vmin + 40px);
 
-    --row3-top-100pct: calc(29.5vmin + 40px);
+    --row3-top-100pct: calc(29.3vmin + 40px);
     --row3-top-90pct: calc(24.5vmin + 40px);
 
-    --row4-top-100pct: calc(16.3vmin + 40px);
+    --row4-top-100pct: calc(16.1vmin + 40px);
     --row4-top-90pct: calc(11.3vmin + 40px);
 
-    --row5-top-100pct: calc(3vmin + 40px);
+    --row5-top-100pct: calc(2.8vmin + 40px);
     --row5-top-90pct: calc(0vmin + 40px);
   }
 }

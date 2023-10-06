@@ -16,6 +16,7 @@ import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
 
 const DEBUG = true;
+const TIMER_ENABLED = false;
 
 import {
   getLocalColor,
@@ -120,7 +121,7 @@ export const App = ({
       }
     };
 
-    if (state.timerRef == null && state.plays > 1) {
+    if (state.timerRef == null && state.plays > 1 && TIMER_ENABLED) {
       state.timerRef = setInterval(decSeconds, 1000);
     }
   }, [state]);
