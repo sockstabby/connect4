@@ -315,183 +315,21 @@ export function diskDropped(
   };
 }
 
-export const getTokenStyle = (
-  state: GameState,
-  col: number,
-  row: number,
-  animate: boolean = true
-) => {
-  const breakPoints = [
-    {
-      upper: 440,
-      lower: -Infinity,
-      heightUpper: 1023,
-      top_positions: [
-        "calc(40px + 69vmin)",
-        "calc(40px + 55.7vmin)",
-        "calc(40px + 42.5vmin)",
-        "calc(40px + 29.3vmin)",
-        "calc(40px + 16.3vmin)",
-        "calc(40px + 2.7vmin)",
-      ],
-      left_positions: [
-        "calc(3.04vmin)",
-        "calc(16.27vmin)",
-        "calc(29.5vmin)",
-        "calc(42.7vmin)",
-        "calc(55.9vmin)",
-        "calc(69.1vmin)",
-        "calc(82.3vmin)",
-      ],
-    },
-    {
-      upper: 526,
-      lower: 440,
-      heightUpper: 1023,
-      top_positions: [
-        "calc(40px + 65.3vmin)",
-        "calc(40px + 52.9vmin)",
-        "calc(40px + 40.5vmin)",
-        "calc(40px + 27.9vmin)",
-        "calc(40px + 15.3vmin)",
-        "calc(40px + 2.57vmin)",
-      ],
-      left_positions: [
-        "calc(2.9vmin)",
-        "calc(15.4vmin)",
-        "calc(27.95vmin)",
-        "calc(40.5vmin)",
-        "calc(53.08vmin)",
-        "calc(65.6vmin)",
-        "calc(78.1vmin)",
-      ],
-    },
-    {
-      upper: 640,
-      lower: 526,
-      heightUpper: 1023,
-      top_positions: [
-        "calc(40px + 58.0vmin)",
-        "calc(40px + 46.9vmin)",
-        "calc(40px + 35.7vmin)",
-        "calc(40px + 24.7vmin)",
-        "calc(40px + 13.6vmin)",
-        "calc(40px + 2.4vmin)",
-      ],
-      left_positions: [
-        "calc(2.55vmin)",
-        "calc(13.7vmin)",
-        "calc(24.85vmin)",
-        "calc(35.95vmin)",
-        "calc(47.1vmin)",
-        "calc(58.2vmin)",
-        "calc(69.35vmin)",
-      ],
-    },
-    {
-      upper: 707,
-      lower: 640,
-      heightUpper: 1023,
-      top_positions: [
-        "calc(40px + 50.95vmin)",
-        "calc(40px + 41.2vmin)",
-        "calc(40px + 31.5vmin)",
-        "calc(40px + 21.7vmin)",
-        "calc(40px + 11.86vmin)",
-        "calc(40px + 2.3vmin)",
-      ],
-      left_positions: [
-        "calc(2.23vmin)",
-        "calc(12vmin)",
-        "calc(21.75vmin)",
-        "calc(31.5vmin)",
-        "calc(41.25vmin)",
-        "calc(51vmin)",
-        "calc(60.75vmin)",
-      ],
-    },
-    {
-      upper: +Infinity,
-      lower: 707,
-      heightUpper: 1023,
-      top_positions: [
-        "calc(40px + 44.99vmin)",
-        "calc(40px + 36.27vmin)",
-        "calc(40px + 27.65vmin)",
-        "calc(40px + 18.99vmin)",
-        "calc(40px + 10.38vmin)",
-        "calc(40px + 1.75vmin)",
-      ],
-      left_positions: [
-        "calc(1.95vmin)",
-        "calc(10.6vmin)",
-        "calc(19.25vmin)",
-        "calc(27.88vmin)",
-        "calc(36.5vmin)",
-        "calc(45.18vmin)",
-        "calc(53.75vmin)",
-      ],
-    },
-    {
-      name: "ipad air",
-      upper: +Infinity,
-      lower: 767,
-      heightUpper: +Infinity,
-      top_positions: [
-        "calc(40px + 59.5vmin)",
-        "calc(40px + 48vmin)",
-        "calc(40px + 36.7vmin)",
-        "calc(40px + 25.4vmin)",
-        "calc(40px + 13.9vmin)",
-        "calc(40px + 2.8vmin)",
-      ],
-      left_positions: [
-        "calc(2.7vmin)",
-        "calc(14vmin)",
-        "calc(25.4vmin)",
-        "calc(36.8vmin)",
-        "calc(48.2vmin)",
-        "calc(59.55vmin)",
-        "calc(70.9vmin)",
-      ],
-    },
-  ];
-
-  const breakPoint = breakPoints.find(
-    (i) =>
-      window.innerWidth <= i.upper &&
-      window.innerWidth > i.lower &&
-      window.innerHeight <= i.heightUpper
-  );
-
-  if (breakPoint!.name) {
-    console.log("Chosen breakpoint = ", breakPoint!.name);
-  }
-
-  const topPos = breakPoint!.top_positions[row];
-  const leftPos = breakPoint!.left_positions[col];
-
+export const getTokenStyle = (row: number, animate: boolean = true) => {
   const ret: React.CSSProperties = {
     position: "absolute",
 
     width: "10.1%",
     maxWidth: "10.1%",
-    height: "10%",
-    left: leftPos,
-    top: topPos,
+    height: "10.1%",
   };
 
-  console.log(`move-${state.colState[col].length}`);
-
-  //   if (row === 6) {
   const animationName = `move-${row}`;
 
-  // const animationName = "move-0";
-
   const merge = {
-    animationTimingFunction: "linear",
+    animationTimingFunction: "ease-in",
     animationIterationCount: 1,
-    animationDuration: "2s",
+    animationDuration: ".5s",
     animationName: animationName,
     animationFillMode: "forwards",
     zIndex: -2,

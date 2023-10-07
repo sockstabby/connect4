@@ -1,3 +1,5 @@
+@use "_disks";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -141,24 +143,6 @@ button[disabled] {
   position: relative;
   min-width: min(62vmin);
   min-height: calc(58.3vmin + 40px);
-
-  --row0-top-100pct: calc(44.94vmin + 40px);
-  --row0-top-90pct: calc(40vmin + 40px);
-
-  --row1-top-100pct: calc(36.38vmin + 40px);
-  --row1-top-90pct: calc(34vmin + 40px);
-
-  --row2-top-100pct: calc(27.8vmin + 40px);
-  --row2-top-90pct: calc(26vmin + 40px);
-
-  --row3-top-100pct: calc(19.2vmin + 40px);
-  --row3-top-90pct: calc(17.5vmin + 40px);
-
-  --row4-top-100pct: calc(10.6vmin + 40px);
-  --row4-top-90pct: calc(8.8vmin + 40px);
-
-  --row5-top-100pct: calc(2vmin + 40px);
-  --row5-top-90pct: calc(0vmin + 40px);
 }
 
 .smiley-container {
@@ -203,26 +187,6 @@ button[disabled] {
   .game-board-items {
     margin-top: 0px;
   }
-  /* (max-width: 707px) { */
-  .game-board-container {
-    --row0-top-100pct: calc(50.7vmin + 40px);
-    --row0-top-90pct: calc(45vmin + 40px);
-
-    --row1-top-100pct: calc(41.1vmin + 40px);
-    --row1-top-90pct: calc(39vmin + 40px);
-
-    --row2-top-100pct: calc(31.2vmin + 40px);
-    --row2-top-90pct: calc(29vmin + 40px);
-
-    --row3-top-100pct: calc(21.8vmin + 40px);
-    --row3-top-90pct: calc(16.8vmin + 40px);
-
-    --row4-top-100pct: calc(12vmin + 40px);
-    --row4-top-90pct: calc(8.8vmin + 40px);
-
-    --row5-top-100pct: calc(2.3vmin + 40px);
-    --row5-top-90pct: calc(0vmin + 40px);
-  }
 }
 
 @media only screen and (max-width: 640px) {
@@ -242,27 +206,6 @@ button[disabled] {
 
   .game-board-items {
     margin-top: 0px;
-  }
-
-  /* (max-width: 640px) { */
-  .game-board-container {
-    --row0-top-100pct: calc(58.2vmin + 40px);
-    --row0-top-90pct: calc(53vmin + 40px);
-
-    --row1-top-100pct: calc(47.1vmin + 40px);
-    --row1-top-90pct: calc(42vmin + 40px);
-
-    --row2-top-100pct: calc(35.95vmin + 40px);
-    --row2-top-90pct: calc(31vmin + 40px);
-
-    --row3-top-100pct: calc(24.7vmin + 40px);
-    --row3-top-90pct: calc(20vmin + 40px);
-
-    --row4-top-100pct: calc(13.7vmin + 40px);
-    --row4-top-90pct: calc(8.7vmin + 40px);
-
-    --row5-top-100pct: calc(2.4vmin + 40px);
-    --row5-top-90pct: calc(0vmin + 40px);
   }
 }
 
@@ -284,27 +227,6 @@ button[disabled] {
   .game-board-items {
     margin-top: 0px;
   }
-
-  /* (max-width: 526px) { */
-  .game-board-container {
-    --row0-top-100pct: calc(65.3vmin + 40px);
-    --row0-top-90pct: calc(60vmin + 40px);
-
-    --row1-top-100pct: calc(52.8vmin + 40px);
-    --row1-top-90pct: calc(47.8vmin + 40px);
-
-    --row2-top-100pct: calc(40.4vmin + 40px);
-    --row2-top-90pct: calc(35.4vmin + 40px);
-
-    --row3-top-100pct: calc(27.8vmin + 40px);
-    --row3-top-90pct: calc(22.8vmin + 40px);
-
-    --row4-top-100pct: calc(15.5vmin + 40px);
-    --row4-top-90pct: calc(10.5vmin + 40px);
-
-    --row5-top-100pct: calc(2.7vmin + 40px);
-    --row5-top-90pct: calc(0vmin + 40px);
-  }
 }
 
 @media only screen and (max-width: 440px) {
@@ -325,27 +247,6 @@ button[disabled] {
 
   .game-board-items {
     margin-top: 0px;
-  }
-
-  /* (max-width: 440px) { */
-  .game-board-container {
-    --row0-top-100pct: calc(68.9vmin + 40px);
-    --row0-top-90pct: calc(64vmin + 40px);
-
-    --row1-top-100pct: calc(55.7vmin + 40px);
-    --row1-top-90pct: calc(50.8.8vmin + 40px);
-
-    --row2-top-100pct: calc(42.5vmin + 40px);
-    --row2-top-90pct: calc(37.5vmin + 40px);
-
-    --row3-top-100pct: calc(29.3vmin + 40px);
-    --row3-top-90pct: calc(24.5vmin + 40px);
-
-    --row4-top-100pct: calc(16.1vmin + 40px);
-    --row4-top-90pct: calc(11.3vmin + 40px);
-
-    --row5-top-100pct: calc(2.8vmin + 40px);
-    --row5-top-90pct: calc(0vmin + 40px);
   }
 }
 
@@ -375,27 +276,6 @@ button[disabled] {
 
   .game-board-items {
     margin-top: 5px;
-  }
-
-  /* (min-width: 768px) and (min-height: 1024px)  */
-  .game-board-container {
-    --row0-top-100pct: calc(59.5vmin + 40px);
-    --row0-top-90pct: calc(54.5vmin + 40px);
-
-    --row1-top-100pct: calc(48vmin + 40px);
-    --row1-top-90pct: calc(43vmin + 40px);
-
-    --row2-top-100pct: calc(36.7vmin + 40px);
-    --row2-top-90pct: calc(31.7vmin + 40px);
-
-    --row3-top-100pct: calc(25.4vmin + 40px);
-    --row3-top-90pct: calc(20.4vmin + 40px);
-
-    --row4-top-100pct: calc(13.9vmin + 40px);
-    --row4-top-90pct: calc(8.9vmin + 40px);
-
-    --row5-top-100pct: calc(2.56vmin + 40px);
-    --row5-top-90pct: calc(0vmin + 40px);
   }
 }
 
@@ -438,122 +318,6 @@ button[disabled] {
 
 .bottom-plate.red {
   background-color: var(--player1-color);
-}
-
-@keyframes move-0 {
-  0% {
-    top: 0;
-  }
-
-  65% {
-    top: var(--row0-top-100pct);
-  }
-
-  75% {
-    top: var(--row0-top-90pct);
-  }
-
-  100% {
-    top: var(--row0-top-100pct);
-  }
-}
-
-@keyframes move-1 {
-  0% {
-    top: 0;
-  }
-
-  50% {
-    top: var(--row1-top-100pct);
-  }
-
-  75% {
-    top: var(--row1-top-90pct);
-  }
-
-  90% {
-    top: var(--row1-top-100pct);
-  }
-
-  95% {
-    top: var(--row1-top-90pct);
-  }
-
-  100% {
-    top: var(--row1-top-100pct);
-  }
-}
-
-@keyframes move-2 {
-  0% {
-    top: 0;
-  }
-
-  95% {
-    top: var(--row2-top-100pct);
-  }
-
-  98% {
-    top: var(--row2-top-90pct);
-  }
-
-  100% {
-    top: var(--row2-top-100pct);
-  }
-}
-
-@keyframes move-3 {
-  0% {
-    top: 0;
-  }
-
-  95% {
-    top: var(--row3-top-100pct);
-  }
-
-  98% {
-    top: var(--row3-top-90pct);
-  }
-
-  100% {
-    top: var(--row3-top-100pct);
-  }
-}
-
-@keyframes move-4 {
-  0% {
-    top: 0;
-  }
-
-  95% {
-    top: var(--row4-top-100pct);
-  }
-
-  98% {
-    top: var(--row4-top-90pct);
-  }
-
-  100% {
-    top: var(--row4-top-100pct);
-  }
-}
-
-@keyframes move-5 {
-  0% {
-    top: 0;
-  }
-
-  95% {
-    top: var(--row5-top-100pct);
-  }
-
-  98% {
-    top: var(--row5-top-90pct);
-  }
-
-  100% {
-    top: var(--row5-top-100pct);
-  }
 }
 
 .dropzone {

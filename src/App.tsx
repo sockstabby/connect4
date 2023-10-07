@@ -1,4 +1,4 @@
-import "./App.css";
+import "./App.scss";
 
 import Board from "../src/assets/connect4-board-top-layer.svg";
 import BlackBoard from "../src/assets/connect4-board-back-layer.svg";
@@ -261,15 +261,11 @@ export const App = ({
         return acc.add(key);
       }, new Set());
 
+  // copy is used at the moment there's a draw or somebody wins, until the user presses Play Again
   const disks = state.winner ? state.animatedDisksCopy : state.animatedDisks;
 
   const tokens = disks.map((disk: AnimatedDisk) => {
-    const style = getTokenStyle(
-      state,
-      disk.col,
-      disk.row,
-      state.winner == null
-    );
+    const style = getTokenStyle(disk.row, state.winner == null);
     const key = `${disk.col}${disk.row}`;
 
     const winningDisk = winningDiskSet.has(key);
@@ -278,7 +274,7 @@ export const App = ({
       <div
         key={`disk${disk.col}${disk.row}${disk.color}${state.winner}`}
         style={style}
-        className="disk-container"
+        className={`disk-row-${disk.row} disk-column-${disk.col} disk-container`}
       >
         {!winningDisk ? (
           <img

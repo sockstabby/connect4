@@ -1,0 +1,491 @@
+.disk-column-0 {
+  left: calc(1.95vmin);
+}
+.disk-column-1 {
+  left: calc(10.6vmin);
+}
+.disk-column-2 {
+  left: calc(19.25vmin);
+}
+.disk-column-3 {
+  left: calc(27.88vmin);
+}
+.disk-column-4 {
+  left: calc(36.5vmin);
+}
+.disk-column-5 {
+  left: calc(45.18vmin);
+}
+.disk-column-6 {
+  left: calc(53.75vmin);
+}
+.disk-row-0 {
+  top: calc(40px + 44.99vmin);
+}
+.disk-row-1 {
+  top: calc(40px + 36.27vmin);
+}
+.disk-row-2 {
+  top: calc(40px + 27.65vmin);
+}
+.disk-row-3 {
+  top: calc(40px + 18.99vmin);
+}
+.disk-row-4 {
+  top: calc(40px + 10.38vmin);
+}
+.disk-row-5 {
+  top: calc(40px + 1.75vmin);
+}
+
+.game-board-container {
+  position: relative;
+  min-width: min(62vmin);
+  min-height: calc(58.3vmin + 40px);
+
+  --row0-top-100pct: calc(44.9vmin + 40px);
+  --row0-top-90pct: calc(40vmin + 40px);
+
+  --row1-top-100pct: calc(36.38vmin + 40px);
+  --row1-top-90pct: calc(32vmin + 40px);
+
+  --row2-top-100pct: calc(27.8vmin + 40px);
+  --row2-top-90pct: calc(22vmin + 40px);
+
+  --row3-top-100pct: calc(19.2vmin + 40px);
+  --row3-top-90pct: calc(17.5vmin + 40px);
+
+  --row4-top-100pct: calc(10.6vmin + 40px);
+  --row4-top-90pct: calc(5.8vmin + 40px);
+
+  --row5-top-100pct: calc(2vmin + 40px);
+  --row5-top-90pct: calc(0vmin + 40px);
+}
+
+@media only screen and (max-width: 707px) {
+  //EWP TESTED
+  .disk-column-0 {
+    left: calc(2.23vmin);
+  }
+  .disk-column-1 {
+    left: calc(12vmin);
+  }
+  .disk-column-2 {
+    left: calc(21.75vmin);
+  }
+  .disk-column-3 {
+    left: calc(31.5vmin);
+  }
+  .disk-column-4 {
+    left: calc(41.25vmin);
+  }
+  .disk-column-5 {
+    left: calc(51vmin);
+  }
+  .disk-column-6 {
+    left: calc(60.75vmin);
+  }
+  .disk-row-0 {
+    top: calc(40px + 50.95vmin);
+  }
+  .disk-row-1 {
+    top: calc(40px + 41.2vmin);
+  }
+  .disk-row-2 {
+    top: calc(40px + 31.5vmin);
+  }
+  .disk-row-3 {
+    top: calc(40px + 21.7vmin);
+  }
+  .disk-row-4 {
+    top: calc(40px + 11.86vmin);
+  }
+  .disk-row-5 {
+    top: calc(40px + 2.3vmin);
+  }
+  .game-board-container {
+    --row0-top-100pct: calc(50.7vmin + 40px);
+    --row0-top-90pct: calc(45vmin + 40px);
+
+    --row1-top-100pct: calc(41.1vmin + 40px);
+    --row1-top-90pct: calc(39vmin + 40px);
+
+    --row2-top-100pct: calc(31.2vmin + 40px);
+    --row2-top-90pct: calc(29vmin + 40px);
+
+    --row3-top-100pct: calc(21.8vmin + 40px);
+    --row3-top-90pct: calc(16.8vmin + 40px);
+
+    --row4-top-100pct: calc(12vmin + 40px);
+    --row4-top-90pct: calc(8.8vmin + 40px);
+
+    --row5-top-100pct: calc(2.3vmin + 40px);
+    --row5-top-90pct: calc(0vmin + 40px);
+  }
+}
+
+@media only screen and (max-width: 640px) {
+  //EWP TESTED
+  .disk-column-0 {
+    left: calc(2.55vmin);
+  }
+  .disk-column-1 {
+    left: calc(13.7vmin);
+  }
+  .disk-column-2 {
+    left: calc(24.85vmin);
+  }
+  .disk-column-3 {
+    left: calc(35.95vmin);
+  }
+  .disk-column-4 {
+    left: calc(47.1vmin);
+  }
+  .disk-column-5 {
+    left: calc(58.2vmin);
+  }
+  .disk-column-6 {
+    left: calc(69.35vmin);
+  }
+  .disk-row-0 {
+    top: calc(40px + 58vmin);
+  }
+  .disk-row-1 {
+    top: calc(40px + 46.9vmin);
+  }
+  .disk-row-2 {
+    top: calc(40px + 35.7vmin);
+  }
+  .disk-row-3 {
+    top: calc(40px + 24.7vmin);
+  }
+  .disk-row-4 {
+    top: calc(40px + 13.6vmin);
+  }
+  .disk-row-5 {
+    top: calc(40px + 2.4vmin);
+  }
+  .game-board-container {
+    --row0-top-100pct: calc(58.2vmin + 40px);
+    --row0-top-90pct: calc(53vmin + 40px);
+
+    --row1-top-100pct: calc(47.1vmin + 40px);
+    --row1-top-90pct: calc(42vmin + 40px);
+
+    --row2-top-100pct: calc(35.95vmin + 40px);
+    --row2-top-90pct: calc(31vmin + 40px);
+
+    --row3-top-100pct: calc(24.7vmin + 40px);
+    --row3-top-90pct: calc(20vmin + 40px);
+
+    --row4-top-100pct: calc(13.7vmin + 40px);
+    --row4-top-90pct: calc(8.7vmin + 40px);
+
+    --row5-top-100pct: calc(2.4vmin + 40px);
+    --row5-top-90pct: calc(0vmin + 40px);
+  }
+}
+
+@media only screen and (max-width: 526px) {
+  //EWP NOT TESTED
+
+  .disk-column-0 {
+    left: calc(2.9vmin);
+  }
+  .disk-column-1 {
+    left: calc(15.4vmin);
+  }
+  .disk-column-2 {
+    left: calc(27.95vmin);
+  }
+  .disk-column-3 {
+    left: calc(40.5vmin);
+  }
+  .disk-column-4 {
+    left: calc(53.08vmin);
+  }
+  .disk-column-5 {
+    left: calc(65.6vmin);
+  }
+  .disk-column-6 {
+    left: calc(78.1vmin);
+  }
+  .disk-row-0 {
+    top: calc(40px + 65.3vmin);
+  }
+  .disk-row-1 {
+    top: calc(40px + 52.9vmin);
+  }
+  .disk-row-2 {
+    top: calc(40px + 40.5vmin);
+  }
+  .disk-row-3 {
+    top: calc(40px + 27.9vmin);
+  }
+  .disk-row-4 {
+    top: calc(40px + 15.3vmin);
+  }
+  .disk-row-5 {
+    top: calc(40px + 2.57vmin);
+  }
+  .game-board-container {
+    --row0-top-100pct: calc(65.3vmin + 40px);
+    --row0-top-90pct: calc(60vmin + 40px);
+
+    --row1-top-100pct: calc(52.8vmin + 40px);
+    --row1-top-90pct: calc(47.8vmin + 40px);
+
+    --row2-top-100pct: calc(40.4vmin + 40px);
+    --row2-top-90pct: calc(35.4vmin + 40px);
+
+    --row3-top-100pct: calc(27.8vmin + 40px);
+    --row3-top-90pct: calc(22.8vmin + 40px);
+
+    --row4-top-100pct: calc(15vmin + 40px);
+    --row4-top-90pct: calc(10.5vmin + 40px);
+
+    --row5-top-100pct: calc(2.7vmin + 40px);
+    --row5-top-90pct: calc(0vmin + 40px);
+  }
+}
+
+@media only screen and (max-width: 440px) {
+  //EWP TESTED
+  .disk-column-0 {
+    left: calc(3.04vmin);
+  }
+  .disk-column-1 {
+    left: calc(16.24vmin);
+  }
+  .disk-column-2 {
+    left: calc(29.5vmin);
+  }
+  .disk-column-3 {
+    left: calc(42.7vmin);
+  }
+  .disk-column-4 {
+    left: calc(55.9vmin);
+  }
+  .disk-column-5 {
+    left: calc(69.1vmin);
+  }
+  .disk-column-6 {
+    left: calc(82.3vmin);
+  }
+  .disk-row-0 {
+    top: calc(40px + 69vmin);
+  }
+  .disk-row-1 {
+    top: calc(40px + 55.7vmin);
+  }
+  .disk-row-2 {
+    top: calc(40px + 42.5vmin);
+  }
+  .disk-row-3 {
+    top: calc(40px + 29.3vmin);
+  }
+  .disk-row-4 {
+    top: calc(40px + 16.3vmin);
+  }
+  .disk-row-5 {
+    top: calc(40px + 2.7vmin);
+  }
+  .game-board-container {
+    --row0-top-100pct: calc(68.9vmin + 40px);
+    --row0-top-90pct: calc(64vmin + 40px);
+
+    --row1-top-100pct: calc(55.7vmin + 40px);
+    --row1-top-90pct: calc(50.8.8vmin + 40px);
+
+    --row2-top-100pct: calc(42.5vmin + 40px);
+    --row2-top-90pct: calc(37.5vmin + 40px);
+
+    --row3-top-100pct: calc(29.3vmin + 40px);
+    --row3-top-90pct: calc(24.5vmin + 40px);
+
+    --row4-top-100pct: calc(16.1vmin + 40px);
+    --row4-top-90pct: calc(11.3vmin + 40px);
+
+    --row5-top-100pct: calc(2.8vmin + 40px);
+    --row5-top-90pct: calc(0vmin + 40px);
+  }
+}
+
+/* @media screen and (min-width: 768px) and (min-height: 1024px) { */
+@media screen and (min-width: 768px) and (min-height: 1024px) {
+  //EWP TESTED
+  .disk-column-0 {
+    left: calc(2.59vmin);
+  }
+  .disk-column-1 {
+    left: calc(14vmin);
+  }
+  .disk-column-2 {
+    left: calc(25.4vmin);
+  }
+  .disk-column-3 {
+    left: calc(36.85vmin);
+  }
+  .disk-column-4 {
+    left: calc(48.25vmin);
+  }
+  .disk-column-5 {
+    left: calc(59.62vmin);
+  }
+  .disk-column-6 {
+    left: calc(71.1vmin);
+  }
+  .disk-row-0 {
+    top: calc(40px + 59.5vmin);
+  }
+  .disk-row-1 {
+    top: calc(40px + 48vmin);
+  }
+  .disk-row-2 {
+    top: calc(40px + 36.7vmin);
+  }
+  .disk-row-3 {
+    top: calc(40px + 25.4vmin);
+  }
+  .disk-row-4 {
+    top: calc(40px + 13.9vmin);
+  }
+  .disk-row-5 {
+    top: calc(40px + 2.8vmin);
+  }
+  .game-board-container {
+    --row0-top-100pct: calc(59.5vmin + 40px);
+    --row0-top-90pct: calc(54.5vmin + 40px);
+
+    --row1-top-100pct: calc(48vmin + 40px);
+    --row1-top-90pct: calc(43vmin + 40px);
+
+    --row2-top-100pct: calc(36.7vmin + 40px);
+    --row2-top-90pct: calc(31.7vmin + 40px);
+
+    --row3-top-100pct: calc(25.4vmin + 40px);
+    --row3-top-90pct: calc(20.4vmin + 40px);
+
+    --row4-top-100pct: calc(13.9vmin + 40px);
+    --row4-top-90pct: calc(8.9vmin + 40px);
+
+    --row5-top-100pct: calc(2.56vmin + 40px);
+    --row5-top-90pct: calc(0vmin + 40px);
+  }
+}
+
+@keyframes move-0 {
+  0% {
+    top: 0;
+  }
+
+  65% {
+    top: var(--row0-top-100pct);
+  }
+
+  75% {
+    top: var(--row0-top-90pct);
+  }
+
+  100% {
+    top: var(--row0-top-100pct);
+  }
+}
+
+@keyframes move-1 {
+  0% {
+    top: 0;
+  }
+
+  50% {
+    top: var(--row1-top-100pct);
+  }
+
+  75% {
+    top: var(--row1-top-90pct);
+  }
+
+  90% {
+    top: var(--row1-top-100pct);
+  }
+
+  95% {
+    top: var(--row1-top-90pct);
+  }
+
+  100% {
+    top: var(--row1-top-100pct);
+  }
+}
+
+@keyframes move-2 {
+  0% {
+    top: 0;
+  }
+
+  95% {
+    top: var(--row2-top-100pct);
+  }
+
+  98% {
+    top: var(--row2-top-90pct);
+  }
+
+  100% {
+    top: var(--row2-top-100pct);
+  }
+}
+
+@keyframes move-3 {
+  0% {
+    top: 0;
+  }
+
+  95% {
+    top: var(--row3-top-100pct);
+  }
+
+  98% {
+    top: var(--row3-top-90pct);
+  }
+
+  100% {
+    top: var(--row3-top-100pct);
+  }
+}
+
+@keyframes move-4 {
+  0% {
+    top: 0;
+  }
+
+  95% {
+    top: var(--row4-top-100pct);
+  }
+
+  98% {
+    top: var(--row4-top-90pct);
+  }
+
+  100% {
+    top: var(--row4-top-100pct);
+  }
+}
+
+@keyframes move-5 {
+  0% {
+    top: 0;
+  }
+
+  95% {
+    top: var(--row5-top-100pct);
+  }
+
+  98% {
+    top: var(--row5-top-90pct);
+  }
+
+  100% {
+    top: var(--row5-top-100pct);
+  }
+}
