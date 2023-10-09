@@ -1,7 +1,6 @@
-import { GameState, AnimatedDisk } from "./App";
+import { GameState, AnimatedDisk, Locations } from "./types";
 import { testForWin } from "./utils";
 import { GameMode } from "./StartGameModal";
-import { Locations } from "./utils";
 
 export type GameActions =
   | {

@@ -9,13 +9,12 @@ import RedWinningPiece from "../src/assets/red-winning-piece.svg";
 import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
-import { Locations } from "./utils";
 import { useCallback, useEffect, useReducer } from "react";
 import StartGameModal, { GameMode } from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
 
-const DEBUG = true;
+const DEBUG = false;
 const TIMER_ENABLED = false;
 
 import {
@@ -25,49 +24,7 @@ import {
   mainReducer,
 } from "./reducerFunctions";
 
-type Column = string[];
-
-type Winner = {
-  pieces: Locations;
-  player: string;
-};
-
-export type ColState = Column[];
-
-export type AnimatedDisk = {
-  color: string;
-  row: number;
-  col: number;
-};
-
-export type GameState = {
-  colState: ColState;
-  yellowWins: number;
-  redWins: number;
-  initiator: boolean;
-  initiatorColor: string;
-  plays: number;
-  animatedPiece: number | null;
-  animatedPieceColor: string | null;
-  mainMenuOpen: boolean;
-  mode: GameMode;
-  draw: boolean;
-  player1: string;
-  player2: string;
-  gameStarted: boolean;
-  opponent: string;
-  remoteDisconnected: boolean;
-  timerRef: NodeJS.Timer | undefined;
-  timerSeconds: number | null;
-  forceRender: boolean;
-  websocket: WebSocket | undefined;
-  winner: Winner | null;
-  winnerGameState: ColState | null;
-  lastDroppedColumn: null | number;
-  listenerAdded: boolean;
-  animatedDisks: AnimatedDisk[];
-  animatedDisksCopy: AnimatedDisk[];
-};
+import { AnimatedDisk, GameState, Connect4Props } from "./types";
 
 const initialGameState: GameState = {
   colState: [[], [], [], [], [], [], []],
@@ -99,10 +56,6 @@ const initialGameState: GameState = {
   animatedDisksCopy: [],
 };
 
-type Connect4Props = {
-  gameTimerConfig?: number;
-  websocketUrl?: string;
-};
 export const App = ({
   gameTimerConfig = 24,
   websocketUrl = "wss://connect4.isomarkets.com",
@@ -302,7 +255,9 @@ export const App = ({
   const [myTurn, playerTurn] = getCurrentTurn();
 
   if (DEBUG) {
-    console.log("state= ", state);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { websocket, ...remainingObject } = state;
+    console.log("state= ", remainingObject);
   }
 
   return (

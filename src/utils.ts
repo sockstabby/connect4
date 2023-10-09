@@ -1,11 +1,4 @@
-import { ColState } from "../src/App";
-
-type Location = {
-  col: number;
-  row: number;
-};
-
-export type Locations = Location[];
+import { Location, Locations, ColState } from "./types";
 
 export const testForWin = (
   col: number,
@@ -63,7 +56,7 @@ export const testForTopRightBottomLeftWin = (
   let itemsRightTop = 0;
   let win = false;
 
-  let winningSet: Locations = [];
+  const winningSet: Locations = [];
 
   //down and to the left
   for (
