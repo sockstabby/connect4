@@ -295,7 +295,7 @@ export const App = ({
       <div className="flex flex-col">
         <div className="player-card-small-container flex flex-row justify-center gap-4">
           <div className="player-card-small flex flex-row justify-around items-center">
-            <div className="flex flex-row pb-1 justify-center  smiley-container smiley-container-red">
+            <div className="flex flex-row justify-center smiley-container smiley-container-red">
               <img src={Player1} alt="Player One Smiley Face" />
             </div>
 
@@ -334,13 +334,13 @@ export const App = ({
                 <img src={Player1} alt="Player One Smiley Face" />
               </div>
 
-              <div className="flex flex-row justify-center font-bold text-lg uppercase pt-2 pb-3">
+              <div className="flex flex-row justify-center font-bold text-lg uppercase pt-3 pb-3">
                 {state.player1}
               </div>
 
               <div
                 data-testid="red-win-count"
-                className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
+                className="flex flex-row justify-center uppercase text-6xl font-bold pb-5"
               >
                 {state.redWins}
               </div>
@@ -402,7 +402,7 @@ export const App = ({
           </div>
           {state.gameStarted && (
             <div className="player2-card player-card">
-              <div className="flex flex-row pb-1 justify-center -mt-6 ">
+              <div className="flex flex-row justify-center -mt-6 ">
                 <img src={Player2} alt="Player Two Smiley Face" />
               </div>
 
@@ -412,7 +412,7 @@ export const App = ({
 
               <div
                 data-testid="yellow-win-count"
-                className="flex flex-row justify-center uppercase text-6xl font-bold pb-3"
+                className="flex-row justify-center uppercase text-6xl font-bold pb-5"
               >
                 {state.yellowWins}
               </div>

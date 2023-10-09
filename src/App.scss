@@ -426,10 +426,8 @@ option:hover {
   background-color: var(--game-background-color1) !important;
 }
 option {
-  /* height: 30px; */
   border-radius: 100px;
   text-align: center;
-  /* padding-left: 30px; */
 }
 
 option::selection {
@@ -524,6 +522,6 @@ input[type="checkbox"]:checked::before {
 }
 
 .disk-container > img {
-  /* disk width will grow up until its parents width.  */
+  /* disk width will grow up until its parents width. */
   width: 100vw;
 }

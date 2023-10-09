@@ -2,6 +2,8 @@ import { GameState, AnimatedDisk, Locations } from "./types";
 import { testForWin } from "./utils";
 import { GameMode } from "./StartGameModal";
 
+const FIRST_ROW_DROP_MS = 500;
+
 export type GameActions =
   | {
       type: "startGame";
@@ -150,10 +152,6 @@ export function mainReducer(state: GameState, action: GameActions) {
 
 export const terminateGame = (state: GameState, notifyRemote: boolean) => {
   console.log("terminating game");
-  // setWinner(null);
-  //   stateRef.current.winner = null;
-  //   stateRef.current.gameStarted = false;
-  //   toggleRender();
 
   if (state.websocket != null) {
     // tell the other player that we quit
@@ -205,8 +203,7 @@ export function setWinnerHelper(
   // the reason we make a copy here is because a new game could be started by the opponent. When
   // theres a winner we want the players to be able to reflect on how they lost. So at this time,
   // the state of the board is a copy of the board whenever somebody won or there was a draw.
-  // New plays go on in the cleared orignal colState and we dont flip over to that state until the user
-  // presses Play Again.
+  // We switch to the real copy as soon as the user presses play again.
 
   const copy = JSON.parse(JSON.stringify(state.animatedDisks));
 
@@ -285,13 +282,17 @@ export function diskDropped(
 
   copy[col].push(player);
 
-  setTimeout(() => {
-    const x = document.getElementById("drop-sound") as HTMLAudioElement;
+  // here we try to match the sound to the disk drop animation
+  const timeForCurrentRow = (FIRST_ROW_DROP_MS * (5 - row)) / 5 - 100;
+  const volumeForCurrentRow = ((1000 * (5 - row)) / 5) * 0.001;
 
-    if (x != null) {
-      x?.play();
+  setTimeout(() => {
+    const audio = document.getElementById("drop-sound") as HTMLAudioElement;
+    if (audio != null) {
+      audio.volume = Math.max(volumeForCurrentRow, 0.3);
+      audio?.play();
     }
-  }, 1200);
+  }, timeForCurrentRow);
 
   return {
     ...state,
@@ -303,10 +304,10 @@ export function diskDropped(
     ...(!win ? { plays: state.plays + 1 } : {}),
     ...(win ? { plays: 0 } : {}),
     ...(win ? { winner: { player, pieces: winningSet } } : {}),
+    lastDroppedColumn: col,
     ...(!win && state.plays + 1 !== 42
       ? {
           timerSeconds: gameTimerConfig,
-          lastDroppedColumn: col,
           animatedPiece: col,
           animatedPieceColor: player,
         }
@@ -323,12 +324,14 @@ export const getTokenStyle = (row: number, animate: boolean = true) => {
     height: "10.1%",
   };
 
+  const timeForCurrentRow = (FIRST_ROW_DROP_MS * (5 - row)) / 5;
+  const secondsForCurrentRow = timeForCurrentRow * 0.001;
   const animationName = `move-${row}`;
 
   const merge = {
     animationTimingFunction: "ease-in",
     animationIterationCount: 1,
-    animationDuration: ".5s",
+    animationDuration: `${secondsForCurrentRow}s`,
     animationName: animationName,
     animationFillMode: "forwards",
     zIndex: -2,
