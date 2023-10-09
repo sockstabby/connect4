@@ -209,6 +209,11 @@ export function setWinnerHelper(
 
   clearInterval(state.timerRef);
 
+  const audio = document.getElementById("winning-sound") as HTMLAudioElement;
+  if (audio != null) {
+    audio?.play();
+  }
+
   return {
     ...state,
     ...(player === "yellow" && !draw
