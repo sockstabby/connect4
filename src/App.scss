@@ -98,7 +98,7 @@ button {
   cursor: pointer;
   color: #ffffff;
   font-family: "Space Grotesk", sans-serif;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
   padding: 16px 31px;
   text-decoration: none;
@@ -173,7 +173,8 @@ button[disabled] {
   }
 
   .dropzone {
-    max-width: 62vmax;
+    min-width: min(70vmin);
+    border: 1px solid red;
   }
 
   .player-card {
@@ -196,6 +197,11 @@ button[disabled] {
     min-height: calc(75.2vmin + 40px);
   }
 
+  .dropzone {
+    min-width: min(80vmin);
+    border: 1px solid red;
+  }
+
   .player-card {
     display: none;
   }
@@ -216,6 +222,11 @@ button[disabled] {
     min-height: calc(84.5vmin + 40px);
   }
 
+  .dropzone {
+    min-width: min(90vmin);
+    border: 1px solid red;
+  }
+
   .player-card {
     display: none;
   }
@@ -234,6 +245,11 @@ button[disabled] {
   .game-board-container {
     min-width: min(95vmin);
     min-height: calc(89vmin + 40px);
+  }
+
+  .dropzone {
+    min-width: min(95vmin);
+    border: 1px solid red;
   }
 
   .player-card {
@@ -264,6 +280,12 @@ button[disabled] {
     min-width: min(82vmin);
     min-height: calc(77vmin + 40px);
   }
+
+  .dropzone {
+    min-width: min(82vmin);
+    border: 1px solid red;
+  }
+
   .player-card {
     display: none;
   }

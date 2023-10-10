@@ -262,7 +262,7 @@ export const App = ({
 
   return (
     <>
-      version 0.1
+      version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`}
       <div className="nav-bar flex flex-row justify-around pt-3 items-center">
         <button onClick={openMainMenuModal}>Menu</button>
 
