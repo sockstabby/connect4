@@ -17,12 +17,7 @@ import ReactModal from "react-modal";
 const DEBUG = false;
 const TIMER_ENABLED = false;
 
-import {
-  getLocalColor,
-  getRemoteColor,
-  getTokenStyle,
-  mainReducer,
-} from "./reducerFunctions";
+import { getLocalColor, getRemoteColor, mainReducer } from "./reducerFunctions";
 
 import { AnimatedDisk, GameState, Connect4Props, GameMode } from "./types";
 
@@ -218,7 +213,6 @@ export const App = ({
   const disks = state.winner ? state.animatedDisksCopy : state.animatedDisks;
 
   const tokens = disks.map((disk: AnimatedDisk) => {
-    const style = getTokenStyle(disk.row, state.winner == null);
     const key = `${disk.col}${disk.row}`;
 
     const winningDisk = winningDiskSet.has(key);
@@ -226,7 +220,6 @@ export const App = ({
     return (
       <div
         key={`disk${disk.col}${disk.row}${disk.color}${state.winner}`}
-        style={style}
         className={`disk-row-${disk.row} disk-column-${disk.col} disk-container`}
       >
         {!winningDisk ? (

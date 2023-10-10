@@ -281,31 +281,3 @@ export function diskDropped(
       : {}),
   };
 }
-
-export const getTokenStyle = (row: number, animate: boolean = true) => {
-  // TODO: Better to apply a class because that way we can conditionally
-  // disable animations if the user doesnt prefer them.
-
-  const ret: React.CSSProperties = {
-    position: "absolute",
-
-    width: "10.1%",
-    maxWidth: "10.1%",
-    height: "10.1%",
-  };
-
-  const timeForCurrentRow = (FIRST_ROW_DROP_MS * (5 - row)) / 5;
-  const secondsForCurrentRow = timeForCurrentRow * 0.001;
-  const animationName = `move-${row}`;
-
-  const merge = {
-    animationTimingFunction: "ease-in",
-    animationIterationCount: 1,
-    animationDuration: `${secondsForCurrentRow}s`,
-    animationName: animationName,
-    animationFillMode: "forwards",
-    zIndex: -2,
-  };
-
-  return { ...ret, ...(animate ? { ...merge } : {}) };
-};

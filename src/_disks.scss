@@ -21,23 +21,57 @@
 .disk-column-6 {
   left: calc(53.75vmin);
 }
+
 .disk-row-0 {
+  animation-duration: 0.5s;
+  animation-name: move-0;
   top: calc($dropzone-height + 44.99vmin);
 }
 .disk-row-1 {
+  animation-duration: 0.4s;
+  animation-name: move-1;
   top: calc($dropzone-height + 36.27vmin);
 }
 .disk-row-2 {
+  animation-duration: 0.3s;
+  animation-name: move-2;
   top: calc($dropzone-height + 27.65vmin);
 }
 .disk-row-3 {
+  animation-duration: 0.2s;
+  animation-name: move-3;
   top: calc($dropzone-height + 18.99vmin);
 }
 .disk-row-4 {
+  animation-duration: 0.1s;
+  animation-name: move-4;
   top: calc($dropzone-height + 10.38vmin);
 }
 .disk-row-5 {
+  animation-duration: 0.1s;
+  animation-name: move-5;
   top: calc($dropzone-height + 1.75vmin);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disk-row-0 {
+    animation-duration: 0s;
+  }
+  .disk-row-1 {
+    animation-duration: 0s;
+  }
+  .disk-row-2 {
+    animation-duration: 0s;
+  }
+  .disk-row-3 {
+    animation-duration: 0s;
+  }
+  .disk-row-4 {
+    animation-duration: 0s;
+  }
+  .disk-row-5 {
+    animation-duration: 0s;
+  }
 }
 
 .game-board-container {
@@ -65,7 +99,6 @@
 }
 
 @media only screen and (max-width: 707px) {
-  //EWP TESTED
   .disk-column-0 {
     left: calc(2.23vmin);
   }
@@ -127,7 +160,6 @@
 }
 
 @media only screen and (max-width: 640px) {
-  //EWP TESTED
   .disk-column-0 {
     left: calc(2.55vmin);
   }
@@ -189,8 +221,6 @@
 }
 
 @media only screen and (max-width: 526px) {
-  //EWP NOT TESTED
-
   .disk-column-0 {
     left: calc(2.9vmin);
   }
@@ -252,7 +282,6 @@
 }
 
 @media only screen and (max-width: 440px) {
-  //EWP TESTED
   .disk-column-0 {
     left: calc(3.04vmin);
   }
@@ -313,9 +342,7 @@
   }
 }
 
-/* @media screen and (min-width: 768px) and (min-height: 1024px) { */
 @media screen and (min-width: 768px) and (min-height: 1024px) {
-  //EWP TESTED
   .disk-column-0 {
     left: calc(2.59vmin);
   }
