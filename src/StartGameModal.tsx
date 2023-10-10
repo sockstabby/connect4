@@ -16,6 +16,7 @@ const StartGameModal = ({
   onClose,
   websocketUrl,
   exchangeSocket,
+  onShowRules,
 }: StartGameModalProps) => {
   const [name, setName] = useState("");
   const [participants, setParticipants] = useState<Player[]>([]);
@@ -249,7 +250,9 @@ const StartGameModal = ({
                 Start Game
               </button>
 
-              <button className="button--fancy uppercase">Game Rules</button>
+              <button onClick={onShowRules} className="button--fancy uppercase">
+                Game Rules
+              </button>
 
               <div className="pad-top-100">
                 <button onClick={() => onClose()}>Cancel</button>

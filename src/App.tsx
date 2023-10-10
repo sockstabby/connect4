@@ -32,6 +32,7 @@ const initialGameState: GameState = {
   animatedPieceColor: null,
   mainMenuOpen: false,
   mode: "local",
+  rulesOpen: false,
   draw: false,
   player1: "Player 1",
   player2: "Player 2",
@@ -269,7 +270,7 @@ export const App = ({
         </button>
       </div>
       <ReactModal
-        className="modal centered"
+        className="modal modal__dark-background centered"
         isOpen={state.mainMenuOpen}
         shouldCloseOnOverlayClick={true}
         onRequestClose={() => {
@@ -286,7 +287,19 @@ export const App = ({
           onClose={() => {
             dispatch({ type: "mainMenuModalVisible", value: false });
           }}
+          onShowRules={() => dispatch({ type: "rulesOpen", value: true })}
         />
+      </ReactModal>
+      <ReactModal
+        className="modal modal__light-background centered"
+        isOpen={state.rulesOpen}
+        shouldCloseOnOverlayClick={true}
+        onRequestClose={() => {
+          dispatch({ type: "rulesOpen", value: false });
+        }}
+        overlayClassName="disabled-background"
+      >
+        <div className=""> Rules Modal</div>
       </ReactModal>
       <div className="flex flex-col">
         <div className="player-card-small-container flex flex-row justify-center gap-4">
@@ -447,7 +460,7 @@ export const App = ({
         } `}
       ></div>
       <ReactModal
-        className="modal winner-card"
+        className="modal modal__light-background modal__bottom-placement"
         isOpen={state.remoteDisconnected}
         shouldCloseOnOverlayClick={true}
         onRequestClose={() => {
@@ -471,7 +484,7 @@ export const App = ({
         </div>
       </ReactModal>
       <ReactModal
-        className="modal winner-card"
+        className="modal modal__light-background modal__bottom-placement"
         isOpen={
           (state.winner != null || state.draw) && !state.remoteDisconnected
         }

@@ -40,6 +40,7 @@ export type GameState = {
   listenerAdded: boolean;
   animatedDisks: AnimatedDisk[];
   animatedDisksCopy: AnimatedDisk[];
+  rulesOpen: boolean;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -63,6 +64,7 @@ export type StartGameModalProps = {
   onClose: () => void;
   websocketUrl: string;
   exchangeSocket: (socket: WebSocket) => void;
+  onShowRules: () => void;
 };
 
 //////
@@ -129,7 +131,6 @@ export type ReducerPayload = {
 };
 
 //////
-
 // Reducer actions
 
 export type GameActions =
@@ -166,6 +167,7 @@ export type GameActions =
       value: boolean;
     }
   | { type: "playAgain" }
+  | { type: "rulesOpen"; value: boolean }
   | { type: "restartGame" }
   | { type: "listenerAdded"; value: boolean }
   | { type: "remoteDisconnected"; value: boolean }

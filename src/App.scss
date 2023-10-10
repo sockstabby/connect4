@@ -80,10 +80,25 @@ button.button--fancy[disabled] {
   max-width: 400px;
   color: #fff;
   padding: 20px;
-  background-color: var(--game-background-color1);
   border-radius: 20px;
   border: 2px solid black;
   box-shadow: 0 15px 0 black;
+
+  &__dark-background {
+    background-color: var(--game-background-color1);
+  }
+  &__light-background {
+    background-color: white;
+  }
+
+  &__bottom-placement {
+    position: absolute;
+    top: calc(100vh - 190px - 20px) !important;
+    left: calc(100vw / 2 - 160px) !important;
+    border-radius: 20px;
+    width: 320px;
+    height: auto;
+  }
 }
 
 .pad-top-100 {
@@ -377,17 +392,6 @@ button[disabled] {
   font-size: 2rem;
 }
 
-.winner-card {
-  position: absolute;
-  top: calc(100vh - 190px - 20px) !important;
-  left: calc(100vw / 2 - 160px) !important;
-  background-color: white;
-  border: 2px solid black;
-  border-radius: 25px;
-  width: 320px;
-  height: auto;
-}
-
 .caret-container.red {
   background-image: url("assets/red-caret.svg");
 }
@@ -515,11 +519,10 @@ button.toggle {
 }
 
 .toggle {
-  display: inline-flex; /* 1 */
-  align-items: center; /* 1 */
-  flex-wrap: wrap; /* 2 */
-  position: relative; /* 3 */
-  gap: 1ch; /* 4 */
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  gap: 1ch;
 }
 
 .toggle__display {
@@ -528,19 +531,19 @@ button.toggle {
 
   --diameter: 0.6em;
 
-  display: inline-flex; /* 1 */
-  align-items: center; /* 1 */
-  justify-content: space-around; /* 1 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-around;
 
-  width: calc(var(--diameter) * 2 + var(--offset) * 2); /* 2 */
-  height: 25px; //calc(var(--diameter) + var(--offset) * 2); /* 2 */
-  box-sizing: content-box; /* 2 */
+  width: calc(var(--diameter) * 2 + var(--offset) * 2);
+  height: 25px;
+  box-sizing: content-box;
 
-  border: 0.1em solid rgb(0 0 0 / 0.2); /* 3 */
+  border: 0.1em solid rgb(0 0 0 / 0.2);
 
-  position: relative; /* 4 */
-  border-radius: 100vw; /* 5 */
-  background-color: black; /* 6 */
+  position: relative;
+  border-radius: 100vw;
+  background-color: black;
 
   transition: 250ms;
   cursor: pointer;
@@ -549,20 +552,20 @@ button.toggle {
 .toggle__display::before {
   content: "";
 
-  width: var(--diameter); /* 1 */
-  height: var(--diameter); /* 1 */
-  border-radius: 50%; /* 1 */
+  width: var(--diameter);
+  height: var(--diameter);
+  border-radius: 50%;
 
-  box-sizing: border-box; /* 2 */
-  border: 0.1 solid rgb(0 0 0 / 0.2); /* 2 */
+  box-sizing: border-box;
+  border: 0.1 solid rgb(0 0 0 / 0.2);
 
-  position: absolute; /* 3 */
-  z-index: 2; /* 3 */
-  top: 50%; /* 3 */
-  left: var(--offset); /* 3 */
-  transform: translate(0, -50%); /* 3 */
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: var(--offset);
+  transform: translate(0, -50%);
 
-  background-color: #fff; /* 4 */
+  background-color: #fff;
   transition: inherit;
 }
 
@@ -581,13 +584,13 @@ button.toggle {
 
 .toggle:focus .toggle__display,
 .toggle__input:focus + .toggle__display {
-  outline: 3px dotted #212121; /* 1 */
-  outline: 3px auto -webkit-focus-ring-color; /* 1 */
+  outline: 3px dotted #212121;
+  outline: 3px auto -webkit-focus-ring-color;
 }
 
 .toggle:focus .toggle__display {
-  outline: 3px dotted #212121; /* 1 */
-  outline: 3px auto -webkit-focus-ring-color; /* 1 */
+  outline: 3px dotted #212121;
+  outline: 3px auto -webkit-focus-ring-color;
 }
 
 .toggle:focus:not(:focus-visible) .toggle__display,
@@ -597,19 +600,19 @@ button.toggle {
 
 .toggle[aria-pressed="true"] .toggle__display::before,
 .toggle__input:checked + .toggle__display {
-  background-color: #e3f5eb; /* 1 */
+  background-color: #e3f5eb;
 }
 
 .toggle[aria-pressed="true"] .toggle__display::before,
 .toggle__input:checked + .toggle__display::before {
-  transform: translate(100%, -50%); /* 1 */
+  transform: translate(100%, -50%);
 }
 
 .toggle[disabled] .toggle__display,
 .toggle__input:disabled + .toggle__display {
-  opacity: 0.6; /* 1 */
-  filter: grayscale(40%); /* 1 */
-  cursor: not-allowed; /* 1 */
+  opacity: 0.6;
+  filter: grayscale(40%);
+  cursor: not-allowed;
 }
 
 .toggle__icon {

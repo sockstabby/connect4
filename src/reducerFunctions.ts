@@ -75,6 +75,9 @@ export function mainReducer(state: GameState, action: GameActions) {
       colState[state.animatedPiece].push(state.animatedPieceColor);
     }
     return { ...state, colState };
+  } else if (action.type === "rulesOpen") {
+    const rulesOpen = action.value;
+    return { ...state, rulesOpen, mainMenuOpen: false };
   } else if (action.type === "clearAnimatedDisk") {
     return { ...state, animatedPiece: null, lastDroppedColumn: null };
   } else if (action.type === "mainMenuModalVisible") {
