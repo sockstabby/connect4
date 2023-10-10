@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import App from "../App";
-import { Server } from "mock-socket";
+import { Client, Server } from "mock-socket";
 
 const TEST_WS_URL = "ws://localhost:5000";
 const REMOTE_PLAYER_NAME = "somebody";
@@ -29,47 +29,55 @@ const getMovePayload = (move: number, moves: number[]) => {
 // }
 
 describe("Connect4", () => {
-  it("online-mode -- the first turn alternates after each game", async () => {
-    let socket: WebSocket;
+  it("online-mode -- the first turn alternates players after each game", async () => {
+    let socket: Client;
 
     websocketServer.on("connection", (websocket) => {
-      socket = websocket as WebSocket;
-      socket.on("message", (message: string) => {
-        console.log(Date.now(), "Received a message from the client", message);
-        const payload = JSON.parse(message as string);
-        console.log("payload = ", payload);
+      socket = websocket;
 
-        if (payload.action === "joinLobby") {
-          console.log(" got a join lobby request");
-
-          socket.send(
-            JSON.stringify({
-              message: "lobbyParticipants",
-              data: [{ name: REMOTE_PLAYER_NAME }],
-            })
+      websocket.on(
+        "message",
+        (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
+          console.log(
+            Date.now(),
+            "Received a message from the client",
+            message
           );
+          const payload = JSON.parse(message as string);
+          console.log("payload = ", payload);
 
-          socket.send(
-            JSON.stringify({
-              message: "playRequested",
-              data: REMOTE_PLAYER_NAME2,
-            })
-          );
+          if (payload.action === "joinLobby") {
+            console.log(" got a join lobby request");
 
-          console.log(Date.now(), "sending start game move");
-          socket.send(
-            JSON.stringify({
-              message: "startGame",
+            socket.send(
+              JSON.stringify({
+                message: "lobbyParticipants",
+                data: [{ name: REMOTE_PLAYER_NAME }],
+              })
+            );
 
-              data: {
-                initiator: false,
-                initiatorName: REMOTE_PLAYER_NAME2,
-                nonInitiatorName: "me",
-              },
-            })
-          );
+            socket.send(
+              JSON.stringify({
+                message: "playRequested",
+                data: REMOTE_PLAYER_NAME2,
+              })
+            );
+
+            console.log(Date.now(), "sending start game move");
+            socket.send(
+              JSON.stringify({
+                message: "startGame",
+
+                data: {
+                  initiator: false,
+                  initiatorName: REMOTE_PLAYER_NAME2,
+                  nonInitiatorName: "me",
+                },
+              })
+            );
+          }
         }
-      });
+      );
     });
 
     render(<App websocketUrl={TEST_WS_URL} />);
@@ -86,17 +94,19 @@ describe("Connect4", () => {
       target: { value: MY_NAME },
     });
     fireEvent.click(await screen.findByText(/join lobby/i));
-    await screen.findByText(/note: a timer/i, undefined, { timeout: 5000 });
+    await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
 
-    // gameplay begins here
-    let send = getMovePayload(myMovesCount, myMoves);
-    console.log(Date.now(), "sending first move of the game", send);
-    socket!.send(JSON.stringify(send));
-    myMovesCount++;
+    await act(async () => {
+      // gameplay begins here we go second
+      const send = getMovePayload(myMovesCount, myMoves);
+      console.log(Date.now(), "sending first move of the game", send);
+      socket!.send(JSON.stringify(send));
+      myMovesCount++;
+    });
 
     await act(async () => {
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 5000 })
+        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
       );
       // send the move
       const send = getMovePayload(myMovesCount, myMoves);
@@ -107,7 +117,7 @@ describe("Connect4", () => {
 
     await act(async () => {
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 5000 })
+        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
       );
       const send = getMovePayload(myMovesCount, myMoves);
       console.log(Date.now(), "server sending playTurn move");
@@ -117,7 +127,7 @@ describe("Connect4", () => {
 
     await act(async () => {
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 5000 })
+        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
       );
       const send = getMovePayload(myMovesCount, myMoves);
       console.log(Date.now(), "server sending playTurn move");
@@ -126,7 +136,7 @@ describe("Connect4", () => {
     });
 
     let winner = await screen.findByTestId("winning-player", undefined, {
-      timeout: 5000,
+      timeout: 1000,
     });
 
     expect(winner.innerHTML).toEqual("red");
@@ -142,7 +152,7 @@ describe("Connect4", () => {
 
     await act(async () => {
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 5000 })
+        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
       );
 
       const send = getMovePayload(myMovesCount, myMoves);
@@ -153,7 +163,7 @@ describe("Connect4", () => {
 
     await act(async () => {
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 5000 })
+        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
       );
 
       const send = getMovePayload(myMovesCount, myMoves);
@@ -165,7 +175,7 @@ describe("Connect4", () => {
     await act(async () => {
       fireEvent.click(
         await screen.findByTestId("drop-column-1", undefined, {
-          timeout: 5000,
+          timeout: 1000,
         })
       );
       const send = getMovePayload(myMovesCount, myMoves);
@@ -177,7 +187,7 @@ describe("Connect4", () => {
     await act(async () => {
       fireEvent.click(
         await screen.findByTestId("drop-column-1", undefined, {
-          timeout: 5000,
+          timeout: 1000,
         })
       );
     });
@@ -197,16 +207,18 @@ describe("Connect4", () => {
     // and this this time we go second
     myMovesCount = 0;
 
-    send = getMovePayload(myMovesCount, myMoves);
-    console.log(Date.now(), "sending first move of the game", send);
-    socket!.send(JSON.stringify(send));
-    myMovesCount++;
+    await act(async () => {
+      const send = getMovePayload(myMovesCount, myMoves);
+      console.log(Date.now(), "sending first move of the game", send);
+      socket!.send(JSON.stringify(send));
+      myMovesCount++;
+    });
 
     await act(async () => {
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 5000 })
+        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
       );
-      send = getMovePayload(myMovesCount, myMoves);
+      const send = getMovePayload(myMovesCount, myMoves);
       console.log(Date.now(), "sending first move of the game", send);
       socket.send(JSON.stringify(send));
       myMovesCount++;
@@ -214,9 +226,9 @@ describe("Connect4", () => {
 
     await act(async () => {
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 5000 })
+        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
       );
-      send = getMovePayload(myMovesCount, myMoves);
+      const send = getMovePayload(myMovesCount, myMoves);
       console.log(Date.now(), "sending first move of the game", send);
       socket.send(JSON.stringify(send));
       myMovesCount++;
@@ -224,9 +236,9 @@ describe("Connect4", () => {
 
     await act(async () => {
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 5000 })
+        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
       );
-      send = getMovePayload(myMovesCount, myMoves);
+      const send = getMovePayload(myMovesCount, myMoves);
       console.log(Date.now(), "sending first move of the game", send);
       socket.send(JSON.stringify(send));
       myMovesCount++;
@@ -261,7 +273,7 @@ describe("Connect4", () => {
 
     // Note: we should also test the scenario where we quit after a game
     //screen.debug();
-  }, 1000);
+  }, 2000);
 
   it("local mode -- first turn alternates", () => {
     render(<App />);

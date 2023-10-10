@@ -2,35 +2,24 @@ import { useEffect, useState } from "react";
 import PlayerVsPlayer from "../src/assets/player-vs-player.svg";
 import PlayerVsCPU from "../src/assets/player-vs-cpu.svg";
 
-export type GameMode = "online" | "local";
-
-export type Player = {
-  name: string;
-};
-
-type StartGameModalProps = {
-  onStartGame: (
-    initiator: boolean,
-    opponent: string,
-    mode: GameMode,
-    player1: string,
-    player2: string,
-    socket?: WebSocket
-  ) => void;
-  onClose: () => void;
-  websocketUrl: string;
-  setSocket: (socket: WebSocket) => void;
-};
+import {
+  StartGameModalProps,
+  Player,
+  GameMode,
+  LobbyParticipants,
+  PlayRequested,
+  StartGame,
+} from "./types";
 
 const StartGameModal = ({
   onStartGame,
   onClose,
   websocketUrl,
-  setSocket,
+  exchangeSocket,
 }: StartGameModalProps) => {
   const [name, setName] = useState("");
   const [participants, setParticipants] = useState<Player[]>([]);
-  const [playersWantingToPlay, setPlayersWantingToPlay] = useState({});
+  const [playerInvites, setPlayersInvites] = useState<string[]>([]);
   const [invitee, setInvitee] = useState("");
   const [chosenOpponent, setChosenOpponent] = useState("");
 
@@ -39,16 +28,16 @@ const StartGameModal = ({
 
   const [mode, setMode] = useState<GameMode>("local");
 
-  const [websocket, setWebsocket] = useState<WebSocket | null>(null);
+  const [websocket, setWebsocket] = useState<WebSocket | undefined>();
 
   const [listenerAdded, setListenerAdded] = useState(false);
 
   useEffect(() => {
-    function closeHandler(_event: any) {
+    function closeHandler() {
       console.error("The Websocket is closed.");
-      setWebsocket(null);
+      setWebsocket(undefined);
     }
-    function openHandler(_event: any) {
+    function openHandler() {
       const payload = {
         service: "chat",
         action: "joinLobby",
@@ -60,20 +49,22 @@ const StartGameModal = ({
       websocket!.send(JSON.stringify(payload));
     }
 
-    function messageHandler(event: MessageEvent<any>) {
-      const payload = JSON.parse(event.data);
+    function messageHandler(event: { data: string }) {
+      const payload: LobbyParticipants | PlayRequested | StartGame = JSON.parse(
+        event.data
+      );
 
       if (payload.message === "lobbyParticipants") {
+        console.log("lobbyParticipants", payload.data);
         setParticipants(payload.data);
       }
       if (payload.message === "playRequested") {
-        setPlayersWantingToPlay((s) => ({
-          ...s,
-          [payload.data]: payload.data,
-        }));
+        console.log("playRequested", payload.data);
+        setPlayersInvites((s) => [...s, payload.data]);
       }
 
       if (payload.message === "startGame") {
+        console.log("start game payload = ", payload);
         let player1Name;
         let player2Name;
 
@@ -91,12 +82,12 @@ const StartGameModal = ({
           "online",
           player1Name,
           player2Name,
-          websocket!
+          websocket
         );
       }
     }
 
-    if (websocket !== null && !listenerAdded) {
+    if (websocket != null && !listenerAdded) {
       websocket!.addEventListener("close", closeHandler);
       websocket!.addEventListener("open", openHandler);
       websocket!.addEventListener("message", messageHandler);
@@ -104,7 +95,7 @@ const StartGameModal = ({
     }
 
     return () => {
-      if (websocket !== null) {
+      if (websocket != null) {
         console.log("modal cleaning up websocket listeners");
         websocket!.removeEventListener("close", closeHandler);
         websocket!.removeEventListener("open", closeHandler);
@@ -125,11 +116,11 @@ const StartGameModal = ({
     setPlayer2(e.target.value);
   };
 
-  const playerSelected = (e: any) => {
+  const playerSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setChosenOpponent(e.target.value);
   };
 
-  const inviteeSelected = (e: any) => {
+  const inviteeSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setInvitee(e.target.value);
   };
 
@@ -163,27 +154,23 @@ const StartGameModal = ({
   };
 
   const joinLobby = () => {
-    if (websocket === null) {
+    if (websocket == null) {
       const ws = new WebSocket(websocketUrl);
-      setSocket(ws);
+      // this first set
+      exchangeSocket(ws);
       setWebsocket(ws);
     }
   };
 
   const players = participants.map((i) => {
-    let name = i.name;
-
-    if (playersWantingToPlay.hasOwnProperty(i.name)) {
-      name = i.name;
-    }
     return (
-      <option key={name} value={name}>
-        {name}
+      <option key={i.name} value={i.name}>
+        {i.name}
       </option>
     );
   });
 
-  const invitesToPlay = Object.keys(playersWantingToPlay).map((i) => {
+  const invitesToPlay = playerInvites.map((i) => {
     return (
       <option key={i} value={i}>
         {i}
@@ -208,38 +195,29 @@ const StartGameModal = ({
             alt="Image of 2 smileys, both looking forwards. One of them is emotionless."
           />
         )}
-
         {mode === "online" && (
           <img src={PlayerVsPlayer} alt="Image of 2 smileys looking right" />
         )}
-
-        <div className="flex flex-row gap-7 pb-4 text-4xl font-extrabold items-center">
-          <label
-            htmlFor="switch"
-            className={mode === "online" ? "line-through" : ""}
-          >
+        <div className="flex flex-row gap-7 pb-4  pt-3 text-4xl font-extrabold items-center">
+          <label className={mode === "online" ? "line-through" : ""}>
             Local
           </label>
-          <div className="toggle-wrapper">
-            <input
-              type="checkbox"
-              id="switch"
-              checked={mode === "online"}
-              onChange={toggleMode}
-              data-testid="online-switch"
-            />
-            <label htmlFor="switch">Online Mode</label>
-          </div>
 
-          <label
-            htmlFor="switch"
-            className={mode === "local" ? "line-through" : ""}
+          <button
+            className="toggle"
+            type="button"
+            aria-pressed={mode === "local" ? "false" : "true"}
+            onClick={toggleMode}
+            data-testid="online-switch"
           >
+            <span className="toggle__display" hidden></span>
+          </button>
+
+          <label className={mode === "local" ? "line-through" : ""}>
             Online
           </label>
         </div>
-
-        {mode !== "online" && (
+        {mode !== "online" ? (
           <>
             <div className="flex flex-col items-center gap-4">
               <div className="flex flex-col items-center">
@@ -274,13 +252,11 @@ const StartGameModal = ({
               <button className="button--fancy uppercase">Game Rules</button>
 
               <div className="pad-top-100">
-                <button onClick={(_e) => onClose()}>Cancel</button>
+                <button onClick={() => onClose()}>Cancel</button>
               </div>
             </div>
           </>
-        )}
-
-        {mode === "online" && (
+        ) : (
           <>
             <div className="flex flex-col items-center">
               <label htmlFor="nameInput">
@@ -344,7 +320,7 @@ const StartGameModal = ({
             </div>
 
             <div className="flex flex-row gap-4">
-              <button onClick={(_e) => onClose()}>Cancel</button>
+              <button onClick={() => onClose()}>Cancel</button>
 
               <button disabled={invitee === ""} onClick={acceptPlayRequest}>
                 Accept Invite

@@ -1,38 +1,7 @@
-import { GameState, AnimatedDisk, Locations } from "./types";
+import { GameState, AnimatedDisk, GameActions } from "./types";
 import { testForWin } from "./utils";
-import { GameMode } from "./StartGameModal";
 
 const FIRST_ROW_DROP_MS = 500;
-
-export type GameActions =
-  | {
-      type: "startGame";
-      value: {
-        initiator: boolean;
-        opponent: string;
-        mode: GameMode;
-        player1: string;
-        player2: string;
-        websocket?: WebSocket;
-      };
-    }
-  | {
-      type: "diskDropped";
-      value: { col: number; remote: boolean; gameTimerConfig: number };
-    }
-  | { type: "decrementSeconds" }
-  | { type: "setWinner"; value: { player: string; pieces: Locations } }
-  | { type: "terminateGame"; value: { notifyRemote: boolean } }
-  | { type: "socketClosed" }
-  | { type: "messageReceived"; value: any }
-  | { type: "setAnimatedDisk" }
-  | { type: "clearAnimatedDisk" }
-  | { type: "mainMenuModalVisible"; value: boolean }
-  | { type: "playAgain" }
-  | { type: "restartGame" }
-  | { type: "listenerAdded"; value: boolean }
-  | { type: "remoteDisconnected"; value: boolean }
-  | { type: "setWebsocket"; value: WebSocket };
 
 export function mainReducer(state: GameState, action: GameActions) {
   if (action.type === "startGame") {
@@ -63,16 +32,13 @@ export function mainReducer(state: GameState, action: GameActions) {
   } else if (action.type === "decrementSeconds") {
     return {
       ...state,
-      ...(state.timerSeconds !== null
+      ...(state.timerSeconds != null
         ? { timerSeconds: state.timerSeconds - 1 }
         : {}),
     };
   } else if (action.type === "setWinner") {
     const { player, pieces } = action.value;
-
     if (state.timerRef != null) {
-      console.log("clearing timer");
-
       clearInterval(state.timerRef);
     }
 
@@ -87,13 +53,11 @@ export function mainReducer(state: GameState, action: GameActions) {
     };
   } else if (action.type === "terminateGame") {
     const { notifyRemote } = action.value;
-
     return terminateGame(state, notifyRemote);
   } else if (action.type === "socketClosed") {
     return { ...state, websocket: undefined };
   } else if (action.type === "messageReceived") {
     const { payload, gameTimerConfig } = action.value;
-    console.log("client received message", payload);
     if (payload.message === "playTurn") {
       if (payload.data.turn === -1) {
         const newState = terminateGame(state, false);
@@ -151,10 +115,8 @@ export function mainReducer(state: GameState, action: GameActions) {
 }
 
 export const terminateGame = (state: GameState, notifyRemote: boolean) => {
-  console.log("terminating game");
-
   if (state.websocket != null) {
-    // tell the other player that we quit
+    // tell the other player that we are quitting
 
     if (notifyRemote) {
       const payload = {

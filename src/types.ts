@@ -62,7 +62,7 @@ export type StartGameModalProps = {
   ) => void;
   onClose: () => void;
   websocketUrl: string;
-  setSocket: (socket: WebSocket) => void;
+  exchangeSocket: (socket: WebSocket) => void;
 };
 
 //////
@@ -79,3 +79,94 @@ export type Connect4Props = {
   gameTimerConfig?: number;
   websocketUrl?: string;
 };
+
+export type PlayTurnQuit = {
+  message: "playTurn";
+  data: { turn: -1 };
+};
+
+export type PlayTurn = {
+  message: "playTurn";
+  data: { turn: { col: number } };
+};
+
+export type PlayerInfo = {
+  name: string;
+};
+
+export type LobbyParticipants = {
+  message: "lobbyParticipants";
+  data: PlayerInfo[];
+};
+
+export type PlayRequested = {
+  message: "playRequested";
+  data: string;
+};
+
+type StartGamePayload = {
+  initiator: boolean;
+  initiatorName: string;
+  nonInitiatorName: string;
+  // opponent is a unique id instead of a name. we always send moves to ids instead of names that can be guessed.
+  opponent: string;
+  opponentName: string;
+};
+
+export type StartGame = {
+  message: "startGame";
+  data: StartGamePayload;
+};
+
+export type ReducerPayload = {
+  payload:
+    | PlayTurnQuit
+    | PlayTurn
+    | LobbyParticipants
+    | PlayRequested
+    | StartGame;
+  gameTimerConfig: number;
+};
+
+//////
+
+// Reducer actions
+
+export type GameActions =
+  | {
+      type: "startGame";
+      value: {
+        initiator: boolean;
+        opponent: string;
+        mode: GameMode;
+        player1: string;
+        player2: string;
+        websocket?: WebSocket;
+      };
+    }
+  | {
+      type: "diskDropped";
+      value: { col: number; remote: boolean; gameTimerConfig: number };
+    }
+  | { type: "decrementSeconds" }
+  | { type: "setWinner"; value: { player: string; pieces: Locations } }
+  | { type: "terminateGame"; value: { notifyRemote: boolean } }
+  | { type: "socketClosed" }
+  | {
+      type: "messageReceived";
+      value: {
+        payload: PlayTurn | PlayTurnQuit;
+        gameTimerConfig: number;
+      };
+    }
+  | { type: "setAnimatedDisk" }
+  | { type: "clearAnimatedDisk" }
+  | {
+      type: "mainMenuModalVisible";
+      value: boolean;
+    }
+  | { type: "playAgain" }
+  | { type: "restartGame" }
+  | { type: "listenerAdded"; value: boolean }
+  | { type: "remoteDisconnected"; value: boolean }
+  | { type: "setWebsocket"; value: WebSocket };

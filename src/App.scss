@@ -450,60 +450,6 @@ input[type="text"] {
   font-size: 1rem;
 }
 
-input[type="checkbox"] {
-  display: grid;
-  width: 1rem;
-  height: 1rem;
-  place-content: center;
-  accent-color: black;
-}
-
-input[type="checkbox"]:checked::before {
-  transform: scale(1);
-}
-
-.toggle-wrapper input[type="checkbox"] {
-  height: 0;
-  width: 0;
-  visibility: hidden;
-}
-
-.toggle-wrapper label {
-  cursor: pointer;
-  text-indent: -9999px;
-  width: 50px;
-  height: 25px;
-  background: black;
-  display: block;
-  border-radius: 100px;
-  position: relative;
-}
-
-.toggle-wrapper label:after {
-  content: "";
-  position: absolute;
-  top: 3.5px;
-  left: 5px;
-  width: 18px;
-  height: 18px;
-  background: #fff;
-  border-radius: 30px;
-  transition: 0.3s;
-}
-
-.toggle-wrapper input:checked + label {
-  background: black;
-}
-
-.toggle-wrapper input:checked + label:after {
-  left: calc(100% - 5px);
-  transform: translateX(-100%);
-}
-
-.toggle-wrapper label:active:after {
-  width: 25px;
-}
-
 .player-card {
   background-color: white;
   width: 150px;
@@ -524,4 +470,127 @@ input[type="checkbox"]:checked::before {
 .disk-container > img {
   /* disk width will grow up until its parents width. */
   width: 100vw;
+}
+
+button.toggle {
+  border: 0; /* 1 */
+  padding: 0; /* 1 */
+  background: transparent; /* 1 */
+  font: inherit; /* 1 */
+}
+
+.toggle:focus {
+  outline: 0; /* 1 */
+}
+
+.toggle {
+  display: inline-flex; /* 1 */
+  align-items: center; /* 1 */
+  flex-wrap: wrap; /* 2 */
+  position: relative; /* 3 */
+  gap: 1ch; /* 4 */
+}
+
+.toggle__display {
+  --offset: 0.1em;
+  --diameter: 0.6em;
+
+  --diameter: 0.6em;
+
+  display: inline-flex; /* 1 */
+  align-items: center; /* 1 */
+  justify-content: space-around; /* 1 */
+
+  width: calc(var(--diameter) * 2 + var(--offset) * 2); /* 2 */
+  height: 25px; //calc(var(--diameter) + var(--offset) * 2); /* 2 */
+  box-sizing: content-box; /* 2 */
+
+  border: 0.1em solid rgb(0 0 0 / 0.2); /* 3 */
+
+  position: relative; /* 4 */
+  border-radius: 100vw; /* 5 */
+  background-color: black; /* 6 */
+
+  transition: 250ms;
+  cursor: pointer;
+}
+
+.toggle__display::before {
+  content: "";
+
+  width: var(--diameter); /* 1 */
+  height: var(--diameter); /* 1 */
+  border-radius: 50%; /* 1 */
+
+  box-sizing: border-box; /* 2 */
+  border: 0.1 solid rgb(0 0 0 / 0.2); /* 2 */
+
+  position: absolute; /* 3 */
+  z-index: 2; /* 3 */
+  top: 50%; /* 3 */
+  left: var(--offset); /* 3 */
+  transform: translate(0, -50%); /* 3 */
+
+  background-color: #fff; /* 4 */
+  transition: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle__display {
+    transition-duration: 0ms;
+  }
+}
+
+.toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.toggle:focus .toggle__display,
+.toggle__input:focus + .toggle__display {
+  outline: 3px dotted #212121; /* 1 */
+  outline: 3px auto -webkit-focus-ring-color; /* 1 */
+}
+
+.toggle:focus .toggle__display {
+  outline: 3px dotted #212121; /* 1 */
+  outline: 3px auto -webkit-focus-ring-color; /* 1 */
+}
+
+.toggle:focus:not(:focus-visible) .toggle__display,
+.toggle:focus:not(:focus-visible) .toggle__display {
+  outline: 0; /* 1 */
+}
+
+.toggle[aria-pressed="true"] .toggle__display::before,
+.toggle__input:checked + .toggle__display {
+  background-color: #e3f5eb; /* 1 */
+}
+
+.toggle[aria-pressed="true"] .toggle__display::before,
+.toggle__input:checked + .toggle__display::before {
+  transform: translate(100%, -50%); /* 1 */
+}
+
+.toggle[disabled] .toggle__display,
+.toggle__input:disabled + .toggle__display {
+  opacity: 0.6; /* 1 */
+  filter: grayscale(40%); /* 1 */
+  cursor: not-allowed; /* 1 */
+}
+
+.toggle__icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: inherit;
+  fill: currentcolor;
+  vertical-align: middle;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  transition: background-color 0s 600000s, color 0s 600000s;
 }

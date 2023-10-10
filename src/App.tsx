@@ -10,7 +10,7 @@ import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
 import { useCallback, useEffect, useReducer } from "react";
-import StartGameModal, { GameMode } from "./StartGameModal";
+import StartGameModal from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
 
@@ -24,7 +24,7 @@ import {
   mainReducer,
 } from "./reducerFunctions";
 
-import { AnimatedDisk, GameState, Connect4Props } from "./types";
+import { AnimatedDisk, GameState, Connect4Props, GameMode } from "./types";
 
 const initialGameState: GameState = {
   colState: [[], [], [], [], [], [], []],
@@ -69,7 +69,9 @@ export const App = ({
   useEffect(() => {
     const decSeconds = () => {
       if (state.timerSeconds != null && state.timerSeconds != -1) {
-        console.log("decseconds", state.timerSeconds);
+        if (DEBUG) {
+          console.log("decseconds", state.timerSeconds);
+        }
         dispatch({ type: "decrementSeconds" });
       }
     };
@@ -107,7 +109,6 @@ export const App = ({
 
   useEffect(() => {
     if (state.timerSeconds === 0) {
-      console.log("setting winner");
       clearInterval(state.timerRef);
 
       const [, playerTurn] = getCurrentTurn();
@@ -143,7 +144,7 @@ export const App = ({
       dispatch({ type: "socketClosed" });
     }
 
-    function messageHandler(event: MessageEvent<any>) {
+    function messageHandler(event: { data: string }) {
       const payload = JSON.parse(event.data);
 
       dispatch({
@@ -153,7 +154,6 @@ export const App = ({
     }
 
     if (state.websocket != null && !state.listenerAdded) {
-      console.log("adding event listener");
       state.websocket!.addEventListener("close", closeHandler);
       state.websocket!.addEventListener("message", messageHandler);
       dispatch({ type: "listenerAdded", value: true });
@@ -174,7 +174,7 @@ export const App = ({
   };
 
   const closeMainMenuModal = () => {
-    dispatch({ type: "mainMenuModalVisible", value: true });
+    dispatch({ type: "mainMenuModalVisible", value: false });
   };
 
   const startGame = (
@@ -185,11 +185,13 @@ export const App = ({
     player2: string,
     websocket?: WebSocket
   ) => {
-    console.log("start game");
-    console.log("initiator", initiator);
-    console.log("mode", mode);
-    console.log("player1", player1);
-    console.log("player2", player2);
+    if (DEBUG) {
+      console.log("start game");
+      console.log("initiator", initiator);
+      console.log("mode", mode);
+      console.log("player1", player1);
+      console.log("player2", player2);
+    }
 
     dispatch({
       type: "startGame",
@@ -198,8 +200,6 @@ export const App = ({
   };
 
   const playAgain = () => {
-    console.log("play again");
-
     dispatch({ type: "playAgain" });
   };
 
@@ -266,7 +266,10 @@ export const App = ({
       <div className="nav-bar flex flex-row justify-around pt-3 items-center">
         <button onClick={openMainMenuModal}>Menu</button>
 
-        <img src={GameLogo} alt=""></img>
+        <img
+          src={GameLogo}
+          alt="Game logo image of disks stacked ontop of eachother"
+        ></img>
 
         <button onClick={restartGame} disabled={state.mode === "online"}>
           Restart
@@ -284,7 +287,7 @@ export const App = ({
         <StartGameModal
           websocketUrl={websocketUrl}
           onStartGame={startGame}
-          setSocket={(socket: WebSocket) => {
+          exchangeSocket={(socket: WebSocket) => {
             dispatch({ type: "setWebsocket", value: socket });
           }}
           onClose={() => {
