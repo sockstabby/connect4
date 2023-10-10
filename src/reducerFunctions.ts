@@ -283,6 +283,9 @@ export function diskDropped(
 }
 
 export const getTokenStyle = (row: number, animate: boolean = true) => {
+  // TODO: Better to apply a class because that way we can conditionally
+  // disable animations if the user doesnt prefer them.
+
   const ret: React.CSSProperties = {
     position: "absolute",
 

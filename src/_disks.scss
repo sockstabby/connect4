@@ -106,22 +106,22 @@
     top: calc($dropzone-height + 2.3vmin);
   }
   .game-board-container {
-    --row0-top-100pct: calc(50.7vmin + 40px);
+    --row0-top-100pct: calc(50.85vmin + 40px);
     --row0-top-90pct: calc(45vmin + 40px);
 
     --row1-top-100pct: calc(41.1vmin + 40px);
     --row1-top-90pct: calc(39vmin + 40px);
 
-    --row2-top-100pct: calc(31.2vmin + 40px);
+    --row2-top-100pct: calc(31.34vmin + 40px);
     --row2-top-90pct: calc(29vmin + 40px);
 
-    --row3-top-100pct: calc(21.8vmin + 40px);
+    --row3-top-100pct: calc(21.64vmin + 40px);
     --row3-top-90pct: calc(16.8vmin + 40px);
 
-    --row4-top-100pct: calc(12vmin + 40px);
+    --row4-top-100pct: calc(11.9vmin + 40px);
     --row4-top-90pct: calc(8.8vmin + 40px);
 
-    --row5-top-100pct: calc(2.3vmin + 40px);
+    --row5-top-100pct: calc(2.1vmin + 40px);
     --row5-top-90pct: calc(0vmin + 40px);
   }
 }
@@ -207,7 +207,7 @@
     left: calc(53.08vmin);
   }
   .disk-column-5 {
-    left: calc(65.6vmin);
+    left: calc(65.5vmin);
   }
   .disk-column-6 {
     left: calc(78.1vmin);
@@ -243,7 +243,7 @@
     --row3-top-100pct: calc(27.8vmin + 40px);
     --row3-top-90pct: calc(22.8vmin + 40px);
 
-    --row4-top-100pct: calc(15vmin + 40px);
+    --row4-top-100pct: calc(15.2vmin + 40px);
     --row4-top-90pct: calc(10.5vmin + 40px);
 
     --row5-top-100pct: calc(2.7vmin + 40px);
