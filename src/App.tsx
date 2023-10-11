@@ -78,6 +78,7 @@ export const App = ({
     }
   }, [state]);
 
+  // useCallback is required to be stable due to the of the dependency
   const getCurrentTurn = useCallback(() => {
     const getCurrentTurnWrapped: () => [boolean, string] = function (): [
       boolean,
@@ -204,6 +205,7 @@ export const App = ({
     dispatch({ type: "restartGame" });
   };
 
+  // we'll use this set to quickly test if a disk is part of a winning set
   const winningDiskSet = !state.winner
     ? new Set()
     : state.winner.pieces.reduce((acc, current) => {
@@ -211,7 +213,8 @@ export const App = ({
         return acc.add(key);
       }, new Set());
 
-  // copy is used at the moment there's a draw or somebody wins, until the user presses Play Again
+  // at the moment there's a draw or somebody wins, a copy of the board
+  // is used until the user presses Play Again.
   const disks = state.winner ? state.animatedDisksCopy : state.animatedDisks;
 
   const disksElements = disks.map((disk: AnimatedDisk) => {
@@ -274,9 +277,7 @@ export const App = ({
         className="modal modal__dark-background centered"
         isOpen={state.mainMenuOpen}
         shouldCloseOnOverlayClick={true}
-        onRequestClose={() => {
-          closeMainMenuModal();
-        }}
+        onRequestClose={closeMainMenuModal}
         overlayClassName="disabled-background"
       >
         <StartGameModal
@@ -446,10 +447,12 @@ export const App = ({
             <div className="white-board">
               <img src={Board} alt="" />
             </div>
+
             <div className="black-board">
               <img src={BlackBoard} alt="" />
             </div>
           </div>
+
           {state.gameStarted && (
             <div className="player2-card player-card">
               <div className="flex flex-row justify-center -mt-6 ">
@@ -510,7 +513,7 @@ export const App = ({
         overlayClassName="disabled-background"
       >
         <div className="column-container col-centered gap15">
-          <div className="row-container grow-h row-centered uppercase text-black">
+          <div className="row-container row-centered uppercase text-black">
             Remote Player Quit
           </div>
 
