@@ -214,7 +214,7 @@ export const App = ({
   // copy is used at the moment there's a draw or somebody wins, until the user presses Play Again
   const disks = state.winner ? state.animatedDisksCopy : state.animatedDisks;
 
-  const tokens = disks.map((disk: AnimatedDisk) => {
+  const disksElements = disks.map((disk: AnimatedDisk) => {
     const key = `${disk.col}${disk.row}`;
 
     const winningDisk = winningDiskSet.has(key);
@@ -441,7 +441,7 @@ export const App = ({
                 </div>
               )}
 
-            {tokens}
+            {disksElements}
 
             <div className="white-board">
               <img src={Board} alt="" />
