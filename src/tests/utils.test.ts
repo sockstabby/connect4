@@ -59,18 +59,13 @@ const leftRightTestData2 = [
 
 describe("utils", () => {
   it("testLeftRight", () => {
-    const [win, _winningSet] = testForLeftRightWin(
-      2,
-      0,
-      "yellow",
-      leftRightTestData2
-    );
+    const [win] = testForLeftRightWin(2, 0, "yellow", leftRightTestData2);
 
     expect(win).toEqual(false);
   });
 
   it("testForTopLeftBottomRightWin", () => {
-    const [win, _winningSet] = testForTopLeftBottomRightWin(
+    const [win] = testForTopLeftBottomRightWin(
       3,
       1,
       "yellow",
@@ -81,13 +76,13 @@ describe("utils", () => {
   });
 
   it("testForTopDownWin", () => {
-    const [win, _winningSet] = testForTopDownWin(3, 3, "red", topDownTestData);
+    const [win] = testForTopDownWin(3, 3, "red", topDownTestData);
 
     expect(win).toEqual(true);
   });
 
   it("testForTopRightBottomLeftWin", () => {
-    const [win, _winningSet] = testForTopRightBottomLeftWin(
+    const [win] = testForTopRightBottomLeftWin(
       4,
       3,
       "red",
@@ -98,12 +93,7 @@ describe("utils", () => {
   });
 
   it("testForTopRightBottomLeftWin", () => {
-    const [win, _winningSet] = testForLeftRightWin(
-      5,
-      1,
-      "red",
-      leftRightTestData
-    );
+    const [win] = testForLeftRightWin(5, 1, "red", leftRightTestData);
 
     expect(win).toEqual(true);
   });
