@@ -3,10 +3,15 @@ import { testForWin } from "./utils";
 
 const FIRST_ROW_DROP_MS = 500;
 
+const DRAW_COUNT = 3;
+
 export function mainReducer(state: GameState, action: GameActions) {
+  console.log("action = ", action);
   if (action.type === "startGame") {
     const { initiator, opponent, mode, player1, player2, websocket } =
       action.value;
+
+    console.log("start game initiator =", initiator);
 
     return {
       ...state,
@@ -55,7 +60,7 @@ export function mainReducer(state: GameState, action: GameActions) {
     const { notifyRemote } = action.value;
     return terminateGame(state, notifyRemote);
   } else if (action.type === "socketClosed") {
-    return { ...state, websocket: undefined };
+    return { ...state, websocket: undefined, listenerAdded: false };
   } else if (action.type === "messageReceived") {
     const { payload, gameTimerConfig } = action.value;
     if (payload.message === "playTurn") {
@@ -84,10 +89,13 @@ export function mainReducer(state: GameState, action: GameActions) {
     const visible = action.value;
     return { ...state, mainMenuOpen: visible };
   } else if (action.type === "playAgain") {
+    console.log("play again intiator will be ", !state.initiator);
+
     return {
       ...state,
       ...{
         initiator: !state.initiator,
+        // if there was a play then preserve it
         plays: state.plays !== 1 ? 0 : state.plays,
         mainMenuOpen: false,
         draw: false,
@@ -101,6 +109,7 @@ export function mainReducer(state: GameState, action: GameActions) {
       ...{
         plays: 0,
         colState: [[], [], [], [], [], [], []],
+        animatedDisks: [],
       },
     };
   } else if (action.type === "setWebsocket") {
@@ -136,9 +145,16 @@ export const terminateGame = (state: GameState, notifyRemote: boolean) => {
     state.websocket.close();
   }
 
-  return { ...state, winner: null, gameStarted: false };
+  return {
+    ...state,
+    winner: null,
+    draw: false,
+    listenerAdded: false,
+    gameStarted: false,
+  };
 };
 const sendMove = (state: GameState, col: number) => {
+  console.log("sending play move to ", state.opponent);
   const payload = {
     service: "chat",
     action: "playTurn",
@@ -211,6 +227,8 @@ export function diskDropped(
   if (state.colState[col].length === 6) {
     return state;
   }
+
+  console.log("diskDropped remote=", remote);
   //creates the animation of the piece
   let player;
   if (state.mode === "online") {
@@ -239,17 +257,18 @@ export function diskDropped(
   const row = state.colState[col].length;
   const newDisk: AnimatedDisk = { row, col, color: player };
 
+  const draw = state.plays + 1 === DRAW_COUNT;
+
   let newState = {};
-  if (win || state.plays + 1 === 42) {
+  if (win || draw) {
     newState = setWinnerHelper(
       { ...state, animatedDisks: [...state.animatedDisks, newDisk] },
       player,
-      state.plays + 1 === 42
+      draw
     );
   }
 
   const copy = JSON.parse(JSON.stringify(state.colState));
-
   copy[col].push(player);
 
   // here we try to match the sound to the disk drop animation
@@ -267,15 +286,17 @@ export function diskDropped(
   return {
     ...state,
     ...newState,
-    draw: state.plays + 1 === 42,
+    draw,
     colState: copy,
-    ...(win ? { colState: [[], [], [], [], [], [], []] } : {}),
-    ...(!win ? { animatedDisks: [...state.animatedDisks, newDisk] } : {}),
-    ...(!win ? { plays: state.plays + 1 } : {}),
-    ...(win ? { plays: 0 } : {}),
+    ...(win || draw ? { colState: [[], [], [], [], [], [], []] } : {}),
+    ...(!win && !draw
+      ? { animatedDisks: [...state.animatedDisks, newDisk] }
+      : {}),
+    ...(!win && !draw ? { plays: state.plays + 1 } : {}),
+    ...(win || draw ? { plays: 0 } : {}),
     ...(win ? { winner: { player, pieces: winningSet } } : {}),
     lastDroppedColumn: col,
-    ...(!win && state.plays + 1 !== 42
+    ...(!win && !draw
       ? {
           timerSeconds: gameTimerConfig,
           animatedPiece: col,

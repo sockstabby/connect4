@@ -15,8 +15,9 @@ import StartGameModal from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
 
-const DEBUG = false;
+const DEBUG = true;
 const TIMER_ENABLED = false;
+const TIMER_SECONDS = 24;
 
 import { getLocalColor, getRemoteColor, mainReducer } from "./reducerFunctions";
 
@@ -54,7 +55,7 @@ const initialGameState: GameState = {
 };
 
 export const App = ({
-  gameTimerConfig = 24,
+  gameTimerConfig = TIMER_SECONDS,
   websocketUrl = "wss://connect4.isomarkets.com",
 }: Connect4Props) => {
   const [state, dispatch] = useReducer(mainReducer, initialGameState);
@@ -152,6 +153,7 @@ export const App = ({
     }
 
     if (state.websocket != null && !state.listenerAdded) {
+      console.log("adding listener");
       state.websocket!.addEventListener("close", closeHandler);
       state.websocket!.addEventListener("message", messageHandler);
       dispatch({ type: "listenerAdded", value: true });
@@ -215,7 +217,8 @@ export const App = ({
 
   // at the moment there's a draw or somebody wins, a copy of the board
   // is used until the user presses Play Again.
-  const disks = state.winner ? state.animatedDisksCopy : state.animatedDisks;
+  const disks =
+    state.winner || state.draw ? state.animatedDisksCopy : state.animatedDisks;
 
   const disksElements = disks.map((disk: AnimatedDisk) => {
     const key = `${disk.col}${disk.row}`;
@@ -253,6 +256,9 @@ export const App = ({
   const [myTurn, playerTurn] = getCurrentTurn();
 
   if (DEBUG) {
+    console.log("myTurn = ", myTurn);
+    console.log("playerTurn = ", playerTurn);
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { websocket, ...remainingObject } = state;
     console.log("state= ", remainingObject);
@@ -350,7 +356,7 @@ export const App = ({
               <img src={Player1} alt="Player One Smiley Face" />
             </div>
 
-            <div className="flex flex-row justify-center font-bold text-lg uppercase">
+            <div className="flex player-card-small__player-name-text flex-row justify-center font-bold text-lg uppercase">
               {state.player1}
             </div>
 
@@ -369,7 +375,7 @@ export const App = ({
             >
               {state.yellowWins}
             </div>
-            <div className="flex flex-row justify-center font-bold text-lg uppercase">
+            <div className="flex player-card-small__player-name-text flex-row justify-center font-bold text-lg uppercase">
               {state.player2}
             </div>
 
@@ -475,9 +481,9 @@ export const App = ({
         {state.winner == null && state.gameStarted && (
           <div className="flex justify-center -mt-7">
             <div
-              className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
+              className={`caret-container ${playerTurn} pl-4 pr-4 flex flex-col justify-center text-white`}
             >
-              <div className="caret-container__player-turn-text flex flex-row justify-center uppercase pt-5 font-extrabold pb-3">
+              <div className="caret-container__player-turn-text flex flex-row justify-center uppercase font-extrabold">
                 {playerTurn === "red"
                   ? `${state.player1}'s Turn`
                   : `${state.player2}'s Turn`}
@@ -490,7 +496,7 @@ export const App = ({
                     : "24s"}
                 </div>
               ) : (
-                <div className="flex flex-row leading-tight text-xs">
+                <div className="caret-container__timer-note flex flex-row leading-tight">
                   Note: A timer will start after each player has played a turn.
                 </div>
               )}
@@ -512,8 +518,8 @@ export const App = ({
         }}
         overlayClassName="disabled-background"
       >
-        <div className="column-container col-centered gap15">
-          <div className="row-container row-centered uppercase text-black">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-row justify-center uppercase text-black">
             Remote Player Quit
           </div>
 
@@ -566,4 +572,5 @@ export const App = ({
     </>
   );
 };
+
 export default App;

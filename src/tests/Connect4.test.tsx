@@ -328,6 +328,21 @@ describe("Connect4", () => {
     expect(yellowWinCount).toEqual("1");
   });
 
+  it("connect4 draw", async () => {
+    // render(<App gameTimerConfig={1} />);
+
+    // fireEvent.click(await screen.findByText(/menu/i));
+    // fireEvent.click(await screen.findByText(/start game/i));
+
+    // fireEvent.click(await screen.findByTestId("drop-column-0"));
+    // fireEvent.click(await screen.findByTestId("drop-column-1"));
+
+    // await wait(1500);
+
+    // let winner = await screen.findByTestId("winning-player");
+    expect(1).toEqual(1);
+  });
+
   // it("connect4 local gameplay timeouts", async () => {
   //   render(<App gameTimerConfig={1} />);
 

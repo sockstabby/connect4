@@ -401,9 +401,16 @@ button[disabled] {
   aspect-ratio: 197 / 165;
   &__player-turn-text {
     font-size: clamp(0.3rem, 3.5vmin, 1.2rem);
+    padding-top: 2vmin;
   }
   &__player-countdown-text {
+    padding-top: 1vmin;
     font-size: clamp(0.3rem, 7.5vmin, 3rem);
+  }
+
+  &__timer-note {
+    font-size: clamp(0.3rem, 3.5vmin, 0.7rem);
+    padding-top: 1vmin;
   }
 }
 
@@ -506,6 +513,10 @@ input[type="text"] {
   border: 2px solid black;
   box-shadow: 0 12px 0 black;
   max-width: 175px;
+
+  &__player-name-text {
+    font-size: clamp(1rem, 4vmin, 1.2rem);
+  }
 }
 
 .disk-container {
