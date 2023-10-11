@@ -1,7 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import App from "../App";
 import { Client, Server } from "mock-socket";
+
+vi.stubGlobal("__APP_VERSION__", "0.1.0");
+vi.stubGlobal("__COMMIT_HASH__", "febaea");
 
 const TEST_WS_URL = "ws://localhost:5000";
 const REMOTE_PLAYER_NAME = "somebody";

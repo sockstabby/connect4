@@ -6,6 +6,7 @@ import OrangePiece from "../src/assets/orange-piece.svg";
 import YellowPiece from "../src/assets/yellow-piece.svg";
 import YellowWinningPiece from "../src/assets/yellow-winning-piece.svg";
 import RedWinningPiece from "../src/assets/red-winning-piece.svg";
+import CheckCircle from "../src/assets/check-circle.svg";
 import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
 import GameLogo from "../src/assets/game-logo.svg";
@@ -299,7 +300,47 @@ export const App = ({
         }}
         overlayClassName="disabled-background"
       >
-        <div className=""> Rules Modal</div>
+        <div className="rules-content pt-5 pb-8">
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-row justify-center text-4xl font-extrabold	">
+              RULES
+            </div>
+            <h1>Objective</h1>
+            <div className="flex flex-row items start gap-3">
+              <p>
+                Be the first player to connect 4 of the same colored discs in a
+                row (either vertically, horizontally, or diagonally).
+              </p>
+            </div>
+            <h1>How To Play</h1>
+            <div className="flex flex-row items start gap-3">
+              <span> 1</span>
+              <p>Red goes first in the first game.</p>
+            </div>
+            <div className="flex flex-row items start gap-3">
+              <span> 2</span>
+              <p>
+                Players must alternate turns, and only one disc can be dropped
+                in each turn.
+              </p>
+            </div>
+            <div className="flex flex-row items start gap-3">
+              <span> 3</span>
+              <p>The game ends when there is a 4-in-a-row or a stalemate.</p>
+            </div>
+            <div className="flex flex-row items start gap-3">
+              <span> 4</span>
+              <p>
+                The starter of the previous game goes second on the next game.
+              </p>
+            </div>
+            <div className="flex flex-row justify-center">
+              <div className="check-circle">
+                <img src={CheckCircle}></img>
+              </div>
+            </div>
+          </div>
+        </div>
       </ReactModal>
       <div className="flex flex-col">
         <div className="player-card-small-container flex flex-row justify-center gap-4">
@@ -429,18 +470,18 @@ export const App = ({
           )}
         </div>
         {state.winner == null && state.gameStarted && (
-          <div className="flex justify-center -mt-8">
+          <div className="flex justify-center -mt-7">
             <div
               className={`caret-container ${playerTurn} pl-4 pr-4 pt-5 flex flex-col text-white`}
             >
-              <div className="flex flex-row justify-center uppercase pt-5 font-extrabold text-xl pb-3">
+              <div className="caret-container__player-turn-text flex flex-row justify-center uppercase pt-5 font-extrabold pb-3">
                 {playerTurn === "red"
                   ? `${state.player1}'s Turn`
                   : `${state.player2}'s Turn`}
               </div>
 
               {state.plays > 1 ? (
-                <div className="flex flex-row justify-center text-5xl font-extrabold">
+                <div className="caret-container__player-countdown-text flex flex-row justify-center text-5xl font-extrabold">
                   {state.timerSeconds != null
                     ? `${state.timerSeconds}s`
                     : "24s"}

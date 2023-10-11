@@ -77,6 +77,7 @@ button.button--fancy[disabled] {
 }
 
 .modal {
+  position: relative;
   max-width: 400px;
   color: #fff;
   padding: 20px;
@@ -89,6 +90,7 @@ button.button--fancy[disabled] {
   }
   &__light-background {
     background-color: white;
+    color: black;
   }
 
   &__bottom-placement {
@@ -99,6 +101,18 @@ button.button--fancy[disabled] {
     width: 320px;
     height: auto;
   }
+}
+
+.rules-content h1 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--game-background-color1);
+}
+
+.check-circle {
+  position: absolute;
+  bottom: -50px;
 }
 
 .pad-top-100 {
@@ -381,11 +395,16 @@ button[disabled] {
   background-repeat: no-repeat;
   background-position: center center;
   background-size: contain;
-  min-width: 199px;
-  min-height: 164px;
-  width: 30vmin;
-  height: 25vmin;
-  padding-block: 5vmin;
+  max-width: 191px;
+  width: 40vmin;
+  height: auto;
+  aspect-ratio: 197 / 165;
+  &__player-turn-text {
+    font-size: clamp(0.3rem, 3.5vmin, 1.2rem);
+  }
+  &__player-countdown-text {
+    font-size: clamp(0.3rem, 7.5vmin, 3rem);
+  }
 }
 
 .win-count {
