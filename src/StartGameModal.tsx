@@ -19,7 +19,7 @@ const StartGameModal = ({
   onShowRules,
 }: StartGameModalProps) => {
   const [name, setName] = useState("");
-  const [participants, setParticipants] = useState<Player[]>([]);
+  const [participants, setParticipants] = useState<string[]>([]);
   const [playerInvites, setPlayersInvites] = useState<string[]>([]);
   const [invitee, setInvitee] = useState("");
   const [chosenOpponent, setChosenOpponent] = useState("");
@@ -56,16 +56,25 @@ const StartGameModal = ({
       );
 
       if (payload.message === "lobbyParticipants") {
-        console.log("lobbyParticipants", payload.data);
-        setParticipants(payload.data);
+        // guarantee uniqueness, in prod this is done in the lambda. so this
+        // is only necessary for test
+        const playerSet = payload.data.reduce((acc, current) => {
+          acc.add(current.name);
+          return acc;
+        }, new Set());
+        const uniquePlayers = [...playerSet];
+        setParticipants(uniquePlayers as string[]);
       }
       if (payload.message === "playRequested") {
-        console.log("playRequested", payload.data);
-        setPlayersInvites((s) => [...s, payload.data]);
+        setPlayersInvites((s) => {
+          if (!s.includes(payload.data)) {
+            [...s, payload.data];
+          }
+          return s;
+        });
       }
 
       if (payload.message === "startGame") {
-        console.log("start game payload = ", payload);
         let player1Name;
         let player2Name;
 
@@ -97,7 +106,6 @@ const StartGameModal = ({
 
     return () => {
       if (websocket != null) {
-        console.log("modal cleaning up websocket listeners");
         websocket!.removeEventListener("close", closeHandler);
         websocket!.removeEventListener("open", closeHandler);
         websocket!.removeEventListener("message", closeHandler);
@@ -165,8 +173,8 @@ const StartGameModal = ({
 
   const players = participants.map((i) => {
     return (
-      <option key={i.name} value={i.name}>
-        {i.name}
+      <option key={i} value={i}>
+        {i}
       </option>
     );
   });

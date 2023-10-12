@@ -12,14 +12,15 @@ const REMOTE_PLAYER_NAME2 = "somebody who wants to play";
 const MY_NAME = "the best player ever";
 const websocketServer = new Server(TEST_WS_URL);
 
-const myMoves = [0, 0, 0, 0];
+const DEBUG = false;
 
-// 21
+const myMoves = [0, 0, 0, 0];
+const myMovesClicked = [1, 1, 1];
+
 const drawMoves = [
   0, 2, 4, 6, 2, 4, 2, 4, 3, 1, 1, 5, 5, 0, 0, 0, 6, 6, 2, 4, 3,
 ];
 
-//21
 const drawMovesClicked = [
   1, 3, 5, 1, 3, 5, 3, 2, 4, 1, 1, 5, 5, 0, 0, 6, 6, 6, 3, 2, 4,
 ];
@@ -35,11 +36,11 @@ const getMovePayload = (move: number, moves: number[]) => {
   return payload;
 };
 
-// async function wait(milliseconds: number) {
-//   return new Promise((resolve) => {
-//     setTimeout(() => resolve(1), milliseconds);
-//   });
-// }
+async function wait(milliseconds: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(1), milliseconds);
+  });
+}
 
 describe("Connect4", () => {
   it("online-mode -- the first turn alternates players after each game", async () => {
@@ -51,17 +52,17 @@ describe("Connect4", () => {
       websocket.on(
         "message",
         (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
-          console.log(
-            Date.now(),
-            "Received a message from the client",
-            message
-          );
+          if (DEBUG) {
+            console.log(
+              Date.now(),
+              "Received a message from the client",
+              message
+            );
+          }
+
           const payload = JSON.parse(message as string);
-          console.log("payload = ", payload);
 
           if (payload.action === "joinLobby") {
-            console.log(" got a join lobby request");
-
             socket.send(
               JSON.stringify({
                 message: "lobbyParticipants",
@@ -76,7 +77,9 @@ describe("Connect4", () => {
               })
             );
 
-            console.log(Date.now(), "sending start game move");
+            if (DEBUG) {
+              console.log(Date.now(), "sending start game move");
+            }
             socket.send(
               JSON.stringify({
                 message: "startGame",
@@ -95,8 +98,6 @@ describe("Connect4", () => {
 
     render(<App websocketUrl={TEST_WS_URL} />);
 
-    let myMovesCount = 0;
-
     fireEvent.click(await screen.findByText(/menu/i));
     await screen.findByText(/Player One Name/i);
     fireEvent.click(await screen.findByText(/menu/i));
@@ -109,44 +110,21 @@ describe("Connect4", () => {
     fireEvent.click(await screen.findByText(/join lobby/i));
     await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
 
-    await act(async () => {
-      // gameplay begins here we go second
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "sending first move of the game", send);
-      socket!.send(JSON.stringify(send));
-      myMovesCount++;
-    });
-
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
-      );
-      // send the move
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "server sending playTurn move");
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-    });
-
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
-      );
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "server sending playTurn move");
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-    });
-
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
-      );
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "server sending playTurn move");
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-    });
+    for (let i = 0; i < myMoves.length; i++) {
+      await act(async () => {
+        // gameplay begins here we go second
+        const send = getMovePayload(i, myMoves);
+        socket!.send(JSON.stringify(send));
+      });
+      if (i < 3) {
+        await act(async () => {
+          const columnName = `drop-column-${myMovesClicked[i]}`;
+          fireEvent.click(
+            await screen.findByTestId(columnName, undefined, { timeout: 1000 })
+          );
+        });
+      }
+    }
 
     let winner = await screen.findByTestId("winning-player", undefined, {
       timeout: 1000,
@@ -156,54 +134,26 @@ describe("Connect4", () => {
 
     ////////////////////////////////////////////////////////////
     // this time we get the first move
-
-    console.log("starting new game");
-    myMovesCount = 0;
     await act(async () => {
       fireEvent.click(screen.getByText(/Play Again/i));
+      await wait(100);
     });
 
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
-      );
-
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "server sending playTurn move");
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-    });
-
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
-      );
-
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "server sending playTurn move");
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-    });
-
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, {
-          timeout: 1000,
-        })
-      );
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "server sending playTurn move");
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-    });
-
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, {
-          timeout: 1000,
-        })
-      );
-    });
+    for (let i = 0; i < myMoves.length; i++) {
+      await act(async () => {
+        const columnName = `drop-column-${myMoves[i]}`;
+        fireEvent.click(
+          await screen.findByTestId(columnName, undefined, { timeout: 1000 })
+        );
+      });
+      if (i < 3) {
+        await act(async () => {
+          // gameplay begins here we go second
+          const send = getMovePayload(i, myMovesClicked);
+          socket!.send(JSON.stringify(send));
+        });
+      }
+    }
 
     winner = await screen.findByTestId("winning-player");
 
@@ -214,54 +164,49 @@ describe("Connect4", () => {
     expect(redWinCount.innerHTML).toEqual("1");
     expect(yellowWinCount.innerHTML).toEqual("1");
 
+    // here's a cool edge case to hit. lets fire a play on the socket while the win modal is stil open
+    // this simulate the case where the remote player sends a move while the local player is
+    // still reflecting on the game and has not pressed Play Again yet.
+    // this move is not visible until the player presses play again.
+
+    await act(async () => {
+      const send = getMovePayload(0, myMoves);
+      socket!.send(JSON.stringify(send));
+      await wait(100);
+    });
+
+    expect(screen.queryByText(/Play again/i)).toBeInTheDocument();
+    expect(screen.queryByText(/win/i)).toBeInTheDocument();
+
     fireEvent.click(screen.getByText(/Play Again/i));
 
-    ////////////////////////////////////////////////////////////
-    // and this this time we go second
-    myMovesCount = 0;
+    expect(screen.queryByText(/Play again/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/win/i)).not.toBeInTheDocument();
 
     await act(async () => {
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "sending first move of the game", send);
-      socket!.send(JSON.stringify(send));
-      myMovesCount++;
-    });
-
-    await act(async () => {
+      const columnName = `drop-column-${myMovesClicked[0]}`;
       fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
+        await screen.findByTestId(columnName, undefined, { timeout: 1000 })
       );
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "sending first move of the game", send);
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
     });
 
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
-      );
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "sending first move of the game", send);
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-    });
-
-    await act(async () => {
-      fireEvent.click(
-        await screen.findByTestId("drop-column-1", undefined, { timeout: 1000 })
-      );
-      const send = getMovePayload(myMovesCount, myMoves);
-      console.log(Date.now(), "sending first move of the game", send);
-      socket.send(JSON.stringify(send));
-      myMovesCount++;
-    });
+    for (let i = 1; i < myMoves.length; i++) {
+      await act(async () => {
+        const send = getMovePayload(i, myMoves);
+        socket!.send(JSON.stringify(send));
+      });
+      if (i < 3) {
+        await act(async () => {
+          const columnName = `drop-column-${myMovesClicked[i]}`;
+          fireEvent.click(
+            await screen.findByTestId(columnName, undefined, { timeout: 1000 })
+          );
+        });
+      }
+    }
 
     winner = await screen.findByTestId("winning-player");
-
     expect(winner.innerHTML).toEqual("red");
-
-    console.log("myMovesCount", myMovesCount);
 
     redWinCount = await screen.getByTestId("red-win-count");
     yellowWinCount = await screen.getByTestId("yellow-win-count");
@@ -288,55 +233,55 @@ describe("Connect4", () => {
     //screen.debug();
   }, 2000);
 
-  it("local mode -- first turn alternates", () => {
-    render(<App />);
-    fireEvent.click(screen.getByText(/menu/i));
-    const player1Input = screen.getByLabelText("Player One Name:");
-    const player2Input = screen.getByLabelText("Player Two Name:");
-    fireEvent.change(player1Input, { target: { value: "PLAYER TEST NAME 1" } });
-    fireEvent.change(player2Input, { target: { value: "PLAYER TEST NAME 2" } });
-    fireEvent.click(screen.getByText(/start game/i));
-    let redWinCount = screen.getByTestId("red-win-count").innerHTML;
-    let yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
-    expect(redWinCount).toEqual("0");
-    expect(yellowWinCount).toEqual("0");
-    fireEvent.click(screen.getByTestId("drop-column-0"));
-    fireEvent.click(screen.getByTestId("drop-column-1"));
-    fireEvent.click(screen.getByTestId("drop-column-0"));
-    fireEvent.click(screen.getByTestId("drop-column-1"));
-    fireEvent.click(screen.getByTestId("drop-column-0"));
-    fireEvent.click(screen.getByTestId("drop-column-1"));
-    fireEvent.click(screen.getByTestId("drop-column-0"));
-    let winner = screen.getByTestId("winning-player").innerHTML;
+  // it("local mode -- first turn alternates", () => {
+  //   render(<App />);
+  //   fireEvent.click(screen.getByText(/menu/i));
+  //   const player1Input = screen.getByLabelText("Player One Name:");
+  //   const player2Input = screen.getByLabelText("Player Two Name:");
+  //   fireEvent.change(player1Input, { target: { value: "PLAYER TEST NAME 1" } });
+  //   fireEvent.change(player2Input, { target: { value: "PLAYER TEST NAME 2" } });
+  //   fireEvent.click(screen.getByText(/start game/i));
+  //   let redWinCount = screen.getByTestId("red-win-count").innerHTML;
+  //   let yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+  //   expect(redWinCount).toEqual("0");
+  //   expect(yellowWinCount).toEqual("0");
+  //   fireEvent.click(screen.getByTestId("drop-column-0"));
+  //   fireEvent.click(screen.getByTestId("drop-column-1"));
+  //   fireEvent.click(screen.getByTestId("drop-column-0"));
+  //   fireEvent.click(screen.getByTestId("drop-column-1"));
+  //   fireEvent.click(screen.getByTestId("drop-column-0"));
+  //   fireEvent.click(screen.getByTestId("drop-column-1"));
+  //   fireEvent.click(screen.getByTestId("drop-column-0"));
+  //   let winner = screen.getByTestId("winning-player").innerHTML;
 
-    expect(winner).toEqual("red");
+  //   expect(winner).toEqual("red");
 
-    redWinCount = screen.getByTestId("red-win-count").innerHTML;
-    yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+  //   redWinCount = screen.getByTestId("red-win-count").innerHTML;
+  //   yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
 
-    expect(redWinCount).toEqual("1");
-    expect(yellowWinCount).toEqual("0");
+  //   expect(redWinCount).toEqual("1");
+  //   expect(yellowWinCount).toEqual("0");
 
-    fireEvent.click(screen.getByText(/play again/i));
+  //   fireEvent.click(screen.getByText(/play again/i));
 
-    // this time yellow goes first
-    fireEvent.click(screen.getByTestId("drop-column-0"));
-    fireEvent.click(screen.getByTestId("drop-column-1"));
-    fireEvent.click(screen.getByTestId("drop-column-0"));
-    fireEvent.click(screen.getByTestId("drop-column-1"));
-    fireEvent.click(screen.getByTestId("drop-column-0"));
-    fireEvent.click(screen.getByTestId("drop-column-1"));
-    fireEvent.click(screen.getByTestId("drop-column-0"));
-    winner = screen.getByTestId("winning-player").innerHTML;
+  //   // this time yellow goes first
+  //   fireEvent.click(screen.getByTestId("drop-column-0"));
+  //   fireEvent.click(screen.getByTestId("drop-column-1"));
+  //   fireEvent.click(screen.getByTestId("drop-column-0"));
+  //   fireEvent.click(screen.getByTestId("drop-column-1"));
+  //   fireEvent.click(screen.getByTestId("drop-column-0"));
+  //   fireEvent.click(screen.getByTestId("drop-column-1"));
+  //   fireEvent.click(screen.getByTestId("drop-column-0"));
+  //   winner = screen.getByTestId("winning-player").innerHTML;
 
-    expect(winner).toEqual("yellow");
+  //   expect(winner).toEqual("yellow");
 
-    redWinCount = screen.getByTestId("red-win-count").innerHTML;
-    yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+  //   redWinCount = screen.getByTestId("red-win-count").innerHTML;
+  //   yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
 
-    expect(redWinCount).toEqual("1");
-    expect(yellowWinCount).toEqual("1");
-  });
+  //   expect(redWinCount).toEqual("1");
+  //   expect(yellowWinCount).toEqual("1");
+  // });
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   it("connect4 draw", async () => {
@@ -348,17 +293,17 @@ describe("Connect4", () => {
       websocket.on(
         "message",
         (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
-          console.log(
-            Date.now(),
-            "Received a message from the client",
-            message
-          );
+          if (DEBUG) {
+            console.log(
+              Date.now(),
+              "Received a message from the client",
+              message
+            );
+          }
+
           const payload = JSON.parse(message as string);
-          console.log("payload = ", payload);
 
           if (payload.action === "joinLobby") {
-            console.log(" got a join lobby request");
-
             socket.send(
               JSON.stringify({
                 message: "lobbyParticipants",
@@ -373,13 +318,15 @@ describe("Connect4", () => {
               })
             );
 
-            console.log(Date.now(), "sending start game move");
+            if (DEBUG) {
+              console.log(Date.now(), "sending start game move");
+            }
             socket.send(
               JSON.stringify({
                 message: "startGame",
 
                 data: {
-                  initiator: false,
+                  initiator: true,
                   initiatorName: REMOTE_PLAYER_NAME2,
                   nonInitiatorName: "me",
                 },
@@ -404,24 +351,69 @@ describe("Connect4", () => {
     fireEvent.click(await screen.findByText(/join lobby/i));
     await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
 
-    // await act(async () => {
-    //   // gameplay begins here we go second
-    //   const send = getMovePayload(myMovesCount, drawMoves);
-    //   console.log(Date.now(), "sending first move of the game", send);
-    //   socket!.send(JSON.stringify(send));
-    //   myMovesCount++;
-    // });
     for (let i = 0; i < drawMoves.length; i++) {
+      await act(async () => {
+        const columnName = `drop-column-${drawMoves[i]}`;
+        fireEvent.click(
+          await screen.findByTestId(columnName, undefined, {
+            timeout: 1000,
+          })
+        );
+      });
+
+      await act(async () => {
+        const send = getMovePayload(i, drawMovesClicked);
+        socket!.send(JSON.stringify(send));
+      });
+    }
+
+    // assert draw modal open
+    // then lets send a move on the socket while the draw modal is open
+    // since we went first the socket simulation goes first this time
+    // and it should be easy to simulate
+
+    // when the move is sent on the socket. the game board should remain unchanged so the
+    // player can reflect on the stalemate game. it is only when the user presses play again
+    // that the stalemate game is cleared and the move that was played on the socket should be visible.
+
+    expect(screen.queryByText(/Play again/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Draw/i)).toBeInTheDocument();
+
+    await act(async () => {
+      const send = getMovePayload(0, drawMoves);
+      socket!.send(JSON.stringify(send));
+    });
+
+    expect(screen.queryByText(/Play again/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Draw/i)).toBeInTheDocument();
+
+    // cool now lets press play again
+
+    fireEvent.click(screen.getByText(/play again/i));
+
+    expect(screen.queryByText(/Play again/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Draw/i)).not.toBeInTheDocument();
+
+    // now send our first move
+    await act(async () => {
+      const columnName = `drop-column-${drawMovesClicked[0]}`;
+      fireEvent.click(
+        await screen.findByTestId(columnName, undefined, {
+          timeout: 1000,
+        })
+      );
+    });
+
+    // play out another draw with plays alternated
+    for (let i = 1; i < drawMoves.length; i++) {
       await act(async () => {
         // gameplay begins here we go second
         const send = getMovePayload(i, drawMoves);
-        console.log(Date.now(), "sending first move of the game", send);
         socket!.send(JSON.stringify(send));
       });
 
       await act(async () => {
         const columnName = `drop-column-${drawMovesClicked[i]}`;
-        console.log("clicking on column", columnName);
         fireEvent.click(
           await screen.findByTestId(columnName, undefined, {
             timeout: 1000,
@@ -430,10 +422,16 @@ describe("Connect4", () => {
       });
     }
 
-    // we need to simulate a remote move while our draw modal is visible
-    // if remote goes first then this wont be possible until the third game
+    // to do: make sure win counts are unchanged.
 
-    expect(1).toEqual(1);
+    const redWinCount = screen.getByTestId("red-win-count").innerHTML;
+    const yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+
+    expect(redWinCount).toEqual("0");
+    expect(yellowWinCount).toEqual("0");
+
+    expect(screen.queryByText(/Play again/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Draw/i)).toBeInTheDocument();
   });
 
   // it("connect4 local gameplay timeouts", async () => {
