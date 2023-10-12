@@ -1,46 +1,33 @@
-import { Location, Locations, ColState } from "./types";
+import {
+  Location,
+  Locations,
+  ColState,
+  AdjacencyFunction,
+  AdjacencyFunctionReturnType,
+} from "./types";
 
-export const testForWin = (
-  col: number,
-  row: number,
-  color: string,
-  state: ColState
-): [win: boolean, pieces: Location[]] => {
-  const [win, winningSet] = testForTopLeftBottomRightWin(
-    col,
-    row,
-    color,
-    state
+export const testForWin: AdjacencyFunction = (col, row, color, state) => {
+  const adjacencyFunctions: AdjacencyFunction[] = [
+    testForTopLeftBottomRightWin,
+    testForLeftRightWin,
+    testForTopRightBottomLeftWin,
+    testForTopDownWin,
+  ];
+
+  const ret: AdjacencyFunctionReturnType = adjacencyFunctions.reduce(
+    (acc: AdjacencyFunctionReturnType, fn: AdjacencyFunction) => {
+      const [win] = acc;
+
+      if (!win) {
+        return fn(col, row, color, state);
+      } else {
+        return acc;
+      }
+    },
+    [false, []]
   );
 
-  if (win) {
-    return [win, winningSet];
-  }
-
-  const [win2, winningSet2] = testForLeftRightWin(col, row, color, state);
-
-  if (win2) {
-    return [win2, winningSet2];
-  }
-
-  const [win3, winningSet3] = testForTopRightBottomLeftWin(
-    col,
-    row,
-    color,
-    state
-  );
-
-  if (win3) {
-    return [win3, winningSet3];
-  }
-
-  const [win4, winningSet4] = testForTopDownWin(col, row, color, state);
-
-  if (win4) {
-    return [win4, winningSet4];
-  }
-
-  return [false, []];
+  return ret;
 };
 
 export const testForTopRightBottomLeftWin = (
@@ -70,7 +57,6 @@ export const testForTopRightBottomLeftWin = (
       winningSet.push({ col: i, row: j });
 
       if (itemsLeftBottom === 3) {
-        // to do: add these items to the winning set
         win = true;
         leftBottomQuit = true;
       }
@@ -96,7 +82,6 @@ export const testForTopRightBottomLeftWin = (
       winningSet.push({ col: i, row: j });
 
       if (itemsLeftBottom + itemsRightTop + 1 === 4) {
-        // to do: add these items to the winning set
         win = true;
         rightTopQuit = true;
       }
@@ -130,7 +115,6 @@ export const testForLeftRightWin = (
       winningSet.push({ col: i, row });
 
       if (itemsLeft === 3) {
-        // to do: add these items to the winning set
         win = true;
         leftQuit = true;
       }
@@ -152,7 +136,6 @@ export const testForLeftRightWin = (
       winningSet.push({ col: i, row });
 
       if (itemsLeft + itemsRight + 1 === 4) {
-        // to do: add these items to the winning set
         win = true;
         rightQuit = true;
       }
@@ -191,7 +174,6 @@ export const testForTopLeftBottomRightWin = (
       winningSet.push({ col: i, row: j });
 
       if (itemsLeftBottom === 3) {
-        // to do: add these items to the winning set
         win = true;
         leftBottomQuit = true;
       }
@@ -238,7 +220,7 @@ export const testForTopDownWin = (
 
   const winningSet: Locations = [];
 
-  //up and to the left
+  // just look at all items in rows below
   for (let j = row - 1; !quit && j >= 0 && winningSet.length < 5; j--) {
     if (state[col][j] === color) {
       adjacentCount++;
@@ -246,7 +228,6 @@ export const testForTopDownWin = (
       winningSet.push({ col, row: j });
 
       if (adjacentCount === 3) {
-        // to do: add these items to the winning set
         win = true;
         quit = true;
       }

@@ -75,6 +75,15 @@ export type Location = {
   row: number;
 };
 
+export type AdjacencyFunctionReturnType = [boolean, Location[]];
+
+export type AdjacencyFunction = (
+  col: number,
+  row: number,
+  color: string,
+  state: ColState
+) => AdjacencyFunctionReturnType;
+
 export type Locations = Location[];
 
 export type Connect4Props = {

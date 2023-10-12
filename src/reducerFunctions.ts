@@ -137,7 +137,7 @@ export const terminateGame = (state: GameState, notifyRemote: boolean) => {
 
     if (notifyRemote) {
       const payload = {
-        service: "chat",
+        service: "connect4",
         action: "playTurn",
         data: {
           turn: -1,
@@ -160,7 +160,7 @@ export const terminateGame = (state: GameState, notifyRemote: boolean) => {
 };
 const sendMove = (state: GameState, col: number) => {
   const payload = {
-    service: "chat",
+    service: "connect4",
     action: "playTurn",
     data: {
       turn: { col },

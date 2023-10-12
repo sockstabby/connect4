@@ -15,8 +15,8 @@ import StartGameModal from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
 
-const DEBUG = false;
-const TIMER_ENABLED = false;
+import { logMessage } from "./logMessage";
+const TIMER_ENABLED = true;
 const TIMER_SECONDS = 24;
 
 import { getLocalColor, getRemoteColor, mainReducer } from "./reducerFunctions";
@@ -67,9 +67,7 @@ export const App = ({
   useEffect(() => {
     const decSeconds = () => {
       if (state.timerSeconds != null && state.timerSeconds != -1) {
-        if (DEBUG) {
-          console.log("decseconds", state.timerSeconds);
-        }
+        logMessage("decseconds", state.timerSeconds);
         dispatch({ type: "decrementSeconds" });
       }
     };
@@ -153,9 +151,7 @@ export const App = ({
     }
 
     if (state.websocket != null && !state.listenerAdded) {
-      if (DEBUG) {
-        console.log("adding listener");
-      }
+      logMessage("adding listener");
       state.websocket!.addEventListener("close", closeHandler);
       state.websocket!.addEventListener("message", messageHandler);
       dispatch({ type: "listenerAdded", value: true });
@@ -187,14 +183,12 @@ export const App = ({
     player2: string,
     websocket?: WebSocket
   ) => {
-    if (DEBUG) {
-      console.log("start game");
-      console.log("initiator", initiator);
-      console.log("opponent", opponent);
-      console.log("mode", mode);
-      console.log("player1", player1);
-      console.log("player2", player2);
-    }
+    logMessage("start game");
+    logMessage("initiator", initiator);
+    logMessage("opponent", opponent);
+    logMessage("mode", mode);
+    logMessage("player1", player1);
+    logMessage("player2", player2);
 
     dispatch({
       type: "startGame",
@@ -258,14 +252,12 @@ export const App = ({
 
   const [myTurn, playerTurn] = getCurrentTurn();
 
-  if (DEBUG) {
-    console.log("myTurn = ", myTurn);
-    console.log("playerTurn = ", playerTurn);
+  logMessage("myTurn = ", myTurn);
+  logMessage("playerTurn = ", playerTurn);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { websocket, ...remainingObject } = state;
-    console.log("state= ", remainingObject);
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { websocket, timerRef, ...remainingObject } = state;
+  logMessage("state= ", remainingObject);
 
   return (
     <>

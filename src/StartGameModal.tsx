@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import PlayerVsPlayer from "../src/assets/player-vs-player.svg";
 import PlayerVsCPU from "../src/assets/player-vs-cpu.svg";
+import { logMessage } from "./logMessage";
 
 import {
   StartGameModalProps,
-  Player,
   GameMode,
   LobbyParticipants,
   PlayRequested,
@@ -18,19 +18,16 @@ const StartGameModal = ({
   exchangeSocket,
   onShowRules,
 }: StartGameModalProps) => {
+  // we have a lot of state but each one is independent.
   const [name, setName] = useState("");
   const [participants, setParticipants] = useState<string[]>([]);
   const [playerInvites, setPlayersInvites] = useState<string[]>([]);
   const [invitee, setInvitee] = useState("");
   const [chosenOpponent, setChosenOpponent] = useState("");
-
   const [player1, setPlayer1] = useState("Player 1");
   const [player2, setPlayer2] = useState("Player 2");
-
   const [mode, setMode] = useState<GameMode>("local");
-
   const [websocket, setWebsocket] = useState<WebSocket | undefined>();
-
   const [listenerAdded, setListenerAdded] = useState(false);
 
   useEffect(() => {
@@ -40,7 +37,7 @@ const StartGameModal = ({
     }
     function openHandler() {
       const payload = {
-        service: "chat",
+        service: "connect4",
         action: "joinLobby",
         data: {
           name,
@@ -51,6 +48,8 @@ const StartGameModal = ({
     }
 
     function messageHandler(event: { data: string }) {
+      logMessage("startGameModal received a message", event);
+
       const payload: LobbyParticipants | PlayRequested | StartGame = JSON.parse(
         event.data
       );
@@ -62,13 +61,12 @@ const StartGameModal = ({
           acc.add(current.name);
           return acc;
         }, new Set());
-        const uniquePlayers = [...playerSet];
-        setParticipants(uniquePlayers as string[]);
+        setParticipants([...playerSet] as string[]);
       }
       if (payload.message === "playRequested") {
         setPlayersInvites((s) => {
           if (!s.includes(payload.data)) {
-            [...s, payload.data];
+            return [...s, payload.data];
           }
           return s;
         });
@@ -98,6 +96,7 @@ const StartGameModal = ({
     }
 
     if (websocket != null && !listenerAdded) {
+      logMessage("adding listeners to socket");
       websocket!.addEventListener("close", closeHandler);
       websocket!.addEventListener("open", openHandler);
       websocket!.addEventListener("message", messageHandler);
@@ -106,6 +105,7 @@ const StartGameModal = ({
 
     return () => {
       if (websocket != null) {
+        logMessage("removing listeners from socket");
         websocket!.removeEventListener("close", closeHandler);
         websocket!.removeEventListener("open", closeHandler);
         websocket!.removeEventListener("message", closeHandler);
@@ -136,13 +136,14 @@ const StartGameModal = ({
   const sendPlayRequest = () => {
     if (chosenOpponent !== "") {
       const payload = {
-        service: "chat",
+        service: "connect4",
         action: "sendPlayRequest",
         data: {
           chosenOpponent,
         },
       };
 
+      logMessage("sending play request to ", chosenOpponent);
       websocket?.send(JSON.stringify(payload));
     }
   };
@@ -150,7 +151,7 @@ const StartGameModal = ({
   const acceptPlayRequest = () => {
     if (invitee !== "") {
       const payload = {
-        service: "chat",
+        service: "connect4",
         action: "acceptPlayRequest",
         data: {
           chosenOpponent: invitee,
@@ -158,6 +159,7 @@ const StartGameModal = ({
         },
       };
 
+      logMessage("sending accept play request to ", chosenOpponent);
       websocket!.send(JSON.stringify(payload));
     }
   };
@@ -165,7 +167,8 @@ const StartGameModal = ({
   const joinLobby = () => {
     if (websocket == null) {
       const ws = new WebSocket(websocketUrl);
-      // this first set
+      // we open the socket when player joins the lobby we will send it over to our parent
+      // to take full ownership of it.
       exchangeSocket(ws);
       setWebsocket(ws);
     }

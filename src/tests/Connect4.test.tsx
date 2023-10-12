@@ -43,7 +43,7 @@ async function wait(milliseconds: number) {
 }
 
 describe("Connect4", () => {
-  it("online-mode -- the first turn alternates players after each game", async () => {
+  it("online win mode -- the first turn alternates between players after each game. win counts incremented", async () => {
     let socket: Client;
 
     websocketServer.on("connection", (websocket) => {
@@ -233,58 +233,58 @@ describe("Connect4", () => {
     //screen.debug();
   }, 2000);
 
-  // it("local mode -- first turn alternates", () => {
-  //   render(<App />);
-  //   fireEvent.click(screen.getByText(/menu/i));
-  //   const player1Input = screen.getByLabelText("Player One Name:");
-  //   const player2Input = screen.getByLabelText("Player Two Name:");
-  //   fireEvent.change(player1Input, { target: { value: "PLAYER TEST NAME 1" } });
-  //   fireEvent.change(player2Input, { target: { value: "PLAYER TEST NAME 2" } });
-  //   fireEvent.click(screen.getByText(/start game/i));
-  //   let redWinCount = screen.getByTestId("red-win-count").innerHTML;
-  //   let yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
-  //   expect(redWinCount).toEqual("0");
-  //   expect(yellowWinCount).toEqual("0");
-  //   fireEvent.click(screen.getByTestId("drop-column-0"));
-  //   fireEvent.click(screen.getByTestId("drop-column-1"));
-  //   fireEvent.click(screen.getByTestId("drop-column-0"));
-  //   fireEvent.click(screen.getByTestId("drop-column-1"));
-  //   fireEvent.click(screen.getByTestId("drop-column-0"));
-  //   fireEvent.click(screen.getByTestId("drop-column-1"));
-  //   fireEvent.click(screen.getByTestId("drop-column-0"));
-  //   let winner = screen.getByTestId("winning-player").innerHTML;
+  it("local mode -- first turn alternates", () => {
+    render(<App />);
+    fireEvent.click(screen.getByText(/menu/i));
+    const player1Input = screen.getByLabelText("Player One Name:");
+    const player2Input = screen.getByLabelText("Player Two Name:");
+    fireEvent.change(player1Input, { target: { value: "PLAYER TEST NAME 1" } });
+    fireEvent.change(player2Input, { target: { value: "PLAYER TEST NAME 2" } });
+    fireEvent.click(screen.getByText(/start game/i));
+    let redWinCount = screen.getByTestId("red-win-count").innerHTML;
+    let yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+    expect(redWinCount).toEqual("0");
+    expect(yellowWinCount).toEqual("0");
+    fireEvent.click(screen.getByTestId("drop-column-0"));
+    fireEvent.click(screen.getByTestId("drop-column-1"));
+    fireEvent.click(screen.getByTestId("drop-column-0"));
+    fireEvent.click(screen.getByTestId("drop-column-1"));
+    fireEvent.click(screen.getByTestId("drop-column-0"));
+    fireEvent.click(screen.getByTestId("drop-column-1"));
+    fireEvent.click(screen.getByTestId("drop-column-0"));
+    let winner = screen.getByTestId("winning-player").innerHTML;
 
-  //   expect(winner).toEqual("red");
+    expect(winner).toEqual("red");
 
-  //   redWinCount = screen.getByTestId("red-win-count").innerHTML;
-  //   yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+    redWinCount = screen.getByTestId("red-win-count").innerHTML;
+    yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
 
-  //   expect(redWinCount).toEqual("1");
-  //   expect(yellowWinCount).toEqual("0");
+    expect(redWinCount).toEqual("1");
+    expect(yellowWinCount).toEqual("0");
 
-  //   fireEvent.click(screen.getByText(/play again/i));
+    fireEvent.click(screen.getByText(/play again/i));
 
-  //   // this time yellow goes first
-  //   fireEvent.click(screen.getByTestId("drop-column-0"));
-  //   fireEvent.click(screen.getByTestId("drop-column-1"));
-  //   fireEvent.click(screen.getByTestId("drop-column-0"));
-  //   fireEvent.click(screen.getByTestId("drop-column-1"));
-  //   fireEvent.click(screen.getByTestId("drop-column-0"));
-  //   fireEvent.click(screen.getByTestId("drop-column-1"));
-  //   fireEvent.click(screen.getByTestId("drop-column-0"));
-  //   winner = screen.getByTestId("winning-player").innerHTML;
+    // this time yellow goes first
+    fireEvent.click(screen.getByTestId("drop-column-0"));
+    fireEvent.click(screen.getByTestId("drop-column-1"));
+    fireEvent.click(screen.getByTestId("drop-column-0"));
+    fireEvent.click(screen.getByTestId("drop-column-1"));
+    fireEvent.click(screen.getByTestId("drop-column-0"));
+    fireEvent.click(screen.getByTestId("drop-column-1"));
+    fireEvent.click(screen.getByTestId("drop-column-0"));
+    winner = screen.getByTestId("winning-player").innerHTML;
 
-  //   expect(winner).toEqual("yellow");
+    expect(winner).toEqual("yellow");
 
-  //   redWinCount = screen.getByTestId("red-win-count").innerHTML;
-  //   yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+    redWinCount = screen.getByTestId("red-win-count").innerHTML;
+    yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
 
-  //   expect(redWinCount).toEqual("1");
-  //   expect(yellowWinCount).toEqual("1");
-  // });
+    expect(redWinCount).toEqual("1");
+    expect(yellowWinCount).toEqual("1");
+  });
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
-  it("connect4 draw", async () => {
+  it("online draw mode -- play alternates after a draw. win counts not incremented", async () => {
     let socket: Client;
 
     websocketServer.on("connection", (websocket) => {
@@ -434,18 +434,170 @@ describe("Connect4", () => {
     expect(screen.queryByText(/Draw/i)).toBeInTheDocument();
   });
 
-  // it("connect4 local gameplay timeouts", async () => {
-  //   render(<App gameTimerConfig={1} />);
+  it("local timeout mode", async () => {
+    render(<App gameTimerConfig={1} />);
 
-  //   fireEvent.click(await screen.findByText(/menu/i));
-  //   fireEvent.click(await screen.findByText(/start game/i));
+    fireEvent.click(await screen.findByText(/menu/i));
+    fireEvent.click(await screen.findByText(/start game/i));
 
-  //   fireEvent.click(await screen.findByTestId("drop-column-0"));
-  //   fireEvent.click(await screen.findByTestId("drop-column-1"));
+    fireEvent.click(await screen.findByTestId("drop-column-0"));
+    fireEvent.click(await screen.findByTestId("drop-column-1"));
 
-  //   await wait(1500);
+    await act(async () => {
+      await wait(1500);
+    });
 
-  //   let winner = await screen.findByTestId("winning-player");
-  //   expect(winner.innerHTML).toEqual("yellow");
-  // });
+    // NOTE: this is the source of Warning: The current testing environment is not configured to support act(...)
+    await act(async () => {
+      const winner = await screen.findByTestId("winning-player");
+      expect(winner.innerHTML).toEqual("yellow");
+    });
+
+    const redWinCount = screen.getByTestId("red-win-count").innerHTML;
+    const yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+
+    expect(redWinCount).toEqual("0");
+    expect(yellowWinCount).toEqual("1");
+  });
+
+  it("online timeout mode", async () => {
+    let socket: Client;
+
+    websocketServer.on("connection", (websocket) => {
+      socket = websocket;
+
+      websocket.on(
+        "message",
+        (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
+          if (DEBUG) {
+            console.log(
+              Date.now(),
+              "Received a message from the client",
+              message
+            );
+          }
+
+          const payload = JSON.parse(message as string);
+
+          if (payload.action === "joinLobby") {
+            socket.send(
+              JSON.stringify({
+                message: "lobbyParticipants",
+                data: [{ name: REMOTE_PLAYER_NAME }],
+              })
+            );
+
+            socket.send(
+              JSON.stringify({
+                message: "playRequested",
+                data: REMOTE_PLAYER_NAME2,
+              })
+            );
+
+            if (DEBUG) {
+              console.log(Date.now(), "sending start game move");
+            }
+            socket.send(
+              JSON.stringify({
+                message: "startGame",
+
+                data: {
+                  initiator: true,
+                  initiatorName: REMOTE_PLAYER_NAME2,
+                  nonInitiatorName: "me",
+                },
+              })
+            );
+          }
+        }
+      );
+    });
+
+    render(<App gameTimerConfig={1} websocketUrl={TEST_WS_URL} />);
+
+    fireEvent.click(await screen.findByText(/menu/i));
+    await screen.findByText(/Player One Name/i);
+    fireEvent.click(await screen.findByText(/menu/i));
+    const onlineSwitch = await screen.findByTestId("online-switch");
+    fireEvent.click(onlineSwitch);
+    const nameInput = await screen.findByTestId("online-name");
+    fireEvent.change(nameInput, {
+      target: { value: MY_NAME },
+    });
+    fireEvent.click(await screen.findByText(/join lobby/i));
+    await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
+
+    await act(async () => {
+      const columnName = `drop-column-${drawMoves[0]}`;
+      fireEvent.click(
+        await screen.findByTestId(columnName, undefined, {
+          timeout: 1000,
+        })
+      );
+    });
+
+    await act(async () => {
+      const send = getMovePayload(0, drawMovesClicked);
+      socket!.send(JSON.stringify(send));
+    });
+
+    // we started the game so we are red. this delay should cause us to lose the game
+    await act(async () => {
+      await wait(1500);
+    });
+
+    expect(screen.queryByText(/Play again/i)).toBeInTheDocument();
+    expect(screen.queryByText(/win/i)).toBeInTheDocument();
+
+    let redWinCount = screen.getByTestId("red-win-count").innerHTML;
+    let yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+
+    expect(redWinCount).toEqual("0");
+    expect(yellowWinCount).toEqual("1");
+
+    // simulate the remote player sending its first move while the win modal is still up
+
+    await act(async () => {
+      const send = getMovePayload(0, drawMoves);
+      socket!.send(JSON.stringify(send));
+    });
+
+    // cool now lets press play again
+
+    fireEvent.click(screen.getByText(/play again/i));
+
+    expect(screen.queryByText(/Play again/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Draw/i)).not.toBeInTheDocument();
+
+    // delaying here doesnt affect us because at least two moves are necessary for the timer to come into play
+    await act(async () => {
+      await wait(1500);
+    });
+
+    expect(screen.queryByText(/Play again/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Draw/i)).not.toBeInTheDocument();
+
+    await act(async () => {
+      const columnName = `drop-column-${drawMoves[1]}`;
+      fireEvent.click(
+        await screen.findByTestId(columnName, undefined, {
+          timeout: 1000,
+        })
+      );
+    });
+
+    // this time we simulate the remote player being to
+    await act(async () => {
+      await wait(1500);
+    });
+
+    expect(screen.queryByText(/Play again/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Win/i)).toBeInTheDocument();
+
+    redWinCount = screen.getByTestId("red-win-count").innerHTML;
+    yellowWinCount = screen.getByTestId("yellow-win-count").innerHTML;
+
+    expect(redWinCount).toEqual("1");
+    expect(yellowWinCount).toEqual("1");
+  }, 8000);
 });
