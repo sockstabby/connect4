@@ -3,15 +3,12 @@ import { testForWin } from "./utils";
 
 const FIRST_ROW_DROP_MS = 500;
 
-const DRAW_COUNT = 3;
+const DRAW_COUNT = 42;
 
 export function mainReducer(state: GameState, action: GameActions) {
-  console.log("action = ", action);
   if (action.type === "startGame") {
     const { initiator, opponent, mode, player1, player2, websocket } =
       action.value;
-
-    console.log("start game initiator =", initiator);
 
     return {
       ...state,
@@ -86,11 +83,19 @@ export function mainReducer(state: GameState, action: GameActions) {
   } else if (action.type === "clearAnimatedDisk") {
     return { ...state, animatedPiece: null, lastDroppedColumn: null };
   } else if (action.type === "mainMenuModalVisible") {
-    const visible = action.value;
-    return { ...state, mainMenuOpen: visible };
-  } else if (action.type === "playAgain") {
-    console.log("play again intiator will be ", !state.initiator);
+    //when we open this model lets make sure that we close the socket
+    if (state.websocket != null) {
+      state.websocket.close();
+    }
 
+    const visible = action.value;
+    return {
+      ...state,
+      mainMenuOpen: visible,
+      websocket: undefined,
+      listenerAdded: false,
+    };
+  } else if (action.type === "playAgain") {
     return {
       ...state,
       ...{
@@ -154,7 +159,6 @@ export const terminateGame = (state: GameState, notifyRemote: boolean) => {
   };
 };
 const sendMove = (state: GameState, col: number) => {
-  console.log("sending play move to ", state.opponent);
   const payload = {
     service: "chat",
     action: "playTurn",
@@ -228,7 +232,6 @@ export function diskDropped(
     return state;
   }
 
-  console.log("diskDropped remote=", remote);
   //creates the animation of the piece
   let player;
   if (state.mode === "online") {
@@ -257,14 +260,14 @@ export function diskDropped(
   const row = state.colState[col].length;
   const newDisk: AnimatedDisk = { row, col, color: player };
 
-  const draw = state.plays + 1 === DRAW_COUNT;
+  const tempDraw = state.plays + 1 === DRAW_COUNT;
 
   let newState = {};
-  if (win || draw) {
+  if (win || tempDraw) {
     newState = setWinnerHelper(
       { ...state, animatedDisks: [...state.animatedDisks, newDisk] },
       player,
-      draw
+      tempDraw
     );
   }
 
@@ -283,20 +286,26 @@ export function diskDropped(
     }
   }, timeForCurrentRow);
 
+  //when state.draw === true the only way it can be set to false is when user presses play again
+  let draw = state.draw;
+  if (state.draw === false) {
+    draw = tempDraw;
+  }
+
   return {
     ...state,
     ...newState,
     draw,
     colState: copy,
-    ...(win || draw ? { colState: [[], [], [], [], [], [], []] } : {}),
-    ...(!win && !draw
+    ...(win || tempDraw ? { colState: [[], [], [], [], [], [], []] } : {}),
+    ...(!win && !tempDraw
       ? { animatedDisks: [...state.animatedDisks, newDisk] }
       : {}),
-    ...(!win && !draw ? { plays: state.plays + 1 } : {}),
-    ...(win || draw ? { plays: 0 } : {}),
+    ...(!win && !tempDraw ? { plays: state.plays + 1 } : {}),
+    ...(win || tempDraw ? { plays: 0 } : {}),
     ...(win ? { winner: { player, pieces: winningSet } } : {}),
     lastDroppedColumn: col,
-    ...(!win && !draw
+    ...(!win && !tempDraw
       ? {
           timerSeconds: gameTimerConfig,
           animatedPiece: col,

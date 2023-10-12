@@ -15,7 +15,7 @@ import StartGameModal from "./StartGameModal";
 import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
 
-const DEBUG = true;
+const DEBUG = false;
 const TIMER_ENABLED = false;
 const TIMER_SECONDS = 24;
 
@@ -153,7 +153,9 @@ export const App = ({
     }
 
     if (state.websocket != null && !state.listenerAdded) {
-      console.log("adding listener");
+      if (DEBUG) {
+        console.log("adding listener");
+      }
       state.websocket!.addEventListener("close", closeHandler);
       state.websocket!.addEventListener("message", messageHandler);
       dispatch({ type: "listenerAdded", value: true });
@@ -188,6 +190,7 @@ export const App = ({
     if (DEBUG) {
       console.log("start game");
       console.log("initiator", initiator);
+      console.log("opponent", opponent);
       console.log("mode", mode);
       console.log("player1", player1);
       console.log("player2", player2);
