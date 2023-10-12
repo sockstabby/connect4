@@ -14,6 +14,16 @@ const websocketServer = new Server(TEST_WS_URL);
 
 const myMoves = [0, 0, 0, 0];
 
+// 21
+const drawMoves = [
+  0, 2, 4, 6, 2, 4, 2, 4, 3, 1, 1, 5, 5, 0, 0, 0, 6, 6, 2, 4, 3,
+];
+
+//21
+const drawMovesClicked = [
+  1, 3, 5, 1, 3, 5, 3, 2, 4, 1, 1, 5, 5, 0, 0, 6, 6, 6, 3, 2, 4,
+];
+
 const getMovePayload = (move: number, moves: number[]) => {
   const payload = {
     message: "playTurn",
@@ -328,18 +338,101 @@ describe("Connect4", () => {
     expect(yellowWinCount).toEqual("1");
   });
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////
   it("connect4 draw", async () => {
-    // render(<App gameTimerConfig={1} />);
+    let socket: Client;
 
-    // fireEvent.click(await screen.findByText(/menu/i));
-    // fireEvent.click(await screen.findByText(/start game/i));
+    websocketServer.on("connection", (websocket) => {
+      socket = websocket;
 
-    // fireEvent.click(await screen.findByTestId("drop-column-0"));
-    // fireEvent.click(await screen.findByTestId("drop-column-1"));
+      websocket.on(
+        "message",
+        (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
+          console.log(
+            Date.now(),
+            "Received a message from the client",
+            message
+          );
+          const payload = JSON.parse(message as string);
+          console.log("payload = ", payload);
 
-    // await wait(1500);
+          if (payload.action === "joinLobby") {
+            console.log(" got a join lobby request");
 
-    // let winner = await screen.findByTestId("winning-player");
+            socket.send(
+              JSON.stringify({
+                message: "lobbyParticipants",
+                data: [{ name: REMOTE_PLAYER_NAME }],
+              })
+            );
+
+            socket.send(
+              JSON.stringify({
+                message: "playRequested",
+                data: REMOTE_PLAYER_NAME2,
+              })
+            );
+
+            console.log(Date.now(), "sending start game move");
+            socket.send(
+              JSON.stringify({
+                message: "startGame",
+
+                data: {
+                  initiator: false,
+                  initiatorName: REMOTE_PLAYER_NAME2,
+                  nonInitiatorName: "me",
+                },
+              })
+            );
+          }
+        }
+      );
+    });
+
+    render(<App websocketUrl={TEST_WS_URL} />);
+
+    fireEvent.click(await screen.findByText(/menu/i));
+    await screen.findByText(/Player One Name/i);
+    fireEvent.click(await screen.findByText(/menu/i));
+    const onlineSwitch = await screen.findByTestId("online-switch");
+    fireEvent.click(onlineSwitch);
+    const nameInput = await screen.findByTestId("online-name");
+    fireEvent.change(nameInput, {
+      target: { value: MY_NAME },
+    });
+    fireEvent.click(await screen.findByText(/join lobby/i));
+    await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
+
+    // await act(async () => {
+    //   // gameplay begins here we go second
+    //   const send = getMovePayload(myMovesCount, drawMoves);
+    //   console.log(Date.now(), "sending first move of the game", send);
+    //   socket!.send(JSON.stringify(send));
+    //   myMovesCount++;
+    // });
+    for (let i = 0; i < drawMoves.length; i++) {
+      await act(async () => {
+        // gameplay begins here we go second
+        const send = getMovePayload(i, drawMoves);
+        console.log(Date.now(), "sending first move of the game", send);
+        socket!.send(JSON.stringify(send));
+      });
+
+      await act(async () => {
+        const columnName = `drop-column-${drawMovesClicked[i]}`;
+        console.log("clicking on column", columnName);
+        fireEvent.click(
+          await screen.findByTestId(columnName, undefined, {
+            timeout: 1000,
+          })
+        );
+      });
+    }
+
+    // we need to simulate a remote move while our draw modal is visible
+    // if remote goes first then this wont be possible until the third game
+
     expect(1).toEqual(1);
   });
 
