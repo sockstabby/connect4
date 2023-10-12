@@ -14,14 +14,14 @@ const websocketServer = new Server(TEST_WS_URL);
 
 const DEBUG = false;
 
-const myMoves = [0, 0, 0, 0];
-const myMovesClicked = [1, 1, 1];
+const winMovesPlayer1 = [0, 0, 0, 0];
+const winMovesPlayer2 = [1, 1, 1];
 
-const drawMoves = [
+const drawMovesPlayer1 = [
   0, 2, 4, 6, 2, 4, 2, 4, 3, 1, 1, 5, 5, 0, 0, 0, 6, 6, 2, 4, 3,
 ];
 
-const drawMovesClicked = [
+const drawMovesPlayer2 = [
   1, 3, 5, 1, 3, 5, 3, 2, 4, 1, 1, 5, 5, 0, 0, 6, 6, 6, 3, 2, 4,
 ];
 
@@ -110,15 +110,15 @@ describe("Connect4", () => {
     fireEvent.click(await screen.findByText(/join lobby/i));
     await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
 
-    for (let i = 0; i < myMoves.length; i++) {
+    for (let i = 0; i < winMovesPlayer1.length; i++) {
       await act(async () => {
         // gameplay begins here we go second
-        const send = getMovePayload(i, myMoves);
+        const send = getMovePayload(i, winMovesPlayer1);
         socket!.send(JSON.stringify(send));
       });
       if (i < 3) {
         await act(async () => {
-          const columnName = `drop-column-${myMovesClicked[i]}`;
+          const columnName = `drop-column-${winMovesPlayer2[i]}`;
           fireEvent.click(
             await screen.findByTestId(columnName, undefined, { timeout: 1000 })
           );
@@ -139,9 +139,9 @@ describe("Connect4", () => {
       await wait(100);
     });
 
-    for (let i = 0; i < myMoves.length; i++) {
+    for (let i = 0; i < winMovesPlayer1.length; i++) {
       await act(async () => {
-        const columnName = `drop-column-${myMoves[i]}`;
+        const columnName = `drop-column-${winMovesPlayer1[i]}`;
         fireEvent.click(
           await screen.findByTestId(columnName, undefined, { timeout: 1000 })
         );
@@ -149,7 +149,7 @@ describe("Connect4", () => {
       if (i < 3) {
         await act(async () => {
           // gameplay begins here we go second
-          const send = getMovePayload(i, myMovesClicked);
+          const send = getMovePayload(i, winMovesPlayer2);
           socket!.send(JSON.stringify(send));
         });
       }
@@ -170,7 +170,7 @@ describe("Connect4", () => {
     // this move is not visible until the player presses play again.
 
     await act(async () => {
-      const send = getMovePayload(0, myMoves);
+      const send = getMovePayload(0, winMovesPlayer1);
       socket!.send(JSON.stringify(send));
       await wait(100);
     });
@@ -184,20 +184,20 @@ describe("Connect4", () => {
     expect(screen.queryByText(/win/i)).not.toBeInTheDocument();
 
     await act(async () => {
-      const columnName = `drop-column-${myMovesClicked[0]}`;
+      const columnName = `drop-column-${winMovesPlayer2[0]}`;
       fireEvent.click(
         await screen.findByTestId(columnName, undefined, { timeout: 1000 })
       );
     });
 
-    for (let i = 1; i < myMoves.length; i++) {
+    for (let i = 1; i < winMovesPlayer1.length; i++) {
       await act(async () => {
-        const send = getMovePayload(i, myMoves);
+        const send = getMovePayload(i, winMovesPlayer1);
         socket!.send(JSON.stringify(send));
       });
       if (i < 3) {
         await act(async () => {
-          const columnName = `drop-column-${myMovesClicked[i]}`;
+          const columnName = `drop-column-${winMovesPlayer2[i]}`;
           fireEvent.click(
             await screen.findByTestId(columnName, undefined, { timeout: 1000 })
           );
@@ -351,9 +351,9 @@ describe("Connect4", () => {
     fireEvent.click(await screen.findByText(/join lobby/i));
     await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
 
-    for (let i = 0; i < drawMoves.length; i++) {
+    for (let i = 0; i < drawMovesPlayer1.length; i++) {
       await act(async () => {
-        const columnName = `drop-column-${drawMoves[i]}`;
+        const columnName = `drop-column-${drawMovesPlayer1[i]}`;
         fireEvent.click(
           await screen.findByTestId(columnName, undefined, {
             timeout: 1000,
@@ -362,7 +362,7 @@ describe("Connect4", () => {
       });
 
       await act(async () => {
-        const send = getMovePayload(i, drawMovesClicked);
+        const send = getMovePayload(i, drawMovesPlayer2);
         socket!.send(JSON.stringify(send));
       });
     }
@@ -380,7 +380,7 @@ describe("Connect4", () => {
     expect(screen.queryByText(/Draw/i)).toBeInTheDocument();
 
     await act(async () => {
-      const send = getMovePayload(0, drawMoves);
+      const send = getMovePayload(0, drawMovesPlayer1);
       socket!.send(JSON.stringify(send));
     });
 
@@ -396,7 +396,7 @@ describe("Connect4", () => {
 
     // now send our first move
     await act(async () => {
-      const columnName = `drop-column-${drawMovesClicked[0]}`;
+      const columnName = `drop-column-${drawMovesPlayer2[0]}`;
       fireEvent.click(
         await screen.findByTestId(columnName, undefined, {
           timeout: 1000,
@@ -405,15 +405,15 @@ describe("Connect4", () => {
     });
 
     // play out another draw with plays alternated
-    for (let i = 1; i < drawMoves.length; i++) {
+    for (let i = 1; i < drawMovesPlayer1.length; i++) {
       await act(async () => {
         // gameplay begins here we go second
-        const send = getMovePayload(i, drawMoves);
+        const send = getMovePayload(i, drawMovesPlayer1);
         socket!.send(JSON.stringify(send));
       });
 
       await act(async () => {
-        const columnName = `drop-column-${drawMovesClicked[i]}`;
+        const columnName = `drop-column-${drawMovesPlayer2[i]}`;
         fireEvent.click(
           await screen.findByTestId(columnName, undefined, {
             timeout: 1000,
@@ -528,7 +528,7 @@ describe("Connect4", () => {
     await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
 
     await act(async () => {
-      const columnName = `drop-column-${drawMoves[0]}`;
+      const columnName = `drop-column-${drawMovesPlayer1[0]}`;
       fireEvent.click(
         await screen.findByTestId(columnName, undefined, {
           timeout: 1000,
@@ -537,7 +537,7 @@ describe("Connect4", () => {
     });
 
     await act(async () => {
-      const send = getMovePayload(0, drawMovesClicked);
+      const send = getMovePayload(0, drawMovesPlayer2);
       socket!.send(JSON.stringify(send));
     });
 
@@ -558,7 +558,7 @@ describe("Connect4", () => {
     // simulate the remote player sending its first move while the win modal is still up
 
     await act(async () => {
-      const send = getMovePayload(0, drawMoves);
+      const send = getMovePayload(0, drawMovesPlayer1);
       socket!.send(JSON.stringify(send));
     });
 
@@ -578,7 +578,7 @@ describe("Connect4", () => {
     expect(screen.queryByText(/Draw/i)).not.toBeInTheDocument();
 
     await act(async () => {
-      const columnName = `drop-column-${drawMoves[1]}`;
+      const columnName = `drop-column-${drawMovesPlayer1[1]}`;
       fireEvent.click(
         await screen.findByTestId(columnName, undefined, {
           timeout: 1000,

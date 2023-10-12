@@ -1,4 +1,4 @@
-import { GameState, AnimatedDisk, GameActions } from "./types";
+import { GameState, Disk, GameActions } from "./types";
 import { testForWin } from "./utils";
 
 const FIRST_ROW_DROP_MS = 500;
@@ -25,7 +25,7 @@ export function mainReducer(state: GameState, action: GameActions) {
         opponent,
         remoteDisconnected: false,
         websocket,
-        animatedDisks: [],
+        disks: [],
       },
     };
   } else if (action.type === "diskDropped") {
@@ -71,7 +71,7 @@ export function mainReducer(state: GameState, action: GameActions) {
       }
     }
     return state;
-  } else if (action.type === "setAnimatedDisk") {
+  } else if (action.type === "setDisk") {
     const colState = JSON.parse(JSON.stringify(state.colState));
     if (state.animatedPiece != null) {
       colState[state.animatedPiece].push(state.animatedPieceColor);
@@ -80,7 +80,7 @@ export function mainReducer(state: GameState, action: GameActions) {
   } else if (action.type === "rulesOpen") {
     const rulesOpen = action.value;
     return { ...state, rulesOpen, mainMenuOpen: false };
-  } else if (action.type === "clearAnimatedDisk") {
+  } else if (action.type === "clearDisk") {
     return { ...state, animatedPiece: null, lastDroppedColumn: null };
   } else if (action.type === "mainMenuModalVisible") {
     //when we open this model lets make sure that we close the socket
@@ -114,7 +114,7 @@ export function mainReducer(state: GameState, action: GameActions) {
       ...{
         plays: 0,
         colState: [[], [], [], [], [], [], []],
-        animatedDisks: [],
+        disks: [],
       },
     };
   } else if (action.type === "setWebsocket") {
@@ -190,7 +190,7 @@ export function setWinnerHelper(
   // the state of the board is a copy of the board whenever somebody won or there was a draw.
   // We switch to the real copy as soon as the user presses play again.
 
-  const copy = JSON.parse(JSON.stringify(state.animatedDisks));
+  const copy = JSON.parse(JSON.stringify(state.disks));
 
   clearInterval(state.timerRef);
 
@@ -208,8 +208,8 @@ export function setWinnerHelper(
 
     colState: [[], [], [], [], [], [], []],
     plays: 0,
-    animatedDisksCopy: copy,
-    animatedDisks: [],
+    disksCopy: copy,
+    disks: [],
     timerRef: undefined,
   };
 }
@@ -258,14 +258,14 @@ export function diskDropped(
   }
 
   const row = state.colState[col].length;
-  const newDisk: AnimatedDisk = { row, col, color: player };
+  const newDisk: Disk = { row, col, color: player };
 
   const tempDraw = state.plays + 1 === DRAW_COUNT;
 
   let newState = {};
   if (win || tempDraw) {
     newState = setWinnerHelper(
-      { ...state, animatedDisks: [...state.animatedDisks, newDisk] },
+      { ...state, disks: [...state.disks, newDisk] },
       player,
       tempDraw
     );
@@ -298,9 +298,7 @@ export function diskDropped(
     draw,
     colState: copy,
     ...(win || tempDraw ? { colState: [[], [], [], [], [], [], []] } : {}),
-    ...(!win && !tempDraw
-      ? { animatedDisks: [...state.animatedDisks, newDisk] }
-      : {}),
+    ...(!win && !tempDraw ? { disks: [...state.disks, newDisk] } : {}),
     ...(!win && !tempDraw ? { plays: state.plays + 1 } : {}),
     ...(win || tempDraw ? { plays: 0 } : {}),
     ...(win ? { winner: { player, pieces: winningSet } } : {}),

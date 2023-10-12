@@ -21,7 +21,7 @@ const TIMER_SECONDS = 24;
 
 import { getLocalColor, getRemoteColor, mainReducer } from "./reducerFunctions";
 
-import { AnimatedDisk, GameState, Connect4Props, GameMode } from "./types";
+import { Disk, GameState, Connect4Props, GameMode } from "./types";
 
 const initialGameState: GameState = {
   colState: [[], [], [], [], [], [], []],
@@ -49,9 +49,9 @@ const initialGameState: GameState = {
   winnerGameState: null,
   lastDroppedColumn: null,
   listenerAdded: false,
-  animatedDisks: [],
-  //this is a copy of animatedDisks at the moment somebody won or their is a draw.
-  animatedDisksCopy: [],
+  disks: [],
+  //this is a copy of disks at the moment somebody won or their is a draw.
+  disksCopy: [],
 };
 
 export const App = ({
@@ -214,10 +214,9 @@ export const App = ({
 
   // at the moment there's a draw or somebody wins, a copy of the board
   // is used until the user presses Play Again.
-  const disks =
-    state.winner || state.draw ? state.animatedDisksCopy : state.animatedDisks;
+  const disks = state.winner || state.draw ? state.disksCopy : state.disks;
 
-  const disksElements = disks.map((disk: AnimatedDisk) => {
+  const disksElements = disks.map((disk: Disk) => {
     const key = `${disk.col}${disk.row}`;
 
     const winningDisk = winningDiskSet.has(key);

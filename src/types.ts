@@ -7,7 +7,7 @@ export type Winner = {
 
 export type ColState = Column[];
 
-export type AnimatedDisk = {
+export type Disk = {
   color: string;
   row: number;
   col: number;
@@ -38,13 +38,10 @@ export type GameState = {
   winnerGameState: ColState | null;
   lastDroppedColumn: null | number;
   listenerAdded: boolean;
-  animatedDisks: AnimatedDisk[];
-  animatedDisksCopy: AnimatedDisk[];
+  disks: Disk[];
+  disksCopy: Disk[];
   rulesOpen: boolean;
 };
-
-////////////////////////////////////////////////////////////////
-// Modal
 
 export type GameMode = "online" | "local";
 
@@ -67,9 +64,6 @@ export type StartGameModalProps = {
   onShowRules: () => void;
 };
 
-//////
-
-// UTIL
 export type Location = {
   col: number;
   row: number;
@@ -139,9 +133,6 @@ export type ReducerPayload = {
   gameTimerConfig: number;
 };
 
-//////
-// Reducer actions
-
 export type GameActions =
   | {
       type: "startGame";
@@ -169,8 +160,8 @@ export type GameActions =
         gameTimerConfig: number;
       };
     }
-  | { type: "setAnimatedDisk" }
-  | { type: "clearAnimatedDisk" }
+  | { type: "setDisk" }
+  | { type: "clearDisk" }
   | {
       type: "mainMenuModalVisible";
       value: boolean;
