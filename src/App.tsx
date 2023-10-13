@@ -16,6 +16,8 @@ import useScreenSize from "./useScreenResize";
 import ReactModal from "react-modal";
 
 import { logMessage } from "./logMessage";
+
+// these should be props
 const TIMER_ENABLED = true;
 const TIMER_SECONDS = 24;
 
@@ -260,19 +262,6 @@ export const App = ({
 
   return (
     <>
-      version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`}
-      <div className="nav-bar flex flex-row justify-around pt-3 items-center">
-        <button onClick={openMainMenuModal}>Menu</button>
-
-        <img
-          src={GameLogo}
-          alt="Game logo image of disks stacked ontop of eachother"
-        ></img>
-
-        <button onClick={restartGame} disabled={state.mode === "online"}>
-          Restart
-        </button>
-      </div>
       <ReactModal
         className="modal modal__dark-background centered"
         isOpen={state.mainMenuOpen}
@@ -344,6 +333,20 @@ export const App = ({
         </div>
       </ReactModal>
       <div className="flex flex-col">
+        version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`}
+        <div className="nav-bar flex flex-row justify-around pt-3 items-center">
+          <button onClick={openMainMenuModal}>Menu</button>
+
+          <img
+            src={GameLogo}
+            alt="Game logo image of disks stacked ontop of eachother"
+          ></img>
+
+          <button onClick={restartGame} disabled={state.mode === "online"}>
+            Restart
+          </button>
+        </div>
+        {/* Note: This gets styled out for large displays */}
         <div className="player-card-small-container flex flex-row justify-center gap-4">
           <div className="player-card-small flex flex-row justify-around items-center">
             <div className="flex flex-row justify-center smiley-container smiley-container-red">
