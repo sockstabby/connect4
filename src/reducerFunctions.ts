@@ -126,6 +126,9 @@ export function mainReducer(state: GameState, action: GameActions) {
   } else if (action.type === "remoteDisconnected") {
     const remoteDisconnected = action.value;
     return { ...state, remoteDisconnected };
+  } else if (action.type === "selectMenuItem") {
+    const bottomMenuSelection = action.value;
+    return { ...state, bottomMenuSelection };
   }
 
   return state;

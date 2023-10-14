@@ -41,6 +41,7 @@ export type GameState = {
   disks: Disk[];
   disksCopy: Disk[];
   rulesOpen: boolean;
+  bottomTab: number;
 };
 
 export type GameMode = "online" | "local";
@@ -171,4 +172,5 @@ export type GameActions =
   | { type: "restartGame" }
   | { type: "listenerAdded"; value: boolean }
   | { type: "remoteDisconnected"; value: boolean }
+  | { type: "setBottomTab"; value: number }
   | { type: "setWebsocket"; value: WebSocket };

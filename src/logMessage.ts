@@ -1,4 +1,4 @@
-const DEBUG = false;
+const DEBUG = true;
 
 export const logMessage = (...args: unknown[]) => {
   if (DEBUG) {

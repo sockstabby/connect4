@@ -11,44 +11,6 @@
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.button--fancy {
-  padding: 0;
-  background: none;
-
-  max-width: 344px;
-  min-width: 270px;
-  min-height: 52px;
-
-  color: black;
-  background-color: black;
-  background-color: white;
-  border-radius: 18px;
-  z-index: unset;
-  box-shadow: 0 15px 0 black;
-}
-
-.button--fancy:hover {
-  background-color: var(--accent-color);
-  color: white;
-}
-
-.button--fancy::after:hover {
-  background-color: var(--game-background-color2);
-  color: white;
-}
-
-.button--fancy.disabled {
-  color: rgb(214, 212, 212);
-  background-color: gray;
-}
-
-button.button--fancy:disabled,
-button.button--fancy[disabled] {
-  border: 1px solid #999999;
-  background-color: #cccccc;
-  color: #aca0a0;
-}
-
 .player-card-small-container {
   height: 80px;
   display: none;
@@ -101,6 +63,43 @@ button.button--fancy[disabled] {
     width: 320px;
     height: auto;
   }
+
+  .button--fancy {
+    padding: 0;
+    background: none;
+
+    max-width: 344px;
+    min-width: 270px;
+    min-height: 52px;
+
+    color: black;
+    background-color: black;
+    background-color: white;
+    border-radius: 18px;
+    z-index: unset;
+    box-shadow: 0 15px 0 black;
+  }
+  .button--fancy:hover {
+    background-color: var(--accent-color);
+    color: white;
+  }
+
+  .button--fancy::after:hover {
+    background-color: var(--game-background-color2);
+    color: white;
+  }
+
+  .button--fancy.disabled {
+    color: rgb(214, 212, 212);
+    background-color: gray;
+  }
+
+  button.button--fancy:disabled,
+  button.button--fancy[disabled] {
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #aca0a0;
+  }
 }
 
 .rules-content h1 {
@@ -119,7 +118,7 @@ button.button--fancy[disabled] {
   padding-top: 144px;
 }
 
-button {
+.main button {
   background-color: var(--game-background-color2);
   border-radius: 28px;
   border: 1px solid var(--game-background-color2);

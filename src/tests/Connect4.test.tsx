@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import App from "../App";
+import GameBoard from "../GameBoard";
 import { Client, Server } from "mock-socket";
 
 vi.stubGlobal("__APP_VERSION__", "0.1.0");
@@ -96,7 +96,7 @@ describe("Connect4", () => {
       );
     });
 
-    render(<App websocketUrl={TEST_WS_URL} />);
+    render(<GameBoard websocketUrl={TEST_WS_URL} />);
 
     fireEvent.click(await screen.findByText(/menu/i));
     await screen.findByText(/Player One Name/i);
@@ -234,7 +234,7 @@ describe("Connect4", () => {
   }, 2000);
 
   it("local mode -- first turn alternates", () => {
-    render(<App />);
+    render(<GameBoard />);
     fireEvent.click(screen.getByText(/menu/i));
     const player1Input = screen.getByLabelText("Player One Name:");
     const player2Input = screen.getByLabelText("Player Two Name:");
@@ -337,7 +337,7 @@ describe("Connect4", () => {
       );
     });
 
-    render(<App websocketUrl={TEST_WS_URL} />);
+    render(<GameBoard websocketUrl={TEST_WS_URL} />);
 
     fireEvent.click(await screen.findByText(/menu/i));
     await screen.findByText(/Player One Name/i);
@@ -435,7 +435,7 @@ describe("Connect4", () => {
   });
 
   it("local timeout mode", async () => {
-    render(<App gameTimerConfig={1} />);
+    render(<GameBoard gameTimerConfig={1} />);
 
     fireEvent.click(await screen.findByText(/menu/i));
     fireEvent.click(await screen.findByText(/start game/i));
@@ -513,7 +513,7 @@ describe("Connect4", () => {
       );
     });
 
-    render(<App gameTimerConfig={1} websocketUrl={TEST_WS_URL} />);
+    render(<GameBoard gameTimerConfig={1} websocketUrl={TEST_WS_URL} />);
 
     fireEvent.click(await screen.findByText(/menu/i));
     await screen.findByText(/Player One Name/i);
