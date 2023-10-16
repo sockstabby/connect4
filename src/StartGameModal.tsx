@@ -1,120 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import PlayerVsPlayer from "../src/assets/player-vs-player.svg";
 import PlayerVsCPU from "../src/assets/player-vs-cpu.svg";
 import { logMessage } from "./logMessage";
 
-import {
-  StartGameModalProps,
-  GameMode,
-  LobbyParticipants,
-  PlayRequested,
-  StartGame,
-} from "./types";
+import { StartGameModalProps, GameMode } from "./types";
 
 const StartGameModal = ({
-  onStartGame,
-  onClose,
+  state,
+  dispatch,
   websocketUrl,
-  exchangeSocket,
-  onShowRules,
 }: StartGameModalProps) => {
-  // we have a lot of state but each one is independent.
-  const [name, setName] = useState("");
-  const [participants, setParticipants] = useState<string[]>([]);
-  const [playerInvites, setPlayersInvites] = useState<string[]>([]);
   const [invitee, setInvitee] = useState("");
   const [chosenOpponent, setChosenOpponent] = useState("");
   const [player1, setPlayer1] = useState("Player 1");
   const [player2, setPlayer2] = useState("Player 2");
   const [mode, setMode] = useState<GameMode>("local");
-  const [websocket, setWebsocket] = useState<WebSocket | undefined>();
-  const [listenerAdded, setListenerAdded] = useState(false);
-
-  useEffect(() => {
-    function closeHandler() {
-      console.error("The Websocket is closed.");
-      setWebsocket(undefined);
-    }
-    function openHandler() {
-      const payload = {
-        service: "connect4",
-        action: "joinLobby",
-        data: {
-          name,
-        },
-      };
-
-      websocket!.send(JSON.stringify(payload));
-    }
-
-    function messageHandler(event: { data: string }) {
-      logMessage("startGameModal received a message", event);
-
-      const payload: LobbyParticipants | PlayRequested | StartGame = JSON.parse(
-        event.data
-      );
-
-      if (payload.message === "lobbyParticipants") {
-        // guarantee uniqueness, in prod this is done in the lambda. so this
-        // is only necessary for test
-        const playerSet = payload.data.reduce((acc, current) => {
-          acc.add(current.name);
-          return acc;
-        }, new Set());
-        setParticipants([...playerSet] as string[]);
-      }
-      if (payload.message === "playRequested") {
-        setPlayersInvites((s) => {
-          if (!s.includes(payload.data)) {
-            return [...s, payload.data];
-          }
-          return s;
-        });
-      }
-
-      if (payload.message === "startGame") {
-        let player1Name;
-        let player2Name;
-
-        if (payload.data.initiator) {
-          player1Name = payload.data.initiatorName;
-          player2Name = payload.data.opponentName;
-        } else {
-          player1Name = payload.data.initiatorName;
-          player2Name = payload.data.nonInitiatorName;
-        }
-
-        onStartGame(
-          payload.data.initiator,
-          payload.data.opponent,
-          "online",
-          player1Name,
-          player2Name,
-          websocket
-        );
-      }
-    }
-
-    if (websocket != null && !listenerAdded) {
-      logMessage("adding listeners to socket");
-      websocket!.addEventListener("close", closeHandler);
-      websocket!.addEventListener("open", openHandler);
-      websocket!.addEventListener("message", messageHandler);
-      setListenerAdded(true);
-    }
-
-    return () => {
-      if (websocket != null) {
-        logMessage("removing listeners from socket");
-        websocket!.removeEventListener("close", closeHandler);
-        websocket!.removeEventListener("open", closeHandler);
-        websocket!.removeEventListener("message", closeHandler);
-      }
-    };
-  }, [websocket, name, listenerAdded, onStartGame]);
 
   const nameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
+    dispatch({ type: "setName", value: e.target.value });
+  };
+
+  const onClose = () => {
+    dispatch({ type: "mainMenuModalVisible", value: false });
   };
 
   const player1NameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,6 +40,10 @@ const StartGameModal = ({
     setInvitee(e.target.value);
   };
 
+  const onShowRules = () => {
+    dispatch({ type: "rulesOpen", value: true });
+  };
+
   const sendPlayRequest = () => {
     if (chosenOpponent !== "") {
       const payload = {
@@ -144,7 +55,7 @@ const StartGameModal = ({
       };
 
       logMessage("sending play request to ", chosenOpponent);
-      websocket?.send(JSON.stringify(payload));
+      state.websocket?.send(JSON.stringify(payload));
     }
   };
 
@@ -160,21 +71,18 @@ const StartGameModal = ({
       };
 
       logMessage("sending accept play request to ", chosenOpponent);
-      websocket!.send(JSON.stringify(payload));
+      state.websocket!.send(JSON.stringify(payload));
     }
   };
 
   const joinLobby = () => {
-    if (websocket == null) {
+    if (state.websocket == null) {
       const ws = new WebSocket(websocketUrl);
-      // we open the socket when player joins the lobby we will send it over to our parent
-      // to take full ownership of it.
-      exchangeSocket(ws);
-      setWebsocket(ws);
+      dispatch({ type: "setWebsocket", value: ws });
     }
   };
 
-  const players = participants.map((i) => {
+  const players = state.playersOnline.map((i) => {
     return (
       <option key={i} value={i}>
         {i}
@@ -182,7 +90,7 @@ const StartGameModal = ({
     );
   });
 
-  const invitesToPlay = playerInvites.map((i) => {
+  const invitesToPlay = state.invites.map((i) => {
     return (
       <option key={i} value={i}>
         {i}
@@ -195,7 +103,17 @@ const StartGameModal = ({
   };
 
   const startLocalGame = () => {
-    onStartGame(true, "local", "local", player1, player2);
+    dispatch({
+      type: "startGame",
+      value: {
+        initiator: true,
+        opponent: "local",
+        mode: "local",
+        player1,
+        player2,
+        websocket: state.websocket,
+      },
+    });
   };
 
   return (
@@ -277,13 +195,13 @@ const StartGameModal = ({
                 id="nameInput"
                 onChange={nameChanged}
                 type="text"
-                value={name}
+                value={state.name}
               />
             </div>
 
             <div className="pb-3">
               <button
-                disabled={name === ""}
+                disabled={state.name === ""}
                 className="button--fancy uppercase"
                 onClick={joinLobby}
               >

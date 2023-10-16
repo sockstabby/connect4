@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import GameBoard from "../GameBoard";
+import App from "../App";
 import { Client, Server } from "mock-socket";
 
 vi.stubGlobal("__APP_VERSION__", "0.1.0");
@@ -12,7 +12,7 @@ const REMOTE_PLAYER_NAME2 = "somebody who wants to play";
 const MY_NAME = "the best player ever";
 const websocketServer = new Server(TEST_WS_URL);
 
-const DEBUG = false;
+const DEBUG = true;
 
 const winMovesPlayer1 = [0, 0, 0, 0];
 const winMovesPlayer2 = [1, 1, 1];
@@ -96,7 +96,7 @@ describe("Connect4", () => {
       );
     });
 
-    render(<GameBoard websocketUrl={TEST_WS_URL} />);
+    render(<App websocketUrl={TEST_WS_URL} />);
 
     fireEvent.click(await screen.findByText(/menu/i));
     await screen.findByText(/Player One Name/i);
@@ -108,6 +108,7 @@ describe("Connect4", () => {
       target: { value: MY_NAME },
     });
     fireEvent.click(await screen.findByText(/join lobby/i));
+
     await screen.findByText(/note: a timer/i, undefined, { timeout: 1000 });
 
     for (let i = 0; i < winMovesPlayer1.length; i++) {
@@ -234,7 +235,7 @@ describe("Connect4", () => {
   }, 2000);
 
   it("local mode -- first turn alternates", () => {
-    render(<GameBoard />);
+    render(<App />);
     fireEvent.click(screen.getByText(/menu/i));
     const player1Input = screen.getByLabelText("Player One Name:");
     const player2Input = screen.getByLabelText("Player Two Name:");
@@ -337,7 +338,7 @@ describe("Connect4", () => {
       );
     });
 
-    render(<GameBoard websocketUrl={TEST_WS_URL} />);
+    render(<App websocketUrl={TEST_WS_URL} />);
 
     fireEvent.click(await screen.findByText(/menu/i));
     await screen.findByText(/Player One Name/i);
@@ -435,7 +436,7 @@ describe("Connect4", () => {
   });
 
   it("local timeout mode", async () => {
-    render(<GameBoard gameTimerConfig={1} />);
+    render(<App gameTimerConfig={1} />);
 
     fireEvent.click(await screen.findByText(/menu/i));
     fireEvent.click(await screen.findByText(/start game/i));
@@ -513,7 +514,7 @@ describe("Connect4", () => {
       );
     });
 
-    render(<GameBoard gameTimerConfig={1} websocketUrl={TEST_WS_URL} />);
+    render(<App gameTimerConfig={1} websocketUrl={TEST_WS_URL} />);
 
     fireEvent.click(await screen.findByText(/menu/i));
     await screen.findByText(/Player One Name/i);

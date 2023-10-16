@@ -26,6 +26,7 @@ export function mainReducer(state: GameState, action: GameActions) {
         remoteDisconnected: false,
         websocket,
         disks: [],
+        bottomTab: 0,
       },
     };
   } else if (action.type === "diskDropped") {
@@ -126,9 +127,28 @@ export function mainReducer(state: GameState, action: GameActions) {
   } else if (action.type === "remoteDisconnected") {
     const remoteDisconnected = action.value;
     return { ...state, remoteDisconnected };
-  } else if (action.type === "selectMenuItem") {
-    const bottomMenuSelection = action.value;
-    return { ...state, bottomMenuSelection };
+  } else if (action.type === "setBottomTab") {
+    const bottomTab = action.value;
+    return { ...state, bottomTab };
+  } else if (action.type === "addPlayerToInviteList") {
+    const player = action.value;
+    const invites = [...state.invites, player];
+    return { ...state, invites };
+  } else if (action.type === "setName") {
+    const name = action.value;
+    return { ...state, name };
+  } else if (action.type === "joinLobby") {
+    const hasJoinedOnline = action.value;
+    return { ...state, hasJoinedOnline };
+  } else if (action.type === "sendInvite") {
+    const name = action.value;
+    // shallow clone/copy which is needed for react to render it after a name is added
+    const invitesSent = new Set(state.invitesSent);
+    invitesSent.add(name);
+    return { ...state, invitesSent };
+  } else if (action.type === "setPlayersOnline") {
+    const playersOnline = action.value;
+    return { ...state, playersOnline };
   }
 
   return state;

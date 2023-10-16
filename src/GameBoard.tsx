@@ -6,66 +6,20 @@ import OrangePiece from "../src/assets/orange-piece.svg";
 import YellowPiece from "../src/assets/yellow-piece.svg";
 import YellowWinningPiece from "../src/assets/yellow-winning-piece.svg";
 import RedWinningPiece from "../src/assets/red-winning-piece.svg";
-import CheckCircle from "../src/assets/check-circle.svg";
 import Player1 from "../src/assets/player1.svg";
 import Player2 from "../src/assets/player2.svg";
-import GameLogo from "../src/assets/game-logo.svg";
-import { useCallback, useEffect, useReducer } from "react";
-import StartGameModal from "./StartGameModal";
-import useScreenSize from "./useScreenResize";
-import ReactModal from "react-modal";
-
+import { useCallback, useEffect } from "react";
 import { logMessage } from "./logMessage";
-
-// these should be props
-const TIMER_ENABLED = true;
-const TIMER_SECONDS = 24;
-
-import { getLocalColor, getRemoteColor, mainReducer } from "./reducerFunctions";
-
-import { Disk, GameState, Connect4Props, GameMode } from "./types";
-
-const initialGameState: GameState = {
-  colState: [[], [], [], [], [], [], []],
-  yellowWins: 0,
-  redWins: 0,
-  initiator: false,
-  initiatorColor: "red",
-  plays: 0,
-  animatedPiece: null,
-  animatedPieceColor: null,
-  mainMenuOpen: false,
-  mode: "local",
-  rulesOpen: false,
-  draw: false,
-  player1: "Player 1",
-  player2: "Player 2",
-  gameStarted: false,
-  opponent: "",
-  remoteDisconnected: false,
-  timerRef: undefined,
-  timerSeconds: null,
-  forceRender: false,
-  websocket: undefined,
-  winner: null,
-  winnerGameState: null,
-  lastDroppedColumn: null,
-  listenerAdded: false,
-  disks: [],
-  //this is a copy of disks at the moment somebody won or their is a draw.
-  disksCopy: [],
-  bottomTab: 0,
-};
+import { getLocalColor, getRemoteColor } from "./reducerFunctions";
+import { Disk, Connect4Props } from "./types";
 
 export const GameBoard = ({
-  gameTimerConfig = TIMER_SECONDS,
-  websocketUrl = "wss://connect4.isomarkets.com",
+  gameTimerConfig,
+  timerEnabled,
+  state,
+  dispatch,
 }: Connect4Props) => {
-  const [state, dispatch] = useReducer(mainReducer, initialGameState);
-
-  useEffect(() => {
-    ReactModal.setAppElement("body");
-  }, []);
+  // const [state, dispatch] = useReducer(mainReducer, initialGameState);
 
   useEffect(() => {
     const decSeconds = () => {
@@ -75,10 +29,10 @@ export const GameBoard = ({
       }
     };
 
-    if (state.timerRef == null && state.plays > 1 && TIMER_ENABLED) {
+    if (state.timerRef == null && state.plays > 1 && timerEnabled) {
       state.timerRef = setInterval(decSeconds, 1000);
     }
-  }, [state]);
+  }, [state, dispatch, timerEnabled]);
 
   // useCallback is required to be stable due to the of the dependency
   const getCurrentTurn = useCallback(() => {
@@ -121,11 +75,7 @@ export const GameBoard = ({
         },
       });
     }
-  }, [state.timerSeconds, getCurrentTurn, state.timerRef]);
-
-  const terminateGame = useCallback((notifyRemote = true) => {
-    dispatch({ type: "terminateGame", value: { notifyRemote } });
-  }, []);
+  }, [dispatch, state.timerSeconds, getCurrentTurn, state.timerRef]);
 
   const animateRow = useCallback(
     (col: number, remote: boolean = false) => {
@@ -134,7 +84,7 @@ export const GameBoard = ({
         value: { col, remote, gameTimerConfig },
       });
     },
-    [gameTimerConfig]
+    [gameTimerConfig, dispatch]
   );
 
   useEffect(() => {
@@ -166,46 +116,7 @@ export const GameBoard = ({
         state.websocket!.removeEventListener("message", closeHandler);
       }
     };
-  }, [state, terminateGame, animateRow, gameTimerConfig]);
-
-  useScreenSize();
-
-  const openMainMenuModal = () => {
-    dispatch({ type: "mainMenuModalVisible", value: true });
-  };
-
-  const closeMainMenuModal = () => {
-    dispatch({ type: "mainMenuModalVisible", value: false });
-  };
-
-  const startGame = (
-    initiator: boolean,
-    opponent: string,
-    mode: GameMode,
-    player1: string,
-    player2: string,
-    websocket?: WebSocket
-  ) => {
-    logMessage("start game");
-    logMessage("initiator", initiator);
-    logMessage("opponent", opponent);
-    logMessage("mode", mode);
-    logMessage("player1", player1);
-    logMessage("player2", player2);
-
-    dispatch({
-      type: "startGame",
-      value: { initiator, opponent, mode, player1, player2, websocket },
-    });
-  };
-
-  const playAgain = () => {
-    dispatch({ type: "playAgain" });
-  };
-
-  const restartGame = () => {
-    dispatch({ type: "restartGame" });
-  };
+  }, [state, dispatch, animateRow, gameTimerConfig]);
 
   // we'll use this set to quickly test if a disk is part of a winning set
   const winningDiskSet = !state.winner
@@ -263,90 +174,7 @@ export const GameBoard = ({
 
   return (
     <>
-      <ReactModal
-        className="modal main modal__dark-background centered"
-        isOpen={state.mainMenuOpen}
-        shouldCloseOnOverlayClick={true}
-        onRequestClose={closeMainMenuModal}
-        overlayClassName="disabled-background"
-      >
-        <StartGameModal
-          websocketUrl={websocketUrl}
-          onStartGame={startGame}
-          exchangeSocket={(socket: WebSocket) => {
-            dispatch({ type: "setWebsocket", value: socket });
-          }}
-          onClose={() => {
-            dispatch({ type: "mainMenuModalVisible", value: false });
-          }}
-          onShowRules={() => dispatch({ type: "rulesOpen", value: true })}
-        />
-      </ReactModal>
-      <ReactModal
-        className="modal modal__light-background centered"
-        isOpen={state.rulesOpen}
-        shouldCloseOnOverlayClick={true}
-        onRequestClose={() => {
-          dispatch({ type: "rulesOpen", value: false });
-        }}
-        overlayClassName="disabled-background"
-      >
-        <div className="rules-content pt-5 pb-8">
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-row justify-center text-4xl font-extrabold	">
-              RULES
-            </div>
-            <h1>Objective</h1>
-            <div className="flex flex-row items start gap-3">
-              <p>
-                Be the first player to connect 4 of the same colored discs in a
-                row (either vertically, horizontally, or diagonally).
-              </p>
-            </div>
-            <h1>How To Play</h1>
-            <div className="flex flex-row items start gap-3">
-              <span> 1</span>
-              <p>Red goes first in the first game.</p>
-            </div>
-            <div className="flex flex-row items start gap-3">
-              <span> 2</span>
-              <p>
-                Players must alternate turns, and only one disc can be dropped
-                in each turn.
-              </p>
-            </div>
-            <div className="flex flex-row items start gap-3">
-              <span> 3</span>
-              <p>The game ends when there is a 4-in-a-row or a stalemate.</p>
-            </div>
-            <div className="flex flex-row items start gap-3">
-              <span> 4</span>
-              <p>
-                The starter of the previous game goes second on the next game.
-              </p>
-            </div>
-            <div className="flex flex-row justify-center">
-              <div className="check-circle">
-                <img src={CheckCircle}></img>
-              </div>
-            </div>
-          </div>
-        </div>
-      </ReactModal>
       <div className="main flex flex-col">
-        version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`}
-        <div className="nav-bar flex flex-row justify-around pt-3 items-center">
-          <button onClick={openMainMenuModal}>Menu</button>
-
-          <img
-            src={GameLogo}
-            alt="Game logo image of disks stacked ontop of eachother"
-          ></img>
-
-          <button onClick={restartGame} disabled={state.mode === "online"}>
-            Restart
-          </button>
-        </div>
         {/* Note: This gets styled out for large displays */}
         <div className="player-card-small-container flex flex-row justify-center gap-4">
           <div className="player-card-small flex flex-row justify-around items-center">
@@ -502,71 +330,6 @@ export const GameBoard = ({
           </div>
         )}
       </div>
-      <div
-        className={`bottom-plate ${
-          state.winner != null ? state.winner.player : ""
-        } `}
-      ></div>
-      <ReactModal
-        className="modal modal__light-background modal__bottom-placement"
-        isOpen={state.remoteDisconnected}
-        shouldCloseOnOverlayClick={true}
-        onRequestClose={() => {
-          dispatch({ type: "remoteDisconnected", value: false });
-        }}
-        overlayClassName="disabled-background"
-      >
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-row justify-center uppercase text-black">
-            Remote Player Quit
-          </div>
-
-          <button
-            onClick={() => {
-              dispatch({ type: "remoteDisconnected", value: false });
-            }}
-            className="uppercase"
-          >
-            Ok
-          </button>
-        </div>
-      </ReactModal>
-      <ReactModal
-        className="modal modal__light-background modal__bottom-placement"
-        isOpen={
-          (state.winner != null || state.draw) && !state.remoteDisconnected
-        }
-        shouldCloseOnOverlayClick={false}
-        overlayClassName="disabled-background"
-      >
-        <div className="flex flex-col justify-center">
-          <div
-            className="uppercase text-black text-center"
-            data-testid="winning-player"
-          >
-            {state.winner && `${state.winner!.player}`}
-          </div>
-          {state.draw && (
-            <div className="uppercase text-center text-5xl font-bold pt-1 text-black">
-              Draw
-            </div>
-          )}
-          {!state.draw && (
-            <div className="uppercase text-center text-5xl font-bold pt-1 text-black">
-              Wins
-            </div>
-          )}
-          <div className="flex flex-row justify-center gap-5 pt-6">
-            <button onClick={() => terminateGame()} className="uppercase">
-              Quit
-            </button>
-
-            <button onClick={playAgain} className="uppercase">
-              Play Again
-            </button>
-          </div>
-        </div>
-      </ReactModal>
     </>
   );
 };

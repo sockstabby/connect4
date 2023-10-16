@@ -657,3 +657,21 @@ input:-webkit-autofill,
 input:-webkit-autofill:focus {
   transition: background-color 0s 600000s, color 0s 600000s;
 }
+
+.sticky {
+  position: fixed;
+  background-color: var(--game-background-color1);
+  z-index: 1;
+
+  border-bottom: 1px solid white;
+
+  color: white;
+
+  width: 100vw;
+}
+
+.player-list {
+  position: absolute;
+  top: 150px;
+  width: 100vw;
+}

@@ -42,6 +42,11 @@ export type GameState = {
   disksCopy: Disk[];
   rulesOpen: boolean;
   bottomTab: number;
+  invites: string[];
+  name: string;
+  hasJoinedOnline: boolean;
+  invitesSent: Set<string>;
+  playersOnline: string[];
 };
 
 export type GameMode = "online" | "local";
@@ -51,18 +56,23 @@ export type Player = {
 };
 
 export type StartGameModalProps = {
-  onStartGame: (
-    initiator: boolean,
-    opponent: string,
-    mode: GameMode,
-    player1: string,
-    player2: string,
-    socket?: WebSocket
-  ) => void;
+  dispatch: React.Dispatch<GameActions>;
+  state: GameState;
+  websocketUrl: string;
+};
+
+export type StartGameOnlineProps = {
+  dispatch: React.Dispatch<GameActions>;
+  state: GameState;
   onClose: () => void;
   websocketUrl: string;
   exchangeSocket: (socket: WebSocket) => void;
   onShowRules: () => void;
+};
+
+export type UseSocketProps = {
+  dispatch: React.Dispatch<GameActions>;
+  state: GameState;
 };
 
 export type Location = {
@@ -82,10 +92,21 @@ export type AdjacencyFunction = (
 export type Locations = Location[];
 
 export type Connect4Props = {
+  gameTimerConfig: number;
+  timerEnabled: boolean;
+  websocketUrl?: string;
+  dispatch: React.Dispatch<GameActions>;
+  state: GameState;
+};
+
+export type InvitesProps = {
+  state: GameState;
+};
+
+export type AppProps = {
   gameTimerConfig?: number;
   websocketUrl?: string;
 };
-
 export type PlayTurnQuit = {
   message: "playTurn";
   data: { turn: -1 };
@@ -173,4 +194,9 @@ export type GameActions =
   | { type: "listenerAdded"; value: boolean }
   | { type: "remoteDisconnected"; value: boolean }
   | { type: "setBottomTab"; value: number }
+  | { type: "addPlayerToInviteList"; value: string }
+  | { type: "setName"; value: string }
+  | { type: "joinLobby"; value: boolean }
+  | { type: "sendInvite"; value: string }
+  | { type: "setPlayersOnline"; value: string[] }
   | { type: "setWebsocket"; value: WebSocket };
