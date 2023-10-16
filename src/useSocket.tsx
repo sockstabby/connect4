@@ -17,7 +17,6 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
     }
 
     function openHandler() {
-      console.log("oh yeah name = ", state.name);
       const payload = {
         service: "connect4",
         action: "joinLobby",
@@ -30,7 +29,7 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
     }
 
     function messageHandler(event: { data: string }) {
-      logMessage("useSocket received a message", event);
+      // logMessage("useSocket received a message", event);
 
       const payload: LobbyParticipants | PlayRequested | StartGame = JSON.parse(
         event.data
@@ -41,7 +40,6 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
       }
 
       if (payload.message === "lobbyParticipants") {
-        console.log("got a lobby participants message");
         dispatch({ type: "joinLobby", value: true });
         // guarantee uniqueness, in prod this is done in the lambda. so this
         // is only necessary for test

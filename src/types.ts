@@ -47,6 +47,7 @@ export type GameState = {
   hasJoinedOnline: boolean;
   invitesSent: Set<string>;
   playersOnline: string[];
+  invitesAccepted: Set<string>;
 };
 
 export type GameMode = "online" | "local";
@@ -101,6 +102,7 @@ export type Connect4Props = {
 
 export type InvitesProps = {
   state: GameState;
+  dispatch: React.Dispatch<GameActions>;
 };
 
 export type AppProps = {
@@ -199,4 +201,5 @@ export type GameActions =
   | { type: "joinLobby"; value: boolean }
   | { type: "sendInvite"; value: string }
   | { type: "setPlayersOnline"; value: string[] }
+  | { type: "addPlayerToInvitesAccepted"; value: string }
   | { type: "setWebsocket"; value: WebSocket };

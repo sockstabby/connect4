@@ -91,6 +91,7 @@ const initialGameState: GameState = {
   hasJoinedOnline: false,
   invitesSent: new Set(),
   playersOnline: [],
+  invitesAccepted: new Set(),
 };
 
 const TIMER_SECONDS = 24;
@@ -174,7 +175,7 @@ export const App = ({
       ></StartGameOnlineForm>
     );
   } else if (state.bottomTab === 2) {
-    activeWidget = <Invites state={state}></Invites>;
+    activeWidget = <Invites state={state} dispatch={dispatch}></Invites>;
   }
 
   return (

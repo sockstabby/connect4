@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import App from "../App";
 import { Client, Server } from "mock-socket";
+import { logMessage } from "../logMessage";
 
 vi.stubGlobal("__APP_VERSION__", "0.1.0");
 vi.stubGlobal("__COMMIT_HASH__", "febaea");
@@ -11,8 +12,6 @@ const REMOTE_PLAYER_NAME = "somebody";
 const REMOTE_PLAYER_NAME2 = "somebody who wants to play";
 const MY_NAME = "the best player ever";
 const websocketServer = new Server(TEST_WS_URL);
-
-const DEBUG = true;
 
 const winMovesPlayer1 = [0, 0, 0, 0];
 const winMovesPlayer2 = [1, 1, 1];
@@ -52,13 +51,7 @@ describe("Connect4", () => {
       websocket.on(
         "message",
         (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
-          if (DEBUG) {
-            console.log(
-              Date.now(),
-              "Received a message from the client",
-              message
-            );
-          }
+          logMessage(Date.now(), "Received a message from the client", message);
 
           const payload = JSON.parse(message as string);
 
@@ -77,9 +70,8 @@ describe("Connect4", () => {
               })
             );
 
-            if (DEBUG) {
-              console.log(Date.now(), "sending start game move");
-            }
+            logMessage(Date.now(), "sending start game move");
+
             socket.send(
               JSON.stringify({
                 message: "startGame",
@@ -294,13 +286,7 @@ describe("Connect4", () => {
       websocket.on(
         "message",
         (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
-          if (DEBUG) {
-            console.log(
-              Date.now(),
-              "Received a message from the client",
-              message
-            );
-          }
+          logMessage(Date.now(), "Received a message from the client", message);
 
           const payload = JSON.parse(message as string);
 
@@ -319,9 +305,8 @@ describe("Connect4", () => {
               })
             );
 
-            if (DEBUG) {
-              console.log(Date.now(), "sending start game move");
-            }
+            logMessage(Date.now(), "sending start game move");
+
             socket.send(
               JSON.stringify({
                 message: "startGame",
@@ -470,13 +455,7 @@ describe("Connect4", () => {
       websocket.on(
         "message",
         (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
-          if (DEBUG) {
-            console.log(
-              Date.now(),
-              "Received a message from the client",
-              message
-            );
-          }
+          logMessage(Date.now(), "Received a message from the client", message);
 
           const payload = JSON.parse(message as string);
 
@@ -495,9 +474,8 @@ describe("Connect4", () => {
               })
             );
 
-            if (DEBUG) {
-              console.log(Date.now(), "sending start game move");
-            }
+            logMessage(Date.now(), "sending start game move");
+
             socket.send(
               JSON.stringify({
                 message: "startGame",

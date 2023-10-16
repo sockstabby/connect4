@@ -132,6 +132,9 @@ export function mainReducer(state: GameState, action: GameActions) {
     return { ...state, bottomTab };
   } else if (action.type === "addPlayerToInviteList") {
     const player = action.value;
+    if (state.invites.includes(player)) {
+      return state;
+    }
     const invites = [...state.invites, player];
     return { ...state, invites };
   } else if (action.type === "setName") {
@@ -149,6 +152,12 @@ export function mainReducer(state: GameState, action: GameActions) {
   } else if (action.type === "setPlayersOnline") {
     const playersOnline = action.value;
     return { ...state, playersOnline };
+  } else if (action.type === "addPlayerToInvitesAccepted") {
+    const player = action.value;
+    // shallow clone/copy which is needed for react to render it after a name is added
+    const invitesAccepted = new Set(state.invitesAccepted);
+    invitesAccepted.add(player);
+    return { ...state, invitesAccepted };
   }
 
   return state;

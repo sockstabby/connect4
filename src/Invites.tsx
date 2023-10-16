@@ -10,16 +10,11 @@ import Switch from "@mui/material/Switch";
 
 import { InvitesProps } from "./types";
 
-export const Invites = ({ state }: InvitesProps) => {
-  const [invitesAccepted, setInvitesAccepted] = useState(new Set());
-
+export const Invites = ({ state, dispatch }: InvitesProps) => {
   const acceptInvite = (name: string) => {
     return () => {
       acceptPlayRequest(name);
-      // shallow clone/copy which is needed for react to render it after a name is added
-      const newSet = new Set(invitesAccepted);
-      newSet.add(name);
-      setInvitesAccepted(newSet);
+      dispatch({ type: "addPlayerToInvitesAccepted", value: name });
     };
   };
 
@@ -40,8 +35,6 @@ export const Invites = ({ state }: InvitesProps) => {
     }
   };
 
-  console.log("invites", state.invites);
-
   return (
     <>
       <div className="player-list">
@@ -56,7 +49,7 @@ export const Invites = ({ state }: InvitesProps) => {
                   <Switch
                     edge="end"
                     onChange={acceptInvite(value)}
-                    checked={invitesAccepted.has(value)}
+                    checked={state.invitesAccepted.has(value)}
                     // disabled={invitesSent.has(value)}
                     inputProps={{
                       "aria-labelledby": "switch-list-label-bluetooth",
