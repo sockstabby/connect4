@@ -77,6 +77,7 @@ const StartGameModal = ({
 
   const joinLobby = () => {
     if (state.websocket == null) {
+      logMessage("creating a new websocket");
       const ws = new WebSocket(websocketUrl);
       dispatch({ type: "setWebsocket", value: ws });
     }

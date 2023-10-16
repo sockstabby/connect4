@@ -42,6 +42,7 @@ const StartGameOnlineForm = ({
 
   const joinLobby = () => {
     if (state.websocket == null) {
+      logMessage("creating a new webscoket");
       const ws = new WebSocket(websocketUrl);
       dispatch({ type: "setWebsocket", value: ws });
     }

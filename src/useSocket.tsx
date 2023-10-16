@@ -13,7 +13,8 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
   useEffect(() => {
     function closeHandler() {
       console.error("The Websocket is closed.");
-      // setWebsocket(undefined);
+      setListenerAdded(false);
+      dispatch({ type: "setWebsocket", value: undefined });
     }
 
     function openHandler() {

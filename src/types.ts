@@ -65,10 +65,7 @@ export type StartGameModalProps = {
 export type StartGameOnlineProps = {
   dispatch: React.Dispatch<GameActions>;
   state: GameState;
-  onClose: () => void;
   websocketUrl: string;
-  exchangeSocket: (socket: WebSocket) => void;
-  onShowRules: () => void;
 };
 
 export type UseSocketProps = {
@@ -202,4 +199,4 @@ export type GameActions =
   | { type: "sendInvite"; value: string }
   | { type: "setPlayersOnline"; value: string[] }
   | { type: "addPlayerToInvitesAccepted"; value: string }
-  | { type: "setWebsocket"; value: WebSocket };
+  | { type: "setWebsocket"; value: WebSocket | undefined };

@@ -1,6 +1,8 @@
 import { GameState, Disk, GameActions } from "./types";
 import { testForWin } from "./utils";
 
+import initialGameState from "./InitialGameState";
+
 const FIRST_ROW_DROP_MS = 500;
 
 const DRAW_COUNT = 42;
@@ -9,6 +11,15 @@ export function mainReducer(state: GameState, action: GameActions) {
   if (action.type === "startGame") {
     const { initiator, opponent, mode, player1, player2, websocket } =
       action.value;
+
+    // clear invites sent and invites accepted. because when the following game(s) end the users will need to
+    // re-pair in order for lambda to send a startGame message.
+    const remotePlayer = initiator ? player2 : player1;
+    const invitesSent = new Set(state.invitesSent);
+    invitesSent.delete(remotePlayer);
+
+    const invitesAccepted = new Set(state.invitesAccepted);
+    invitesAccepted.delete(remotePlayer);
 
     return {
       ...state,
@@ -27,6 +38,8 @@ export function mainReducer(state: GameState, action: GameActions) {
         websocket,
         disks: [],
         bottomTab: 0,
+        invitesSent,
+        invitesAccepted,
       },
     };
   } else if (action.type === "diskDropped") {
@@ -120,7 +133,15 @@ export function mainReducer(state: GameState, action: GameActions) {
     };
   } else if (action.type === "setWebsocket") {
     const websocket = action.value;
-    return { ...state, websocket };
+    return {
+      ...state,
+      websocket,
+      ...(websocket == null
+        ? {
+            ...initialGameState,
+          }
+        : {}),
+    };
   } else if (action.type === "listenerAdded") {
     const listenerAdded = action.value;
     return { ...state, listenerAdded };
