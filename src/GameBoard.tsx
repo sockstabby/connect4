@@ -62,6 +62,10 @@ export const GameBoard = ({
   }, [state]);
 
   useEffect(() => {
+    dispatch({ type: "setTimerSecondsConfig", value: gameTimerConfig });
+  }, [dispatch, gameTimerConfig]);
+
+  useEffect(() => {
     if (state.timerSeconds === 0) {
       clearInterval(state.timerRef);
 
@@ -86,37 +90,6 @@ export const GameBoard = ({
     },
     [gameTimerConfig, dispatch]
   );
-
-  useEffect(() => {
-    function closeHandler() {
-      console.error("The Websocket is closed.");
-      // we need to tell the user what to do when this happens
-      dispatch({ type: "socketClosed" });
-    }
-
-    function messageHandler(event: { data: string }) {
-      const payload = JSON.parse(event.data);
-
-      dispatch({
-        type: "messageReceived",
-        value: { payload, gameTimerConfig },
-      });
-    }
-
-    if (state.websocket != null && !state.listenerAdded) {
-      logMessage("adding listener");
-      state.websocket!.addEventListener("close", closeHandler);
-      state.websocket!.addEventListener("message", messageHandler);
-      dispatch({ type: "listenerAdded", value: true });
-    }
-
-    return () => {
-      if (state.websocket != null) {
-        state.websocket!.removeEventListener("close", closeHandler);
-        state.websocket!.removeEventListener("message", closeHandler);
-      }
-    };
-  }, [state, dispatch, animateRow, gameTimerConfig]);
 
   // we'll use this set to quickly test if a disk is part of a winning set
   const winningDiskSet = !state.winner

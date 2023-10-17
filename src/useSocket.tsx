@@ -4,6 +4,7 @@ import {
   UseSocketProps,
   StartGame,
   LobbyParticipants,
+  PlayTurn,
 } from "./types";
 import { logMessage } from "./logMessage";
 
@@ -32,9 +33,17 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
     function messageHandler(event: { data: string }) {
       // logMessage("useSocket received a message", event);
 
-      const payload: LobbyParticipants | PlayRequested | StartGame = JSON.parse(
-        event.data
-      );
+      const payload: PlayTurn | LobbyParticipants | PlayRequested | StartGame =
+        JSON.parse(event.data);
+
+      // dispatch({
+      //   type: "messageReceived",
+      //   value: { payload, gameTimerConfig },
+      // });
+
+      if (payload.message === "playTurn") {
+        dispatch({ type: "playTurn", value: payload });
+      }
 
       if (payload.message === "playRequested") {
         dispatch({ type: "addPlayerToInviteList", value: payload.data });

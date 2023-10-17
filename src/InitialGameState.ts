@@ -30,12 +30,13 @@ const initialGameState: GameState = {
   //this is a copy of disks at the moment somebody won or their is a draw.
   disksCopy: [],
   bottomTab: 0,
-  invites: ["jack", "eva"],
+  invites: [],
   name: "",
   hasJoinedOnline: false,
   invitesSent: new Set(),
   playersOnline: [],
   invitesAccepted: new Set(),
+  timerSecondsConfig: null,
 };
 
 export default initialGameState;

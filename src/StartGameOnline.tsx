@@ -6,6 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Switch from "@mui/material/Switch";
+import GameLogo from "../src/assets/game-logo.svg";
 
 import { StartGameOnlineProps } from "./types";
 
@@ -50,8 +51,23 @@ const StartGameOnlineForm = ({
 
   return (
     <>
-      <div className="sticky main">
-        <div className="flex flex-col items-center gap-4 pt-5">
+      <div className="scroll-header scroll-header__lobby-player-list  main">
+        <div className="logo-container">
+          <div className="logo">
+            <span className="game-title game-title__pad-right">C</span>
+            <span className="game-title">
+              <img
+                src={GameLogo}
+                alt="Game logo image of disks stacked ontop of eachother"
+              ></img>
+            </span>
+            <span className="game-title game-title__pad-left">nnect</span>
+
+            <span className="game-title-number">4</span>
+          </div>
+        </div>
+
+        <div className="join-name-container flex flex-col items-center gap-4 pt-35">
           <label htmlFor="nameInput">Enter your name to join the lobby:</label>
           <input
             data-testid="online-name"
@@ -71,16 +87,18 @@ const StartGameOnlineForm = ({
               Join Lobby
             </button>
           </div>
+          <div>Toggle the switch to send an invitation.</div>
         </div>
       </div>
 
-      <div className="player-list">
+      <div className="player-list player-list__lobby-player-list">
         <List dense sx={{ width: "100%", bgcolor: "#5c2dd5", color: "white" }}>
-          {/* {[...Array(100).keys()].map((value) => { */}
-          {state.playersOnline.map((value) => {
+          {/* adding an extra item that is invisible so the last item is not clipped by the bottom nav */}
+          {[...state.playersOnline, ""].map((value) => {
             const labelId = `checkbox-list-secondary-label-${value}`;
             return (
               <ListItem
+                style={{ visibility: value === "" ? "hidden" : "visible" }}
                 key={value}
                 secondaryAction={
                   <Switch
@@ -94,7 +112,9 @@ const StartGameOnlineForm = ({
                 }
                 disablePadding
               >
-                <ListItemButton>
+                <ListItemButton
+                  style={{ visibility: value === "" ? "hidden" : "visible" }}
+                >
                   <ListItemAvatar>
                     <Avatar
                       alt="A user avatar"
@@ -102,6 +122,7 @@ const StartGameOnlineForm = ({
                       sx={{ width: 40, height: 40 }}
                     />
                   </ListItemAvatar>
+
                   <ListItemText id={labelId} primary={value} />
                 </ListItemButton>
               </ListItem>

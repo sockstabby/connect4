@@ -224,7 +224,9 @@ const StartGameModal = ({
 
               <div className="pt-2">
                 <button
-                  disabled={chosenOpponent === "" || chosenOpponent === name}
+                  disabled={
+                    chosenOpponent === "" || chosenOpponent === state.name
+                  }
                   onClick={sendPlayRequest}
                 >
                   Send Invite

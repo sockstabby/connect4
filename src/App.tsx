@@ -1,7 +1,6 @@
 import GameBoard from "./GameBoard";
 import GameLogo from "../src/assets/game-logo.svg";
 import BottomNavigation from "@mui/material/BottomNavigation";
-import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import Paper from "@mui/material/Paper";
 import RestoreIcon from "@mui/icons-material/Restore";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
@@ -19,8 +18,19 @@ import StartGameOnlineForm from "./StartGameOnline";
 import Invites from "./Invites";
 
 import initialGameState from "./InitialGameState";
+import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
+
+import { styled } from "@mui/material/styles";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+const BottomNavigationAction = styled(MuiBottomNavigationAction)(`
+  color: white;
+  background-color: indigo;
+  &.Mui-selected {
+    color: #fd6687;
+  }
+`);
 
 const theme = createTheme({
   typography: {
@@ -94,15 +104,31 @@ export const App = ({
   if (state.bottomTab === 0) {
     activeWidget = (
       <>
-        version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`}
+        {/* <div className="scroll-header scroll-header__game-board  main"> */}
+        <div className="logo-container">
+          <div className="logo">
+            <span className="game-title game-title__pad-right">C</span>
+            <span className="game-title">
+              <img
+                src={GameLogo}
+                alt="Game logo image of disks stacked ontop of eachother"
+              ></img>
+            </span>
+            <span className="game-title game-title__pad-left">nnect</span>
+
+            <span className="game-title-number">4</span>
+          </div>
+        </div>
+        {/* </div> */}
+        {/* version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`} */}
         {/* nav bar buttons get styled out in css and is replaced by the bottom nav bar*/}
         <div className="main nav-bar flex flex-row justify-around pt-3 items-center">
           <button onClick={openMainMenuModal}>Menu</button>
 
-          <img
+          {/* <img
             src={GameLogo}
             alt="Game logo image of disks stacked ontop of eachother"
-          ></img>
+          ></img> */}
 
           <button onClick={restartGame} disabled={state.mode === "online"}>
             Restart
@@ -263,7 +289,13 @@ export const App = ({
       </ReactModal>
 
       <Paper
-        sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
+        className="bottom-nav-bar"
+        sx={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
         elevation={3}
       >
         <BottomNavigation

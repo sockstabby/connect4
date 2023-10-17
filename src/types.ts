@@ -48,6 +48,7 @@ export type GameState = {
   invitesSent: Set<string>;
   playersOnline: string[];
   invitesAccepted: Set<string>;
+  timerSecondsConfig: number | null;
 };
 
 export type GameMode = "online" | "local";
@@ -113,7 +114,7 @@ export type PlayTurnQuit = {
 
 export type PlayTurn = {
   message: "playTurn";
-  data: { turn: { col: number } };
+  data: { turn: { col: number } } | { turn: -1 };
 };
 
 export type PlayerInfo = {
@@ -199,4 +200,6 @@ export type GameActions =
   | { type: "sendInvite"; value: string }
   | { type: "setPlayersOnline"; value: string[] }
   | { type: "addPlayerToInvitesAccepted"; value: string }
+  | { type: "playTurn"; value: PlayTurn }
+  | { type: "setTimerSecondsConfig"; value: number }
   | { type: "setWebsocket"; value: WebSocket | undefined };

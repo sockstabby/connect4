@@ -1,4 +1,4 @@
-import { GameState, Disk, GameActions } from "./types";
+import { GameState, Disk, GameActions, PlayTurn } from "./types";
 import { testForWin } from "./utils";
 
 import initialGameState from "./InitialGameState";
@@ -72,18 +72,22 @@ export function mainReducer(state: GameState, action: GameActions) {
     return terminateGame(state, notifyRemote);
   } else if (action.type === "socketClosed") {
     return { ...state, websocket: undefined, listenerAdded: false };
-  } else if (action.type === "messageReceived") {
-    const { payload, gameTimerConfig } = action.value;
-    if (payload.message === "playTurn") {
-      if (payload.data.turn === -1) {
-        const newState = terminateGame(state, false);
-        return { ...newState, remoteDisconnected: true };
-      } else {
-        const x = document.getElementById("drop-sound") as HTMLAudioElement;
-        x?.play();
-        return diskDropped(state, payload.data.turn.col, true, gameTimerConfig);
-      }
+  } else if (action.type === "playTurn") {
+    const playTurn: PlayTurn = action.value;
+    if (playTurn.data.turn === -1) {
+      const newState = terminateGame(state, false);
+      return { ...newState, remoteDisconnected: true };
+    } else {
+      const x = document.getElementById("drop-sound") as HTMLAudioElement;
+      x?.play();
+      return diskDropped(
+        state,
+        playTurn.data.turn.col,
+        true,
+        state.timerSecondsConfig
+      );
     }
+
     return state;
   } else if (action.type === "setDisk") {
     const colState = JSON.parse(JSON.stringify(state.colState));
@@ -158,6 +162,9 @@ export function mainReducer(state: GameState, action: GameActions) {
     }
     const invites = [...state.invites, player];
     return { ...state, invites };
+  } else if (action.type === "setTimerSecondsConfig") {
+    const timerSecondsConfig = action.value;
+    return { ...state, timerSecondsConfig };
   } else if (action.type === "setName") {
     const name = action.value;
     return { ...state, name };
@@ -279,7 +286,7 @@ export function diskDropped(
   state: GameState,
   col: number,
   remote: boolean = false,
-  gameTimerConfig: number
+  gameTimerConfig: number | null
 ): GameState {
   if (state.colState[col].length === 6) {
     return state;

@@ -5,6 +5,114 @@
 @tailwind components;
 @tailwind utilities;
 
+.logo-container {
+  position: fixed;
+  display: flex;
+  left: 0px;
+  justify-content: center;
+  top: 0px;
+  width: 100%;
+  font-family: Pacifico;
+}
+
+.join-name-container {
+  padding-top: 125px;
+}
+
+.game-title {
+  color: #ffce67;
+  font-size: 63px;
+  font-weight: 800;
+  letter-spacing: 0px;
+
+  &__pad-right {
+    padding-right: 10px;
+  }
+  &__pad-left {
+    padding-left: 4px;
+  }
+}
+
+.game-title-number {
+  color: #fd6687;
+  font-size: 54px;
+  font-weight: 800;
+}
+.bottom-nav-bar {
+  display: none;
+}
+
+.nav-bar {
+  padding-top: 100px;
+}
+
+.game-title img {
+  display: inline;
+  width: 30px;
+  padding-left: 3px;
+
+  -webkit-animation: spin 50s linear infinite;
+  -moz-animation: spin 50s linear infinite;
+  animation: spin 50s linear infinite;
+}
+
+.scroll-header {
+  position: fixed;
+
+  top: 0px;
+  background-color: var(--game-background-color1);
+  z-index: 1;
+  color: white;
+  width: 100vw;
+
+  &__lobby-player-list {
+    height: 320px;
+  }
+
+  &__invites-player-list {
+    height: 130px;
+  }
+
+  &__game-board {
+    height: 94px;
+  }
+}
+
+.player-list {
+  position: absolute;
+
+  width: 100vw;
+
+  &__lobby-player-list {
+    top: 320px;
+  }
+
+  &__invites-player-list {
+    top: 160px;
+  }
+}
+
+@-moz-keyframes spin {
+  100% {
+    -moz-transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.MuiBottomNavigation-root {
+  background-color: indigo !important;
+}
+
 .disabled-background {
   position: fixed;
   inset: 0px;
@@ -29,15 +137,6 @@
   transform: translateY(-50%);
 }
 
-.parent {
-  top: 0px;
-  left: 0px;
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  z-index: 10002;
-}
-
 .modal {
   position: relative;
   max-width: 400px;
@@ -57,7 +156,7 @@
 
   &__bottom-placement {
     position: absolute;
-    top: calc(100vh - 190px - 20px) !important;
+    top: calc(100vh - 260px - 20px) !important;
     left: calc(100vw / 2 - 160px) !important;
     border-radius: 20px;
     width: 320px;
@@ -272,6 +371,23 @@ button[disabled] {
     min-height: calc(89vmin + 40px);
   }
 
+  .nav-bar img {
+    height: 50px;
+  }
+
+  .nav-bar {
+    padding-top: 10px;
+  }
+
+  .nav-bar button {
+    display: none;
+  }
+
+  .bottom-nav-bar {
+    display: block;
+    color: white;
+  }
+
   .dropzone {
     min-width: min(95vmin);
   }
@@ -282,7 +398,7 @@ button[disabled] {
   .player-card-small-container {
     display: flex;
     min-width: min(62vmax, 92vw);
-    margin-top: 40px;
+    margin-top: 85px;
     margin-bottom: 40px;
   }
 
@@ -293,8 +409,61 @@ button[disabled] {
 
 @media only screen and (max-height: 741px) {
   .player-card-small-container {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 56px;
+    margin-bottom: 0px;
+  }
+
+  .nav-bar {
+    padding-top: 0px;
+  }
+
+  .nav-bar img {
+    display: none;
+  }
+
+  .scroll-header {
+    &__lobby-player-list {
+      height: 267px;
+    }
+
+    &__invite-player-list {
+      height: 100px;
+    }
+
+    &__game-board {
+      height: 50px;
+    }
+  }
+
+  .player-list {
+    &__lobby-player-list {
+      top: 271px;
+    }
+    &__invites-player-list {
+      top: 130px;
+    }
+  }
+
+  .join-name-container {
+    padding-top: 75px;
+  }
+
+  .logo-container {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    top: -27px;
+    width: 100%;
+    font-family: Pacifico;
+  }
+
+  .game-title-number {
+    color: #fd6687;
+    // font-size: 2rem;
+    font-weight: 800;
+  }
+  .game-title {
+    font-size: 2rem;
   }
 }
 
@@ -506,7 +675,7 @@ input[type="text"] {
 
 .player-card-small {
   background-color: white;
-  width: 35vmin;
+  width: 42vmin;
   height: 65px;
   border-radius: 12px;
   border: 2px solid black;
@@ -658,20 +827,10 @@ input:-webkit-autofill:focus {
   transition: background-color 0s 600000s, color 0s 600000s;
 }
 
-.sticky {
-  position: fixed;
-  background-color: var(--game-background-color1);
-  z-index: 1;
-
-  border-bottom: 1px solid white;
-
-  color: white;
-
-  width: 100vw;
+.MuiList-root:last-child {
+  // display: none;
 }
 
-.player-list {
-  position: absolute;
-  top: 150px;
-  width: 100vw;
+.MuiListItem:last-child {
+  visibility: hidden;
 }
