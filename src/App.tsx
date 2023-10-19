@@ -106,31 +106,24 @@ export const App = ({
   if (state.bottomTab === 0) {
     activeWidget = (
       <>
-        <div className="scroll-header scroll-header__game-board  main">
-          <div className="logo-container">
-            <div className="logo">
-              <span className="game-title game-title__pad-right">C</span>
-              <span className="game-title">
-                <img
-                  src={GameLogo}
-                  alt="Game logo image of disks stacked ontop of eachother"
-                ></img>
-              </span>
-              <span className="game-title game-title__pad-left">nnect</span>
+        <div className="logo-container">
+          <div className="logo">
+            <span className="game-title game-title__pad-right">C</span>
+            <span className="game-title">
+              <img
+                src={GameLogo}
+                alt="Game logo image of disks stacked ontop of eachother"
+              ></img>
+            </span>
+            <span className="game-title game-title__pad-left">nnect</span>
 
-              <span className="game-title-number">4</span>
-            </div>
+            <span className="game-title-number">4</span>
           </div>
         </div>
         {/* version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`} */}
         {/* nav bar buttons get styled out in css and is replaced by the bottom nav bar*/}
         <div className="main nav-bar flex flex-row justify-around pt-3 items-center">
           <button onClick={openMainMenuModal}>Menu</button>
-
-          {/* <img
-            src={GameLogo}
-            alt="Game logo image of disks stacked ontop of eachother"
-          ></img> */}
 
           <button onClick={restartGame} disabled={state.mode === "online"}>
             Restart
