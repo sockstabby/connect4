@@ -89,17 +89,11 @@ export function mainReducer(state: GameState, action: GameActions) {
     }
 
     return state;
-  } else if (action.type === "setDisk") {
-    const colState = JSON.parse(JSON.stringify(state.colState));
-    if (state.animatedPiece != null) {
-      colState[state.animatedPiece].push(state.animatedPieceColor);
-    }
-    return { ...state, colState };
   } else if (action.type === "rulesOpen") {
     const rulesOpen = action.value;
     return { ...state, rulesOpen, mainMenuOpen: false };
   } else if (action.type === "clearDisk") {
-    return { ...state, animatedPiece: null, lastDroppedColumn: null };
+    return { ...state, disk: null, lastDroppedColumn: null };
   } else if (action.type === "mainMenuModalVisible") {
     //when we open this model lets make sure that we close the socket
     if (state.websocket != null) {
@@ -368,8 +362,8 @@ export function diskDropped(
     ...(!win && !tempDraw
       ? {
           timerSeconds: gameTimerConfig,
-          animatedPiece: col,
-          animatedPieceColor: player,
+          disk: col,
+          diskColor: player,
         }
       : {}),
   };

@@ -20,8 +20,6 @@ export type GameState = {
   initiator: boolean;
   initiatorColor: string;
   plays: number;
-  animatedPiece: number | null;
-  animatedPieceColor: string | null;
   mainMenuOpen: boolean;
   mode: GameMode;
   draw: boolean;

@@ -7,8 +7,6 @@ const initialGameState: GameState = {
   initiator: false,
   initiatorColor: "red",
   plays: 0,
-  animatedPiece: null,
-  animatedPieceColor: null,
   mainMenuOpen: false,
   mode: "local",
   rulesOpen: false,
