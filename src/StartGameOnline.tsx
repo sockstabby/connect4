@@ -87,48 +87,58 @@ const StartGameOnlineForm = ({
               Join Lobby
             </button>
           </div>
-          <div>Toggle the switch to send an invitation.</div>
+
+          {state.playersOnline.length > 0 ? (
+            <div>Toggle the switch to send an invitation.</div>
+          ) : (
+            <div>
+              After joining the lobby you will be able to see a list of players
+              and be able to send invites to play.{" "}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="player-list player-list__lobby-player-list">
-        <List dense sx={{ width: "100%", bgcolor: "#5c2dd5", color: "white" }}>
-          {/* adding an extra item that is invisible so the last item is not clipped by the bottom nav */}
-          {[...state.playersOnline, ""].map((value) => {
-            const labelId = `checkbox-list-secondary-label-${value}`;
-            return (
-              <ListItem
-                style={{ visibility: value === "" ? "hidden" : "visible" }}
-                key={value}
-                secondaryAction={
-                  <Switch
-                    edge="end"
-                    onChange={sendInvite(value)}
-                    checked={state.invitesSent.has(value)}
-                    inputProps={{
-                      "aria-labelledby": "switch-list-label-bluetooth",
-                    }}
-                  />
-                }
-                disablePadding
-              >
-                <ListItemButton
+        {state.playersOnline.length > 0 && (
+          <List
+            dense
+            sx={{ width: "100%", bgcolor: "#5c2dd5", color: "white" }}
+          >
+            {/* adding an extra item that is invisible so the last item is not clipped by the bottom nav */}
+            {[...state.playersOnline, ""].map((value) => {
+              const labelId = `checkbox-list-secondary-label-${value}`;
+              return (
+                <ListItem
                   style={{ visibility: value === "" ? "hidden" : "visible" }}
-                >
-                  <ListItemAvatar>
-                    <Avatar
-                      alt="A user avatar"
-                      //   src={"../src/assets/1.jpg"}
-                      sx={{ width: 40, height: 40 }}
+                  key={value}
+                  secondaryAction={
+                    <Switch
+                      edge="end"
+                      onChange={sendInvite(value)}
+                      checked={state.invitesSent.has(value)}
                     />
-                  </ListItemAvatar>
+                  }
+                  disablePadding
+                >
+                  <ListItemButton
+                    style={{ visibility: value === "" ? "hidden" : "visible" }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        alt="A user avatar"
+                        //   src={"../src/assets/1.jpg"}
+                        sx={{ width: 40, height: 40 }}
+                      />
+                    </ListItemAvatar>
 
-                  <ListItemText id={labelId} primary={value} />
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
+                    <ListItemText id={labelId} primary={value} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        )}
       </div>
     </>
   );

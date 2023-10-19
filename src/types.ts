@@ -32,7 +32,6 @@ export type GameState = {
   remoteDisconnected: boolean;
   timerRef: NodeJS.Timer | undefined;
   timerSeconds: number | null;
-  forceRender: boolean;
   websocket: WebSocket | undefined;
   winner: Winner | null;
   winnerGameState: ColState | null;

@@ -208,6 +208,11 @@
   color: var(--game-background-color1);
 }
 
+.rules-content-mobile {
+  background-color: white;
+  color: black;
+}
+
 .check-circle {
   position: absolute;
   bottom: -50px;
@@ -446,6 +451,7 @@ button[disabled] {
 
   .join-name-container {
     padding-top: 75px;
+    padding-inline: 15px;
   }
 
   .logo-container {

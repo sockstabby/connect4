@@ -36,11 +36,6 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
       const payload: PlayTurn | LobbyParticipants | PlayRequested | StartGame =
         JSON.parse(event.data);
 
-      // dispatch({
-      //   type: "messageReceived",
-      //   value: { payload, gameTimerConfig },
-      // });
-
       if (payload.message === "playTurn") {
         dispatch({ type: "playTurn", value: payload });
       }

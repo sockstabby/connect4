@@ -4,8 +4,8 @@
   box-sizing: border-box;
 }
 
-html {
-  overscroll-behavior: none;
+.hide-scroll {
+  overflow: hidden;
 }
 
 input,
@@ -31,7 +31,7 @@ body {
   margin: 0;
   display: flex;
   min-width: 320px;
-  min-height: -webkit-fill-available;
+  min-height: 100vh;
 
   --game-background-color1: #7945ff;
   --game-background-color2: #5c2dd5;

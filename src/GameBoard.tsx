@@ -19,8 +19,6 @@ export const GameBoard = ({
   state,
   dispatch,
 }: Connect4Props) => {
-  // const [state, dispatch] = useReducer(mainReducer, initialGameState);
-
   useEffect(() => {
     const decSeconds = () => {
       if (state.timerSeconds != null && state.timerSeconds != -1) {
@@ -33,6 +31,13 @@ export const GameBoard = ({
       state.timerRef = setInterval(decSeconds, 1000);
     }
   }, [state, dispatch, timerEnabled]);
+
+  useEffect(() => {
+    document.body.classList.add("hide-scroll");
+    return () => {
+      document.body.classList.remove("hide-scroll");
+    };
+  });
 
   // useCallback is required to be stable due to the of the dependency
   const getCurrentTurn = useCallback(() => {

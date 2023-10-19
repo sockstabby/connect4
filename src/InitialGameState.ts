@@ -20,7 +20,6 @@ const initialGameState: GameState = {
   remoteDisconnected: false,
   timerRef: undefined,
   timerSeconds: null,
-  forceRender: false,
   websocket: undefined,
   winner: null,
   winnerGameState: null,

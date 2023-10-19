@@ -53,45 +53,65 @@ export const Invites = ({ state, dispatch }: InvitesProps) => {
           </div>
         </div>
         <div className="join-name-container flex flex-col items-center gap-4 pt-35">
-          <div>Toggle the switch to accept an invitation.</div>
+          {state.invites.length > 0 ? (
+            <div>Toggle the switch to accept an invitation.</div>
+          ) : (
+            <div className="flex flex-col gap-5">
+              <p>
+                When an online player invites you to play they will show up in a
+                list below.
+              </p>
+              <p>
+                Please note that you must first join the lobby in order to
+                receive an invitation.
+              </p>
+              <p>
+                A game will begin at the moment you accept an invitation as long
+                as the remote player has not started another game.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="player-list player-list__invites-player-list">
-        <List dense sx={{ width: "100%", bgcolor: "#5c2dd5", color: "white" }}>
-          {/* {[...Array(100).keys()].map((value) => { */}
-          {[...state.invites, ""].map((value) => {
-            const labelId = `checkbox-list-secondary-label-${value}`;
-            return (
-              <ListItem
-                key={value}
-                secondaryAction={
-                  <Switch
-                    edge="end"
-                    onChange={acceptInvite(value)}
-                    checked={state.invitesAccepted.has(value)}
-                    // disabled={invitesSent.has(value)}
-                    inputProps={{
-                      "aria-labelledby": "switch-list-label-bluetooth",
-                    }}
-                  />
-                }
-                disablePadding
-              >
-                <ListItemButton>
-                  <ListItemAvatar>
-                    <Avatar
-                      alt="A user avatar"
-                      //   src={"../src/assets/1.jpg"}
-                      sx={{ width: 40, height: 40 }}
+        {state.invites.length > 0 && (
+          <List
+            dense
+            sx={{ width: "100%", bgcolor: "#5c2dd5", color: "white" }}
+          >
+            {[...state.invites, ""].map((value) => {
+              const labelId = `checkbox-list-secondary-label-${value}`;
+              return (
+                <ListItem
+                  style={{ visibility: value === "" ? "hidden" : "visible" }}
+                  key={value}
+                  secondaryAction={
+                    <Switch
+                      edge="end"
+                      onChange={acceptInvite(value)}
+                      checked={state.invitesAccepted.has(value)}
                     />
-                  </ListItemAvatar>
-                  <ListItemText id={labelId} primary={value} />
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
+                  }
+                  disablePadding
+                >
+                  <ListItemButton
+                    style={{ visibility: value === "" ? "hidden" : "visible" }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        alt="A user avatar"
+                        //   src={"../src/assets/1.jpg"}
+                        sx={{ width: 40, height: 40 }}
+                      />
+                    </ListItemAvatar>
+                    <ListItemText id={labelId} primary={value} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        )}
       </div>
     </>
   );

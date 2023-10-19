@@ -66,7 +66,7 @@ const StartGameModal = ({
         action: "acceptPlayRequest",
         data: {
           chosenOpponent: invitee,
-          acceptor: name,
+          acceptor: state.name,
         },
       };
 

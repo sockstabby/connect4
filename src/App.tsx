@@ -10,6 +10,8 @@ import ReactModal from "react-modal";
 import StartGameModal from "./StartGameModal";
 import CloudQueueIcon from "@mui/icons-material/CloudQueue";
 
+import DescriptionIcon from "@mui/icons-material/Description";
+
 import useSocket from "./useSocket";
 
 import { AppProps } from "./types";
@@ -104,22 +106,22 @@ export const App = ({
   if (state.bottomTab === 0) {
     activeWidget = (
       <>
-        {/* <div className="scroll-header scroll-header__game-board  main"> */}
-        <div className="logo-container">
-          <div className="logo">
-            <span className="game-title game-title__pad-right">C</span>
-            <span className="game-title">
-              <img
-                src={GameLogo}
-                alt="Game logo image of disks stacked ontop of eachother"
-              ></img>
-            </span>
-            <span className="game-title game-title__pad-left">nnect</span>
+        <div className="scroll-header scroll-header__game-board  main">
+          <div className="logo-container">
+            <div className="logo">
+              <span className="game-title game-title__pad-right">C</span>
+              <span className="game-title">
+                <img
+                  src={GameLogo}
+                  alt="Game logo image of disks stacked ontop of eachother"
+                ></img>
+              </span>
+              <span className="game-title game-title__pad-left">nnect</span>
 
-            <span className="game-title-number">4</span>
+              <span className="game-title-number">4</span>
+            </div>
           </div>
         </div>
-        {/* </div> */}
         {/* version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`} */}
         {/* nav bar buttons get styled out in css and is replaced by the bottom nav bar*/}
         <div className="main nav-bar flex flex-row justify-around pt-3 items-center">
@@ -150,13 +152,57 @@ export const App = ({
     );
   } else if (state.bottomTab === 1) {
     activeWidget = (
+      <div className="modal rules-content-mobile pt-5 pb-8">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-row justify-center text-4xl font-extrabold	">
+            RULES
+          </div>
+          <h1>Objective</h1>
+          <div className="flex flex-row items start gap-3">
+            <p>
+              Be the first player to connect 4 of the same colored discs in a
+              row (either vertically, horizontally, or diagonally).
+            </p>
+          </div>
+          <h1>How To Play</h1>
+          <div className="flex flex-row items start gap-3">
+            <span> 1</span>
+            <p>Red goes first in the first game.</p>
+          </div>
+          <div className="flex flex-row items start gap-3">
+            <span> 2</span>
+            <p>
+              Players must alternate turns, and only one disc can be dropped in
+              each turn.
+            </p>
+          </div>
+          <div className="flex flex-row items start gap-3">
+            <span> 3</span>
+            <p>The game ends when there is a 4-in-a-row or a stalemate.</p>
+          </div>
+          <div className="flex flex-row items start gap-3">
+            <span> 4</span>
+            <p>
+              The starter of the previous game goes second on the next game.
+            </p>
+          </div>
+          <div className="flex flex-row justify-center">
+            <div className="check-circle">
+              <img src={CheckCircle}></img>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  } else if (state.bottomTab === 2) {
+    activeWidget = (
       <StartGameOnlineForm
         dispatch={dispatch}
         state={state}
         websocketUrl={websocketUrl}
       ></StartGameOnlineForm>
     );
-  } else if (state.bottomTab === 2) {
+  } else if (state.bottomTab === 3) {
     activeWidget = <Invites state={state} dispatch={dispatch}></Invites>;
   }
 
@@ -306,7 +352,9 @@ export const App = ({
           }}
         >
           <BottomNavigationAction label="Game" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Local" icon={<PeopleOutlineIcon />} />
+          <BottomNavigationAction label="Rules" icon={<DescriptionIcon />} />
+
+          <BottomNavigationAction label="Lobby" icon={<PeopleOutlineIcon />} />
           <BottomNavigationAction label="Invites" icon={<CloudQueueIcon />} />
         </BottomNavigation>
       </Paper>

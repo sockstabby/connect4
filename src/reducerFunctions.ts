@@ -145,6 +145,8 @@ export function mainReducer(state: GameState, action: GameActions) {
             ...initialGameState,
           }
         : {}),
+      // preserve remoteDisconnected so the user can acknowledge that.
+      remoteDisconnected: state.remoteDisconnected,
     };
   } else if (action.type === "listenerAdded") {
     const listenerAdded = action.value;
