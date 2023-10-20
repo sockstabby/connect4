@@ -459,6 +459,17 @@ button[disabled] {
     font-size: 2rem;
     font-weight: 800;
     letter-spacing: 0px;
+
+    img {
+      width: 17px;
+    }
+
+    &__first-character {
+      padding-right: 5px;
+    }
+    &__suffix {
+      padding-left: 1px;
+    }
   }
 }
 

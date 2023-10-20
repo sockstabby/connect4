@@ -3,7 +3,7 @@ import ReactModal from "react-modal";
 
 import BottomNavigation from "@mui/material/BottomNavigation";
 import Paper from "@mui/material/Paper";
-import RestoreIcon from "@mui/icons-material/Restore";
+import DragIndicator from "@mui/icons-material/DragIndicator";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import CloudQueueIcon from "@mui/icons-material/CloudQueue";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -257,7 +257,7 @@ export const App = ({
             dispatch({ type: "setBottomTab", value: tab });
           }}
         >
-          <BottomNavigationAction label="Game" icon={<RestoreIcon />} />
+          <BottomNavigationAction label="Game" icon={<DragIndicator />} />
           <BottomNavigationAction label="Rules" icon={<DescriptionIcon />} />
 
           <BottomNavigationAction label="Lobby" icon={<PeopleOutlineIcon />} />
