@@ -101,6 +101,7 @@ export type InvitesProps = {
 };
 
 export type AppProps = {
+  timerEnabled: true;
   gameTimerConfig?: number;
   websocketUrl?: string;
 };

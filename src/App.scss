@@ -13,47 +13,60 @@
   top: 0px;
   width: 100%;
   font-family: Pacifico;
+
+  color: #ffce67;
+  font-size: 63px;
+  font-weight: 800;
+  letter-spacing: 0px;
+
+  &__first-character {
+    padding-right: 10px;
+  }
+  &__suffix {
+    padding-left: 4px;
+  }
+
+  &__number {
+    color: #fd6687;
+    font-size: 54px;
+    font-weight: 800;
+  }
+
+  img {
+    display: inline;
+    width: 30px;
+    padding-left: 3px;
+
+    -webkit-animation: spin 50s linear infinite;
+    -moz-animation: spin 50s linear infinite;
+    animation: spin 50s linear infinite;
+  }
+}
+
+.rule-list {
+  list-style-type: decimal;
+  text-align: left;
+  padding-inline: 15px;
+}
+
+li {
+  /* padding-top: 50px;
+  padding-bottom: 10px; */
+  // padding: 50px 0 10px 0;
+  padding-left: 7px;
+  /* you can also use padding-block for top and bottom and padding-inline for right and left */
 }
 
 .join-name-container {
   padding-top: 125px;
 }
 
-.game-title {
-  color: #ffce67;
-  font-size: 63px;
-  font-weight: 800;
-  letter-spacing: 0px;
-
-  &__pad-right {
-    padding-right: 10px;
-  }
-  &__pad-left {
-    padding-left: 4px;
-  }
-}
-
-.game-title-number {
-  color: #fd6687;
-  font-size: 54px;
-  font-weight: 800;
-}
 .bottom-nav-bar {
   display: none;
 }
 
 .nav-bar {
   padding-top: 100px;
-}
-
-.game-title img {
-  display: inline;
-  width: 30px;
-  padding-left: 3px;
-
-  -webkit-animation: spin 50s linear infinite;
-  -moz-animation: spin 50s linear infinite;
-  animation: spin 50s linear infinite;
 }
 
 .scroll-header {
@@ -137,6 +150,14 @@
   transform: translateY(-50%);
 }
 
+.align-top {
+  position: absolute;
+  top: 0%;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
 .modal {
   position: relative;
   max-width: 400px;
@@ -146,21 +167,28 @@
   border: 2px solid black;
   box-shadow: 0 15px 0 black;
 
-  &__dark-background {
+  &--dark-background {
     background-color: var(--game-background-color1);
   }
-  &__light-background {
+  &--light-background {
     background-color: white;
     color: black;
   }
 
-  &__bottom-placement {
+  &--bottom-placement {
     position: absolute;
     top: calc(100vh - 260px - 20px) !important;
     left: calc(100vw / 2 - 160px) !important;
     border-radius: 20px;
     width: 320px;
     height: auto;
+  }
+
+  &__rules h1 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--game-background-color1);
   }
 
   .button--fancy {
@@ -177,6 +205,7 @@
     border-radius: 18px;
     z-index: unset;
     box-shadow: 0 15px 0 black;
+    text-transform: uppercase;
   }
   .button--fancy:hover {
     background-color: var(--accent-color);
@@ -199,18 +228,6 @@
     background-color: #cccccc;
     color: #aca0a0;
   }
-}
-
-.rules-content h1 {
-  font-size: 1.2rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  color: var(--game-background-color1);
-}
-
-.rules-content-mobile {
-  background-color: white;
-  color: black;
 }
 
 .check-circle {
@@ -461,15 +478,11 @@ button[disabled] {
     top: -27px;
     width: 100%;
     font-family: Pacifico;
-  }
 
-  .game-title-number {
-    color: #fd6687;
-    // font-size: 2rem;
-    font-weight: 800;
-  }
-  .game-title {
+    color: #ffce67;
     font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0px;
   }
 }
 
@@ -525,20 +538,20 @@ button[disabled] {
   background-color: var(--game-background-color2);
   border-top-left-radius: 40px;
   border-top-right-radius: 40px;
-}
 
-.bottom-plate.yellow {
-  background-color: var(--player2-color);
-  background: rgb(254, 255, 103);
-  background: linear-gradient(
-    0deg,
-    rgba(254, 255, 103, 1) 0%,
-    rgba(255, 225, 103, 1) 82%
-  );
-}
+  &--yellow {
+    background-color: var(--player2-color);
+    background: rgb(254, 255, 103);
+    background: linear-gradient(
+      0deg,
+      rgba(254, 255, 103, 1) 0%,
+      rgba(255, 225, 103, 1) 82%
+    );
+  }
 
-.bottom-plate.red {
-  background-color: var(--player1-color);
+  &--red {
+    background-color: var(--player1-color);
+  }
 }
 
 .dropzone {

@@ -9,6 +9,7 @@ import Switch from "@mui/material/Switch";
 import GameLogo from "../src/assets/game-logo.svg";
 
 import { StartGameOnlineProps } from "./types";
+import Logo from "./Logo";
 
 const StartGameOnlineForm = ({
   state,
@@ -52,21 +53,7 @@ const StartGameOnlineForm = ({
   return (
     <>
       <div className="scroll-header scroll-header__lobby-player-list  main">
-        <div className="logo-container">
-          <div className="logo">
-            <span className="game-title game-title__pad-right">C</span>
-            <span className="game-title">
-              <img
-                src={GameLogo}
-                alt="Game logo image of disks stacked ontop of eachother"
-              ></img>
-            </span>
-            <span className="game-title game-title__pad-left">nnect</span>
-
-            <span className="game-title-number">4</span>
-          </div>
-        </div>
-
+        <Logo />
         <div className="join-name-container flex flex-col items-center gap-4 pt-35">
           <label htmlFor="nameInput">Enter your name to join the lobby:</label>
           <input
@@ -81,7 +68,6 @@ const StartGameOnlineForm = ({
           <div className="pb-3">
             <button
               disabled={state.name === "" || state.hasJoinedOnline}
-              className="button--fancy uppercase"
               onClick={joinLobby}
             >
               Join Lobby

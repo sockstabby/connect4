@@ -1,15 +1,13 @@
 import GameBoard from "./GameBoard";
-import GameLogo from "../src/assets/game-logo.svg";
 import BottomNavigation from "@mui/material/BottomNavigation";
 import Paper from "@mui/material/Paper";
 import RestoreIcon from "@mui/icons-material/Restore";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
-import { useCallback, useEffect, useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import CheckCircle from "../src/assets/check-circle.svg";
 import ReactModal from "react-modal";
 import StartGameModal from "./StartGameModal";
 import CloudQueueIcon from "@mui/icons-material/CloudQueue";
-
 import DescriptionIcon from "@mui/icons-material/Description";
 
 import useSocket from "./useSocket";
@@ -25,6 +23,7 @@ import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 import { styled } from "@mui/material/styles";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Logo from "./Logo";
 
 const BottomNavigationAction = styled(MuiBottomNavigationAction)(`
   color: white;
@@ -33,6 +32,49 @@ const BottomNavigationAction = styled(MuiBottomNavigationAction)(`
     color: #fd6687;
   }
 `);
+
+const Rules = () => {
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-row justify-center text-4xl font-extrabold	">
+        RULES
+      </div>
+
+      <div className="flex flex-row">
+        <h1>Objective</h1>
+      </div>
+
+      <div className="flex flex-row">
+        <p className="text-left">
+          Be the first player to connect 4 of the same colored discs in a row
+          (either vertically, horizontally, or diagonally).
+        </p>
+      </div>
+
+      <div className="flex flex-row">
+        <h1>How To Play</h1>
+      </div>
+
+      <ol className="rule-list">
+        <li>Red goes first in the first game.</li>
+
+        <li>
+          Players must alternate turns, and only one disc can be dropped in each
+          turn.
+        </li>
+
+        <li>The game ends when there is a 4-in-a-row or a stalemate.</li>
+
+        <li>The starter of the previous game goes second on the next game.</li>
+      </ol>
+      <div className="flex flex-row justify-center">
+        <div className="check-circle">
+          <img src={CheckCircle}></img>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const theme = createTheme({
   typography: {
@@ -66,13 +108,9 @@ const theme = createTheme({
   },
 });
 
-// these should be props
-const TIMER_ENABLED = true;
-
-const TIMER_SECONDS = 24;
-
 export const App = ({
-  gameTimerConfig = TIMER_SECONDS,
+  timerEnabled = true,
+  gameTimerConfig = 24,
   websocketUrl = "wss://connect4.isomarkets.com",
 }: AppProps) => {
   const [state, dispatch] = useReducer(mainReducer, initialGameState);
@@ -98,44 +136,30 @@ export const App = ({
     dispatch({ type: "playAgain" });
   };
 
-  const terminateGame = useCallback((notifyRemote = true) => {
+  const terminateGame = (notifyRemote = true) => {
     dispatch({ type: "terminateGame", value: { notifyRemote } });
-  }, []);
+  };
 
   let activeWidget;
   if (state.bottomTab === 0) {
     activeWidget = (
       <>
-        <div className="logo-container">
-          <div className="logo">
-            <span className="game-title game-title__pad-right">C</span>
-            <span className="game-title">
-              <img
-                src={GameLogo}
-                alt="Game logo image of disks stacked ontop of eachother"
-              ></img>
-            </span>
-            <span className="game-title game-title__pad-left">nnect</span>
-
-            <span className="game-title-number">4</span>
-          </div>
-        </div>
+        <Logo />
         {/* version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`} */}
         {/* nav bar buttons get styled out in css and is replaced by the bottom nav bar*/}
         <div className="main nav-bar flex flex-row justify-around pt-3 items-center">
           <button onClick={openMainMenuModal}>Menu</button>
-
           <button onClick={restartGame} disabled={state.mode === "online"}>
             Restart
           </button>
         </div>
         <div
           className={`bottom-plate ${
-            state.winner != null ? state.winner.player : ""
+            state.winner != null ? "bottom-plate--" + state.winner.player : ""
           } `}
         ></div>
         <GameBoard
-          timerEnabled={TIMER_ENABLED}
+          timerEnabled={timerEnabled}
           state={state}
           dispatch={dispatch}
           gameTimerConfig={gameTimerConfig}
@@ -145,46 +169,8 @@ export const App = ({
     );
   } else if (state.bottomTab === 1) {
     activeWidget = (
-      <div className="modal rules-content-mobile pt-5 pb-8">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-row justify-center text-4xl font-extrabold	">
-            RULES
-          </div>
-          <h1>Objective</h1>
-          <div className="flex flex-row items start gap-3">
-            <p>
-              Be the first player to connect 4 of the same colored discs in a
-              row (either vertically, horizontally, or diagonally).
-            </p>
-          </div>
-          <h1>How To Play</h1>
-          <div className="flex flex-row items start gap-3">
-            <span> 1</span>
-            <p>Red goes first in the first game.</p>
-          </div>
-          <div className="flex flex-row items start gap-3">
-            <span> 2</span>
-            <p>
-              Players must alternate turns, and only one disc can be dropped in
-              each turn.
-            </p>
-          </div>
-          <div className="flex flex-row items start gap-3">
-            <span> 3</span>
-            <p>The game ends when there is a 4-in-a-row or a stalemate.</p>
-          </div>
-          <div className="flex flex-row items start gap-3">
-            <span> 4</span>
-            <p>
-              The starter of the previous game goes second on the next game.
-            </p>
-          </div>
-          <div className="flex flex-row justify-center">
-            <div className="check-circle">
-              <img src={CheckCircle}></img>
-            </div>
-          </div>
-        </div>
+      <div className="modal modal__rules modal--light-background pt-5 pb-8 align-top">
+        <Rules />
       </div>
     );
   } else if (state.bottomTab === 2) {
@@ -203,7 +189,7 @@ export const App = ({
     <ThemeProvider theme={theme}>
       {activeWidget}
       <ReactModal
-        className="modal main modal__dark-background centered"
+        className="modal main modal--dark-background centered"
         isOpen={state.mainMenuOpen}
         shouldCloseOnOverlayClick={true}
         onRequestClose={closeMainMenuModal}
@@ -216,7 +202,7 @@ export const App = ({
         />
       </ReactModal>
       <ReactModal
-        className="modal modal__light-background centered"
+        className="modal modal__rules modal--light-background centered pt-5 pb-8"
         isOpen={state.rulesOpen}
         shouldCloseOnOverlayClick={true}
         onRequestClose={() => {
@@ -224,50 +210,10 @@ export const App = ({
         }}
         overlayClassName="disabled-background"
       >
-        <div className="rules-content pt-5 pb-8">
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-row justify-center text-4xl font-extrabold	">
-              RULES
-            </div>
-            <h1>Objective</h1>
-            <div className="flex flex-row items start gap-3">
-              <p>
-                Be the first player to connect 4 of the same colored discs in a
-                row (either vertically, horizontally, or diagonally).
-              </p>
-            </div>
-            <h1>How To Play</h1>
-            <div className="flex flex-row items start gap-3">
-              <span> 1</span>
-              <p>Red goes first in the first game.</p>
-            </div>
-            <div className="flex flex-row items start gap-3">
-              <span> 2</span>
-              <p>
-                Players must alternate turns, and only one disc can be dropped
-                in each turn.
-              </p>
-            </div>
-            <div className="flex flex-row items start gap-3">
-              <span> 3</span>
-              <p>The game ends when there is a 4-in-a-row or a stalemate.</p>
-            </div>
-            <div className="flex flex-row items start gap-3">
-              <span> 4</span>
-              <p>
-                The starter of the previous game goes second on the next game.
-              </p>
-            </div>
-            <div className="flex flex-row justify-center">
-              <div className="check-circle">
-                <img src={CheckCircle}></img>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Rules />
       </ReactModal>
       <ReactModal
-        className="modal modal__light-background modal__bottom-placement"
+        className="modal modal--light-background modal--bottom-placement"
         isOpen={state.remoteDisconnected}
         shouldCloseOnOverlayClick={true}
         onRequestClose={() => {
@@ -291,7 +237,7 @@ export const App = ({
         </div>
       </ReactModal>
       <ReactModal
-        className="modal modal__light-background modal__bottom-placement"
+        className="modal modal--light-background modal--bottom-placement"
         isOpen={
           (state.winner != null || state.draw) && !state.remoteDisconnected
         }

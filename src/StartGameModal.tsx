@@ -169,14 +169,11 @@ const StartGameModal = ({
             </div>
 
             <div className="flex flex-col items-center gap-8">
-              <button
-                className="button--fancy uppercase font-bold"
-                onClick={startLocalGame}
-              >
+              <button className="button--fancy " onClick={startLocalGame}>
                 Start Game
               </button>
 
-              <button onClick={onShowRules} className="button--fancy uppercase">
+              <button onClick={onShowRules} className="button--fancy">
                 Game Rules
               </button>
 
@@ -203,7 +200,7 @@ const StartGameModal = ({
             <div className="pb-3">
               <button
                 disabled={state.name === ""}
-                className="button--fancy uppercase"
+                className="button--fancy"
                 onClick={joinLobby}
               >
                 Join Lobby
