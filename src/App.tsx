@@ -1,29 +1,39 @@
-import GameBoard from "./GameBoard";
+import { useEffect, useReducer } from "react";
+import ReactModal from "react-modal";
+
 import BottomNavigation from "@mui/material/BottomNavigation";
 import Paper from "@mui/material/Paper";
 import RestoreIcon from "@mui/icons-material/Restore";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
-import { useEffect, useReducer } from "react";
-import CheckCircle from "../src/assets/check-circle.svg";
-import ReactModal from "react-modal";
-import StartGameModal from "./StartGameModal";
 import CloudQueueIcon from "@mui/icons-material/CloudQueue";
 import DescriptionIcon from "@mui/icons-material/Description";
+import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
+import { styled } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+import Badge, { BadgeProps } from "@mui/material/Badge";
 
 import useSocket from "./useSocket";
 
 import { AppProps } from "./types";
 import { mainReducer } from "./reducerFunctions";
-import StartGameOnlineForm from "./StartGameOnline";
-import Invites from "./Invites";
-
 import initialGameState from "./InitialGameState";
-import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 
-import { styled } from "@mui/material/styles";
-
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Logo from "./Logo";
+import GameBoard from "./GameBoard";
+import Rules from "./Rules";
+import StartGameModal from "./StartGameModal";
+import LobbyMobile from "./LobbyMobile";
+import Invites from "./InvitesMobile";
+
+const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    right: -3,
+    top: 13,
+    border: `2px solid ${theme.palette.background.paper}`,
+    padding: "0 4px",
+  },
+}));
 
 const BottomNavigationAction = styled(MuiBottomNavigationAction)(`
   color: white;
@@ -32,49 +42,6 @@ const BottomNavigationAction = styled(MuiBottomNavigationAction)(`
     color: #fd6687;
   }
 `);
-
-const Rules = () => {
-  return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-row justify-center text-4xl font-extrabold	">
-        RULES
-      </div>
-
-      <div className="flex flex-row">
-        <h1>Objective</h1>
-      </div>
-
-      <div className="flex flex-row">
-        <p className="text-left">
-          Be the first player to connect 4 of the same colored discs in a row
-          (either vertically, horizontally, or diagonally).
-        </p>
-      </div>
-
-      <div className="flex flex-row">
-        <h1>How To Play</h1>
-      </div>
-
-      <ol className="rule-list">
-        <li>Red goes first in the first game.</li>
-
-        <li>
-          Players must alternate turns, and only one disc can be dropped in each
-          turn.
-        </li>
-
-        <li>The game ends when there is a 4-in-a-row or a stalemate.</li>
-
-        <li>The starter of the previous game goes second on the next game.</li>
-      </ol>
-      <div className="flex flex-row justify-center">
-        <div className="check-circle">
-          <img src={CheckCircle}></img>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const theme = createTheme({
   typography: {
@@ -175,11 +142,11 @@ export const App = ({
     );
   } else if (state.bottomTab === 2) {
     activeWidget = (
-      <StartGameOnlineForm
+      <LobbyMobile
         dispatch={dispatch}
         state={state}
         websocketUrl={websocketUrl}
-      ></StartGameOnlineForm>
+      ></LobbyMobile>
     );
   } else if (state.bottomTab === 3) {
     activeWidget = <Invites state={state} dispatch={dispatch}></Invites>;
@@ -294,7 +261,17 @@ export const App = ({
           <BottomNavigationAction label="Rules" icon={<DescriptionIcon />} />
 
           <BottomNavigationAction label="Lobby" icon={<PeopleOutlineIcon />} />
-          <BottomNavigationAction label="Invites" icon={<CloudQueueIcon />} />
+          <BottomNavigationAction
+            label="Invites"
+            icon={
+              <StyledBadge
+                badgeContent={state.invites.length}
+                color="secondary"
+              >
+                <CloudQueueIcon />
+              </StyledBadge>
+            }
+          />
         </BottomNavigation>
       </Paper>
     </ThemeProvider>

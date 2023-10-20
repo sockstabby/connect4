@@ -6,7 +6,6 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Switch from "@mui/material/Switch";
-import GameLogo from "../src/assets/game-logo.svg";
 
 import { StartGameOnlineProps } from "./types";
 import Logo from "./Logo";
