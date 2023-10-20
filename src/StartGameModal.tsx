@@ -4,6 +4,7 @@ import PlayerVsCPU from "../src/assets/player-vs-cpu.svg";
 import { logMessage } from "./logMessage";
 import Button from "./Button";
 import { StartGameModalProps, GameMode } from "./types";
+import Switch from "@mui/material/Switch";
 
 const StartGameModal = ({
   state,
@@ -132,15 +133,11 @@ const StartGameModal = ({
         <div className="flex flex-row gap-7 pb-4  pt-3 text-4xl font-extrabold items-center">
           <span className={mode === "online" ? "line-through" : ""}>Local</span>
 
-          <button
-            className="toggle"
-            type="button"
-            aria-pressed={mode === "local" ? "false" : "true"}
-            onClick={toggleMode}
-            data-testid="online-switch"
-          >
-            <span className="toggle__display" hidden></span>
-          </button>
+          <Switch
+            edge="end"
+            onChange={toggleMode}
+            checked={mode === "local" ? false : true}
+          />
 
           <span className={mode === "local" ? "line-through" : ""}>Online</span>
         </div>
