@@ -11,10 +11,10 @@ import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 import { styled } from "@mui/material/styles";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
+import Button from "./Button";
 import Badge, { BadgeProps } from "@mui/material/Badge";
 
 import useSocket from "./useSocket";
-
 import { AppProps } from "./types";
 import { mainReducer } from "./reducerFunctions";
 import initialGameState from "./InitialGameState";
@@ -23,8 +23,8 @@ import Logo from "./Logo";
 import GameBoard from "./GameBoard";
 import Rules from "./Rules";
 import StartGameModal from "./StartGameModal";
-import LobbyMobile from "./LobbyMobile";
-import Invites from "./InvitesMobile";
+import LobbyMobile from "./mobile/Lobby";
+import Invites from "./mobile/Invites";
 
 const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -114,11 +114,13 @@ export const App = ({
         <Logo />
         {/* version {` ${__APP_VERSION__} ${__COMMIT_HASH__}`} */}
         {/* nav bar buttons get styled out in css and is replaced by the bottom nav bar*/}
-        <div className="main nav-bar flex flex-row justify-around pt-3 items-center">
-          <button onClick={openMainMenuModal}>Menu</button>
-          <button onClick={restartGame} disabled={state.mode === "online"}>
+        <div className="nav-bar flex flex-row justify-around pt-3 items-center">
+          <Button onClick={openMainMenuModal} variant="contained">
+            Menu
+          </Button>
+          <Button onClick={restartGame} variant="contained">
             Restart
-          </button>
+          </Button>
         </div>
         <div
           className={`bottom-plate ${
@@ -156,7 +158,7 @@ export const App = ({
     <ThemeProvider theme={theme}>
       {activeWidget}
       <ReactModal
-        className="modal main modal--dark-background centered"
+        className="modal modal--dark-background centered"
         isOpen={state.mainMenuOpen}
         shouldCloseOnOverlayClick={true}
         onRequestClose={closeMainMenuModal}
@@ -193,14 +195,14 @@ export const App = ({
             Remote Player Quit
           </div>
 
-          <button
+          <Button
             onClick={() => {
               dispatch({ type: "remoteDisconnected", value: false });
             }}
             className="uppercase"
           >
             Ok
-          </button>
+          </Button>
         </div>
       </ReactModal>
       <ReactModal
@@ -229,13 +231,13 @@ export const App = ({
             </div>
           )}
           <div className="flex flex-row justify-center gap-5 pt-6">
-            <button onClick={() => terminateGame()} className="uppercase">
+            <Button onClick={() => terminateGame()} variant="contained">
               Quit
-            </button>
+            </Button>
 
-            <button onClick={playAgain} className="uppercase">
+            <Button variant="contained" onClick={playAgain}>
               Play Again
-            </button>
+            </Button>
           </div>
         </div>
       </ReactModal>

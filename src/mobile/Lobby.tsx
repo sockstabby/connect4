@@ -1,4 +1,4 @@
-import { logMessage } from "./logMessage";
+import { logMessage } from "../logMessage";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -7,8 +7,9 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Switch from "@mui/material/Switch";
 
-import { StartGameOnlineProps } from "./types";
-import Logo from "./Logo";
+import { StartGameOnlineProps } from "../types";
+import Logo from "../Logo";
+import Button from "../Button";
 
 const StartGameOnlineForm = ({
   state,
@@ -65,12 +66,12 @@ const StartGameOnlineForm = ({
           />
 
           <div className="pb-3">
-            <button
+            <Button
               disabled={state.name === "" || state.hasJoinedOnline}
               onClick={joinLobby}
             >
               Join Lobby
-            </button>
+            </Button>
           </div>
 
           {state.playersOnline.length > 0 ? (
@@ -112,7 +113,6 @@ const StartGameOnlineForm = ({
                     <ListItemAvatar>
                       <Avatar
                         alt="A user avatar"
-                        //   src={"../src/assets/1.jpg"}
                         sx={{ width: 40, height: 40 }}
                       />
                     </ListItemAvatar>

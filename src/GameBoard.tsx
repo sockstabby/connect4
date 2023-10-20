@@ -152,7 +152,7 @@ export const GameBoard = ({
 
   return (
     <>
-      <div className="main flex flex-col">
+      <div className="flex flex-col">
         {/* Note: This gets styled out for large displays */}
         <div className="player-card-small-container flex flex-row justify-center gap-4">
           <div className="player-card-small flex flex-row justify-around items-center">

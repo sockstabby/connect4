@@ -2,7 +2,7 @@ import { useState } from "react";
 import PlayerVsPlayer from "../src/assets/player-vs-player.svg";
 import PlayerVsCPU from "../src/assets/player-vs-cpu.svg";
 import { logMessage } from "./logMessage";
-
+import Button from "./Button";
 import { StartGameModalProps, GameMode } from "./types";
 
 const StartGameModal = ({
@@ -178,7 +178,7 @@ const StartGameModal = ({
               </button>
 
               <div className="pad-top-100">
-                <button onClick={() => onClose()}>Cancel</button>
+                <Button onClick={() => onClose()}>Cancel</Button>
               </div>
             </div>
           </>
@@ -198,13 +198,13 @@ const StartGameModal = ({
             </div>
 
             <div className="pb-3">
-              <button
+              <Button
                 disabled={state.name === ""}
                 className="button--fancy"
                 onClick={joinLobby}
               >
                 Join Lobby
-              </button>
+              </Button>
             </div>
 
             <div className="flex flex-col items-center w-full">
@@ -220,14 +220,14 @@ const StartGameModal = ({
               </select>
 
               <div className="pt-2">
-                <button
+                <Button
                   disabled={
                     chosenOpponent === "" || chosenOpponent === state.name
                   }
                   onClick={sendPlayRequest}
                 >
                   Send Invite
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -248,11 +248,11 @@ const StartGameModal = ({
             </div>
 
             <div className="flex flex-row gap-4">
-              <button onClick={() => onClose()}>Cancel</button>
+              <Button onClick={() => onClose()}>Cancel</Button>
 
-              <button disabled={invitee === ""} onClick={acceptPlayRequest}>
+              <Button disabled={invitee === ""} onClick={acceptPlayRequest}>
                 Accept Invite
-              </button>
+              </Button>
             </div>
           </>
         )}

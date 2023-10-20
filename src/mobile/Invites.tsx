@@ -1,4 +1,4 @@
-import { logMessage } from "./logMessage";
+import { logMessage } from "../logMessage";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -7,8 +7,8 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Switch from "@mui/material/Switch";
 
-import { InvitesProps } from "./types";
-import Logo from "./Logo";
+import { InvitesProps } from "../types";
+import Logo from "../Logo";
 
 export const Invites = ({ state, dispatch }: InvitesProps) => {
   const acceptInvite = (name: string) => {
@@ -88,7 +88,6 @@ export const Invites = ({ state, dispatch }: InvitesProps) => {
                     <ListItemAvatar>
                       <Avatar
                         alt="A user avatar"
-                        //   src={"../src/assets/1.jpg"}
                         sx={{ width: 40, height: 40 }}
                       />
                     </ListItemAvatar>

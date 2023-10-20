@@ -215,34 +215,6 @@ li {
   padding-top: 144px;
 }
 
-.main button {
-  background-color: var(--game-background-color2);
-  border-radius: 28px;
-  border: 1px solid var(--game-background-color2);
-  display: inline-block;
-  cursor: pointer;
-  color: #ffffff;
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  padding: 16px 31px;
-  text-decoration: none;
-  line-height: 0px;
-  height: 40px;
-  text-transform: uppercase;
-}
-
-button:hover {
-  border: 1px solid white;
-}
-
-button:disabled,
-button[disabled] {
-  cursor: not-allowed;
-  color: black;
-  border: 0px solid white;
-}
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
