@@ -130,16 +130,17 @@ const StartGameModal = ({
         {mode === "online" && (
           <img src={PlayerVsPlayer} alt="Image of 2 smileys looking right" />
         )}
-        <div className="flex flex-row gap-7 pb-4  pt-3 text-4xl font-extrabold items-center">
-          <span className={mode === "online" ? "line-through" : ""}>Local</span>
+        <div className="flex flex-row pb-4 gap-4  pt-3  font-extrabold items-center">
+          {/* <span className={mode === "online" ? "line-through" : ""}>Local</span> */}
 
+          <label>Play Local: </label>
           <Switch
             edge="end"
             onChange={toggleMode}
             checked={mode === "local" ? false : true}
           />
-
-          <span className={mode === "local" ? "line-through" : ""}>Online</span>
+          <label>Play Online: </label>
+          {/* <span className={mode === "local" ? "line-through" : ""}>Online</span> */}
         </div>
         {mode !== "online" ? (
           <>
