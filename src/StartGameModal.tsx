@@ -5,6 +5,7 @@ import { logMessage } from "./logMessage";
 import Button from "./Button";
 import { StartGameModalProps, GameMode } from "./types";
 import Switch from "@mui/material/Switch";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const StartGameModal = ({
   state,
@@ -138,6 +139,7 @@ const StartGameModal = ({
             edge="end"
             onChange={toggleMode}
             checked={mode === "local" ? false : true}
+            data-testid="online-switch"
           />
           <label>Play Online: </label>
           {/* <span className={mode === "local" ? "line-through" : ""}>Online</span> */}
@@ -201,7 +203,11 @@ const StartGameModal = ({
                 className="button--fancy"
                 onClick={joinLobby}
               >
-                Join Lobby
+                {state.joinPending ? (
+                  <CircularProgress size={24} color="secondary" />
+                ) : (
+                  "Join Lobby"
+                )}
               </Button>
             </div>
 

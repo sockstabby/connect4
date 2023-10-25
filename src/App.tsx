@@ -39,11 +39,19 @@ const BottomNavigationAction = styled(MuiBottomNavigationAction)(`
   color: white;
   background-color: indigo;
   &.Mui-selected {
-    color: #fd6687;
+    color: #ffce67;
   }
 `);
 
 const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#fd6687",
+    },
+    secondary: {
+      main: "#ffce67",
+    },
+  },
   typography: {
     fontFamily: ['"Space Grotesk"'].join(","),
   },

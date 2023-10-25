@@ -27,6 +27,7 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
         },
       };
 
+      dispatch({ type: "joinPending", value: true });
       state.websocket!.send(JSON.stringify(payload));
     }
 
@@ -37,6 +38,8 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
         JSON.parse(event.data);
 
       if (payload.message === "playTurn") {
+        const x = document.getElementById("drop-sound") as HTMLAudioElement;
+        x?.play();
         dispatch({ type: "playTurn", value: payload });
       }
 
@@ -45,6 +48,7 @@ const useSocket = ({ state, dispatch }: UseSocketProps) => {
       }
 
       if (payload.message === "lobbyParticipants") {
+        dispatch({ type: "joinPending", value: false });
         dispatch({ type: "joinLobby", value: true });
         // guarantee uniqueness, in prod this is done in the lambda. so this
         // is only necessary for test

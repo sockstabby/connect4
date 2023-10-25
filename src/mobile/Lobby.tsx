@@ -6,6 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Switch from "@mui/material/Switch";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { StartGameOnlineProps } from "../types";
 import Logo from "../Logo";
@@ -70,7 +71,11 @@ const StartGameOnlineForm = ({
               disabled={state.name === "" || state.hasJoinedOnline}
               onClick={joinLobby}
             >
-              Join Lobby
+              {state.joinPending ? (
+                <CircularProgress size={24} color="secondary" />
+              ) : (
+                "Join Lobby"
+              )}
             </Button>
           </div>
 
@@ -79,7 +84,7 @@ const StartGameOnlineForm = ({
           ) : (
             <div>
               After joining the lobby you will be able to see a list of players
-              and be able to send invites to play.{" "}
+              and be able to send invites to play.
             </div>
           )}
         </div>

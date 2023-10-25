@@ -46,6 +46,7 @@ export type GameState = {
   playersOnline: string[];
   invitesAccepted: Set<string>;
   timerSecondsConfig: number | null;
+  joinPending: boolean;
 };
 
 export type GameMode = "online" | "local";
@@ -199,5 +200,6 @@ export type GameActions =
   | { type: "setPlayersOnline"; value: string[] }
   | { type: "addPlayerToInvitesAccepted"; value: string }
   | { type: "playTurn"; value: PlayTurn }
+  | { type: "joinPending"; value: boolean }
   | { type: "setTimerSecondsConfig"; value: number }
   | { type: "setWebsocket"; value: WebSocket | undefined };

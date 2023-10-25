@@ -78,8 +78,6 @@ export function mainReducer(state: GameState, action: GameActions) {
       const newState = terminateGame(state, false);
       return { ...newState, remoteDisconnected: true };
     } else {
-      const x = document.getElementById("drop-sound") as HTMLAudioElement;
-      x?.play();
       return diskDropped(
         state,
         playTurn.data.turn.col,
@@ -129,6 +127,9 @@ export function mainReducer(state: GameState, action: GameActions) {
         disks: [],
       },
     };
+  } else if (action.type === "joinPending") {
+    const joinPending = action.value;
+    return { ...state, joinPending };
   } else if (action.type === "setWebsocket") {
     const websocket = action.value;
     return {

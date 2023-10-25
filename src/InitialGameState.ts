@@ -34,6 +34,7 @@ const initialGameState: GameState = {
   playersOnline: [],
   invitesAccepted: new Set(),
   timerSecondsConfig: null,
+  joinPending: false,
 };
 
 export default initialGameState;
